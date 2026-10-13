@@ -300,6 +300,7 @@ fun Entity?.isHypnotized(): Boolean {
 
 fun DamageSource.isZombieFireworkExplosion(): Boolean {
     val hurtBy = entity ?: return false
+    if (hurtBy.isHypnotized()) return false
     val isFirework = typeHolder().`is`(DamageTypes.FIREWORKS)
     return isFirework && hurtBy.`is`(PazTags.EntityTypes.ZOMBIE_RAIDERS)
 }

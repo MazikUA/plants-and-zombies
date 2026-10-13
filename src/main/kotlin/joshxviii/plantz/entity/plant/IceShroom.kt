@@ -9,6 +9,7 @@ import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundEvent
 import net.minecraft.sounds.SoundEvents
+import net.minecraft.tags.BlockTags
 import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.damagesource.DamageType
 import net.minecraft.world.effect.MobEffectInstance
@@ -21,6 +22,7 @@ import net.minecraft.world.entity.monster.Enemy
 import net.minecraft.world.entity.monster.zombie.Zombie
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.level.Level
+import net.minecraft.world.level.block.state.BlockState
 
 class IceShroom(type: EntityType<out ExplosivePlant>, level: Level) : ExplosivePlant(type, level) {
     override fun registerGoals() {
@@ -80,5 +82,9 @@ class IceShroom(type: EntityType<out ExplosivePlant>, level: Level) : ExplosiveP
                 entity.applyImpulse(direction.x, direction.y+0.2f, direction.z, 1.0f)
             }
         }
+    }
+
+    override fun canSurviveOn(block: BlockState): Boolean {
+        return super.canSurviveOn(block) || block.`is`(BlockTags.SNOW)
     }
 }

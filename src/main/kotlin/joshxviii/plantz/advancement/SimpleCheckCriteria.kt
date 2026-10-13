@@ -17,6 +17,6 @@ class SimpleCheckCriteria(
     }
 
     override fun matches(player: ServerPlayer, context: Boolean): Boolean {
-        return true
+        return context
     }
 }

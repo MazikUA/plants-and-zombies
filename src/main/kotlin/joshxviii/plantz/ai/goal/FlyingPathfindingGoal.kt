@@ -27,7 +27,7 @@ open class FlyingPathfindingGoal (
     private var randomMoveDelay = 0
 
     override fun canUse(): Boolean {
-        if (entity is PazZombie && entity.state == ZombieState.FLYING) return true
+        if (entity is PazZombie && entity.state != ZombieState.FLYING) return false
         if (hoverGroundHeight > 0) {
             val distanceAboveGround = entity.y - entity.level().getHeight(Heightmap.Types.WORLD_SURFACE, entity.blockPosition()).toDouble()
             if (distanceAboveGround < hoverGroundHeight) return true

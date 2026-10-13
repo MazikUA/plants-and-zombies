@@ -197,7 +197,7 @@ abstract class PazProjectile(
 
     override fun getOwner(): LivingEntity? {
         return super.getOwner().let {
-            if (it is OwnableEntity && PazConfig.PLAYER_CREDIT_FOR_PLANT_KILLS) it.rootOwner
+            if (it is Plant && PazConfig.PLAYER_CREDIT_FOR_PLANT_KILLS) it.rootOwner
             else it as? LivingEntity
         }
     }
@@ -372,7 +372,7 @@ abstract class PazProjectile(
         if (entity is Projectile) return false
         if (piercingIgnoreEntityIds.contains(entity.id)) return false
         val owner = entityOwner ?: return super.canHitEntity(entity)
-        if ((entity is Plant && owner is Plant && entity.owner !is Enemy) || (entity is Enemy && owner is Enemy && extractRootOwner(owner) !is Player)) return false
+        if ((entity is Plant && owner is Plant && entity.owner !is Enemy) || (entity is Enemy && owner is Enemy && !owner.isHypnotized() && extractRootOwner(owner) !is Player)) return false
         if (owner.hasSameRootOwner(entity)) return false
         return super.canHitEntity(entity)
     }
