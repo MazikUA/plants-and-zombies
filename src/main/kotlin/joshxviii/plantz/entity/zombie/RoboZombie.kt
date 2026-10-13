@@ -11,6 +11,7 @@ import net.minecraft.server.level.ServerLevel
 import net.minecraft.sounds.SoundEvent
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.DifficultyInstance
+import net.minecraft.world.InteractionHand
 import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.damagesource.DamageTypes
 import net.minecraft.world.entity.*
@@ -147,7 +148,7 @@ class RoboZombie(type: EntityType<out RoboZombie>, level: Level) : PazZombie(typ
             }
         }
 
-        if (bashTime>0) {
+        if (bashTime>0 || swinging) {
             bashAnimation.startIfStopped(tickCount)
             if (bashTime++>20) {
                 bashAnimation.stop()

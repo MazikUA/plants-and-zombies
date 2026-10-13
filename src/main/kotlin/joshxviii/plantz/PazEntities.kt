@@ -96,7 +96,7 @@ object PazEntities {
             maxHealth = 25.0,
             attackDamage = 10.0,
             attackKnockback = 0.15,
-            attackRange = 3.0,
+            attackRange = 2.25,
             followRange = 4.75,
         )
     )

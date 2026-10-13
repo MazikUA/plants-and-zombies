@@ -224,14 +224,13 @@ class Gargantuar(type: EntityType<out Gargantuar>, level: Level) : PazZombie(typ
             }
         }
 
-        if (punchAttackTime>0) {
+        if (punchAttackTime>0 || swinging) {
             punchAttackAnimation.startIfStopped(tickCount)
             if (punchAttackTime++>30) {
                 punchAttackAnimation.stop()
                 punchAttackTime=0
             }
         }
-
 
         if (throwTime>0) {
             throwImpAnimation.startIfStopped(tickCount)
