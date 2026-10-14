@@ -25,6 +25,7 @@ class ZombieDrone(type: EntityType<out ZombieDrone>, level: Level) : ZombieRobot
 
     override fun tick() {
         super.tick()
+        if (state != ZombieState.FLYING) state = ZombieState.FLYING
 
         if (actionTime>0) {
             actionAnimation.startIfStopped(tickCount)

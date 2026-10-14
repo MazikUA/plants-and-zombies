@@ -4,6 +4,7 @@ import joshxviii.plantz.entity.gnome.GnomeSoundVariant
 import net.minecraft.core.Holder
 import net.minecraft.core.Registry
 import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.sounds.Music
 import net.minecraft.sounds.SoundEvent
 import net.minecraft.sounds.SoundEvents
 
@@ -80,7 +81,6 @@ object PazSounds {
     @JvmField val RAID_MUSIC_ARMY = registerForHolder("music.raid.army")
     @JvmField val RAID_MUSIC_LEAGUE = registerForHolder("music.raid.league")
     @JvmField val RAID_MUSIC_ZOMBOSS = registerForHolder("music.raid.zomboss")
-
 
     private fun registerGnomeSoundVariants(): Map<GnomeSoundVariant, GnomeSoundVariant.GnomeSoundSet> {
         return GnomeSoundVariant.entries.associateWith { soundVariant ->

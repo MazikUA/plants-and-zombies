@@ -242,6 +242,17 @@
 
   "jukebox_song.plantz.grassy_groove": "joshxviii - Grassy Groove",
 
+  "music.plantz.raid.low": "Patrika - Loon Griefers",
+  "music.plantz.raid.medium": "Patrika - Loon Griefers",
+  "music.plantz.raid.high": "Patrika - Loon Griefers",
+  "music.plantz.raid.bucket": "Patrika - Loon Griefers",
+  "music.plantz.raid.halftime": "Patrika - Loon Griefers",
+  "music.plantz.raid.winter": "Patrika - Loon Griefers",
+  "music.plantz.raid.pirate": "Patrika - Loon Griefers",
+  "music.plantz.raid.army": "Patrika - Loon Griefers",
+  "music.plantz.raid.league": "Patrika - Loon Griefers",
+  "music.plantz.raid.zomboss": "Patrika - [Zomboss]",
+
   "block.plantz.time_machine": "Time Machine",
   "block.plantz.blue_garden_gnome": "Blue Garden Gnome",
   "block.plantz.green_garden_gnome": "Green Garden Gnome",
