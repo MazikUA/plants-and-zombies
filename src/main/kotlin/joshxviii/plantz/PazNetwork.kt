@@ -23,6 +23,8 @@ object PazNetwork {
         fun put(data: ZombieRaidClientData) { active[data.id] = data }
         fun remove(id: UUID) { active.remove(id) }
         fun clear() { active.clear() }
+
+        fun isActive() = active.isNotEmpty()
     }
 
     fun initialize() {

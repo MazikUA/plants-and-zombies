@@ -15,6 +15,7 @@
     "GuiMixin",
     "HumanoidModelMixin",
     "LivingEntityRendererMixin",
-    "NowPlayingToastMixin"
+    "NowPlayingToastMixin",
+    "SoundManagerMixin"
   ]
 }
