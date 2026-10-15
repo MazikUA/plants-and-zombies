@@ -497,7 +497,6 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         }
     }
 
-
     /**
      * State machine for plant animations
      */

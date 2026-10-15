@@ -523,7 +523,7 @@ object PazEntities {
             maxHealth = 150.0,
             stepHeight = 1.0,
             movementSpeed = 0.25,
-            flyingSpeed = 0.25,
+            flyingSpeed = 0.28,
             knockbackResistance = 0.6,
             spawnReinforcementsChance = 0.0,
         )

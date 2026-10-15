@@ -396,18 +396,19 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
     }
 
     override fun travel(travelVector: Vec3) {
-        if (state == ZombieState.FLYING && this.isEffectiveAi()) {
+        if (state == ZombieState.FLYING && this.isEffectiveAi) {
+            val flyingSpeed = attributes.getValue(Attributes.FLYING_SPEED).toFloat() * this.speed * 0.25f
             if (this.isInWater) {
-                this.moveRelative(0.02f, travelVector)
+                this.moveRelative(flyingSpeed * 0.8f, travelVector)
                 this.move(MoverType.SELF, this.deltaMovement)
                 this.deltaMovement = this.deltaMovement.scale(0.8)
             } else if (this.isInLava) {
-                this.moveRelative(0.02f, travelVector)
+                this.moveRelative(flyingSpeed * 0.5f, travelVector)
                 this.move(MoverType.SELF, this.deltaMovement)
                 this.deltaMovement = this.deltaMovement.scale(0.5)
             } else {
                 val input = if (travelVector.lengthSqr() > 1.0E-5) travelVector.normalize() else travelVector
-                this.moveRelative(this.speed, input)
+                this.moveRelative(flyingSpeed, input)
                 this.move(MoverType.SELF, this.deltaMovement)
                 this.deltaMovement = this.deltaMovement.scale(0.91)
             }
