@@ -118,7 +118,7 @@ class DestroyFlagGoal(
 
     fun canSeeFlag(): Boolean {
         targetFlagPos?.let {
-            return mob.level().clip(ClipContext(mob.eyePosition, it.center, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mob)).type == HitResult.Type.MISS
+            return mob.level().clip(ClipContext(mob.eyePosition, it.above().center, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mob)).type == HitResult.Type.MISS
         }
         return false
     }
