@@ -32,7 +32,11 @@
       "rolls": 1,
       "conditions": [
         {
-          "condition": "minecraft:killed_by_player"
+          "condition": "minecraft:entity_properties",
+          "entity": "attacker",
+          "predicate": {
+            "type": "#plantz:drop_loot_when_killed_by"
+          }
         }
       ]
     }
