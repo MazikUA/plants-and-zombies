@@ -169,7 +169,7 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
             val attackKnockback: Double = 0.4,
             val attackRange: Double = 1.5,
             val movementSpeed: Double = ZOMBIE_SPEED,
-            val flyingSpeed: Double = ZOMBIE_SPEED * .5,
+            val flyingSpeed: Double = ZOMBIE_SPEED,
             val jumpStrength: Double = 0.42,
             val followRange: Double = 50.0,
             val armor: Double = 0.0,
@@ -243,23 +243,57 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
 
     var state: ZombieState
         get() = this.entityData.get(ZOMBIE_STATE)
-        set(value) { this.entityData.set(ZOMBIE_STATE, value) }
+        set(value) {
+            this.entityData.set(ZOMBIE_STATE, value)
+            updateNavigationForState(value)
+        }
 
+    protected val groundNavigation: PathNavigation by lazy { super.createNavigation(level()) }
+    protected val flyingNavigation: FlyingPathNavigation by lazy {
+        val nav = FlyingPathNavigation(this, level())
+        nav.setCanOpenDoors(false)
+        nav.setCanFloat(true)
+        nav
+    }
+
+    protected val groundMoveControl: MoveControl by lazy { MoveControl(this) }
+    protected val flyingMoveControl: FlyingMoveControl by lazy { FlyingMoveControl(this, 20, true) }
     protected val noMoveControl = object : MoveControl(this) { override fun getSpeedModifier(): Double = 0.0 }
     protected val noLookControl = object : LookControl(this) {}
 
-    val flyControl = object : FlyingMoveControl(this, 20, true) {
-        override fun getSpeedModifier(): Double = 0.0
+    fun updateNavigationForState(zombieState: ZombieState) {
+        if (zombieState == ZombieState.FLYING) {
+            if (this.navigation !== flyingNavigation) {
+                this.navigation.stop()
+                this.navigation = flyingNavigation
+            }
+            this.moveControl = flyingMoveControl
+        } else {
+            if (this.navigation !== groundNavigation) {
+                this.navigation.stop()
+                this.navigation = groundNavigation
+            }
+            this.moveControl = if (zombieState == ZombieState.EMERGING) noMoveControl else groundMoveControl
+            if (this !is ZombieRobot && this !is PirateCaptainGhost) {
+                this.isNoGravity = false
+            }
+        }
+    }
+
+    override fun onSyncedDataUpdated(accessor: EntityDataAccessor<*>) {
+        super.onSyncedDataUpdated(accessor)
+        if (ZOMBIE_STATE == accessor) {
+            updateNavigationForState(this.state)
+        }
     }
 
     override fun createNavigation(level: Level): PathNavigation {
-        return if (state == ZombieState.FLYING) FlyingPathNavigation(this, level)
-        else super.createNavigation(level)
+        return super.createNavigation(level)
     }
 
     override fun getMoveControl(): MoveControl {
         if (state == ZombieState.EMERGING) return noMoveControl
-        if (state == ZombieState.FLYING) return flyControl
+        if (state == ZombieState.FLYING) return flyingMoveControl
         return super.getMoveControl()
     }
 
@@ -268,7 +302,7 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
 
     override fun registerGoals() {
         super.registerGoals()
-        this.goalSelector.addGoal(1, FlyingPathfindingGoal(this))
+        this.goalSelector.addGoal(7, FlyingPathfindingGoal(this, hoverGroundHeight = 1.5))
     }
 
     fun addBehaviourGoalsNoMelee() {
@@ -309,6 +343,9 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
             ZombieState.IDLE -> {
                 emergeAnimation.stop()
                 floatAnimation.stop()
+                if (this !is ZombieRobot && this !is PirateCaptainGhost && this.isNoGravity) {
+                    this.isNoGravity = false
+                }
                 if (serverLevel!=null && this !is SuperBrainz && balloons.isNotEmpty()) state = ZombieState.FLYING
             }
             ZombieState.FLYING -> {
@@ -319,6 +356,9 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
                 }
             }
             ZombieState.EMERGING -> {
+                if (this !is ZombieRobot && this !is PirateCaptainGhost && this.isNoGravity) {
+                    this.isNoGravity = false
+                }
                 emergeAnimation.startIfStopped(tickCount)
                 if (tickCount < 15) {
                     if(tickCount==1) playSound(SoundEvents.ROOTED_DIRT_HIT, 1.0f, 0.2f)
@@ -353,6 +393,28 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
 
     override fun isImmobile(): Boolean {
         return if (state==ZombieState.EMERGING) true else super.isImmobile()
+    }
+
+    override fun travel(travelVector: Vec3) {
+        if (state == ZombieState.FLYING && this.isEffectiveAi()) {
+            if (this.isInWater) {
+                this.moveRelative(0.02f, travelVector)
+                this.move(MoverType.SELF, this.deltaMovement)
+                this.deltaMovement = this.deltaMovement.scale(0.8)
+            } else if (this.isInLava) {
+                this.moveRelative(0.02f, travelVector)
+                this.move(MoverType.SELF, this.deltaMovement)
+                this.deltaMovement = this.deltaMovement.scale(0.5)
+            } else {
+                val input = if (travelVector.lengthSqr() > 1.0E-5) travelVector.normalize() else travelVector
+                this.moveRelative(this.speed, input)
+                this.move(MoverType.SELF, this.deltaMovement)
+                this.deltaMovement = this.deltaMovement.scale(0.91)
+            }
+            this.calculateEntityAnimation(true)
+            return
+        }
+        super.travel(travelVector)
     }
 
     override fun defineSynchedData(entityData: SynchedEntityData.Builder) {

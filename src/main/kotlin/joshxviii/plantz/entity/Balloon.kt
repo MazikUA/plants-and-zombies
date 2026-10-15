@@ -47,10 +47,10 @@ class Balloon(
         private const val PITCH_LERP_SPEED = 0.25f
         private const val YAW_LERP_SPEED = 0.5f
         private const val MIN_ROTATION_SPEED = 0.001f
-        private const val HOLDER_GRAVITY_LIFT_MULTIPLIER = 0.4
-        private const val HOLDER_PULL_STIFFNESS = 0.0075
-        private const val MAX_HOLDER_PULL_FORCE = 0.16
-        private const val MAX_HOLDER_UPWARD_VELOCITY = 0.3
+        private const val HOLDER_GRAVITY_LIFT_MULTIPLIER = 0.25
+        private const val HOLDER_PULL_STIFFNESS = 0.004
+        private const val MAX_HOLDER_PULL_FORCE = 0.04
+        private const val MAX_HOLDER_UPWARD_VELOCITY = 0.08
         private const val POPPING_HEIGHT = 96
     }
 
@@ -147,8 +147,9 @@ class Balloon(
         val verticalStretch = y - holder.y - 2.0
         if (verticalStretch <= 0.0) return
 
-        val floorHeight = y - level().getHeight(Heightmap.Types.WORLD_SURFACE, blockPosition()).toDouble()
-        val heightLimitForce = (floorHeight / 64).coerceIn(0.0, 1.0)
+        val holderFloorHeight = (holder.y - level().getHeight(Heightmap.Types.WORLD_SURFACE, holder.blockPosition()).toDouble()).coerceAtLeast(0.0)
+        val maxLiftHeight = if (holder is PazZombie) 2.5 else 5.0
+        val heightLimitForce = (holderFloorHeight / maxLiftHeight).coerceIn(0.0, 1.0)
 
         val crouchMultiplier = if (holder.isCrouching) 0.55 else 1.0
         val gravityLift = holder.getAttributeValue(Attributes.GRAVITY) * HOLDER_GRAVITY_LIFT_MULTIPLIER
@@ -160,12 +161,15 @@ class Balloon(
         val availableLift = (MAX_HOLDER_UPWARD_VELOCITY - currentYVelocity).coerceAtLeast(0.0)
         val appliedLift = totalLift.coerceAtMost(availableLift)
 
-        if (appliedLift <= 0.0) return
-
-        holder.addDeltaMovement(Vec3(0.0, appliedLift, 0.0))
-        holder.needsSync = true
-        holder.checkFallDistanceAccumulation()
-        holder.checkFallDistanceAccumulation()
+        if (appliedLift > 0.0) {
+            holder.addDeltaMovement(Vec3(0.0, appliedLift, 0.0))
+            holder.needsSync = true
+            holder.checkFallDistanceAccumulation()
+            holder.checkFallDistanceAccumulation()
+        } else if (holderFloorHeight >= maxLiftHeight && holder.deltaMovement.y > 0.02) {
+            holder.deltaMovement = Vec3(holder.deltaMovement.x, holder.deltaMovement.y * 0.75, holder.deltaMovement.z)
+            holder.needsSync = true
+        }
     }
 
     override fun dropLeash() {

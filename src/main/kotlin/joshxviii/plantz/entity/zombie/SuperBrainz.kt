@@ -117,16 +117,17 @@ class SuperBrainz(type: EntityType<out SuperBrainz>, level: Level) : PazZombie(t
 
         updateCapeState()
         val level = level() as? ServerLevel?: return
-        if (tickCount % 60 == 0) when (state) {
+        if (tickCount % 20 == 0) when (state) {
             ZombieState.IDLE -> {
                 target?.let {
-                    if (it.y > y + 4.5) state = ZombieState.FLYING
+                    if (it.y > y + 2.5) state = ZombieState.FLYING
                 }
-                if (moveControl.wantedY > y + 4.5) state = ZombieState.FLYING
+                if (moveControl.wantedY > y + 2.5) state = ZombieState.FLYING
             }
             ZombieState.FLYING -> {
                 val floorHeight = y - level.getHeight(Heightmap.Types.WORLD_SURFACE, blockPosition()).toDouble()
-                if (floorHeight<2) state = ZombieState.IDLE
+                val targetOnGround = target == null || target!!.y <= y + 1.5
+                if (floorHeight < 2.0 && targetOnGround) state = ZombieState.IDLE
             }
             else -> {}
         }

@@ -235,7 +235,11 @@ enum class WaveType(
                 ),
                 WaveSpawnEntry(
                     PazEntities.SOLDIER_ZOMBIE,
-                    scaled(6f + wave * 0.7f, omen, credits, min = 2)
+                    scaled(5f + wave * 0.7f, omen, credits, min = 2)
+                ),
+                WaveSpawnEntry(
+                    PazEntities.ZOMBIE_DRONE,
+                    scaled(7f + wave * 0.9f, omen, credits, min = 3)
                 )
             )
         },
@@ -336,15 +340,12 @@ enum class WaveType(
                 zombie.variant = BrownCoatVariant.SNOW
                 val boots = Items.LEATHER_BOOTS.defaultInstance
                 boots.set(DataComponents.DYED_COLOR, DyedItemColor(0xFFFFFF))
-                if (zombie.random.nextFloat() < 0.7f) {
-                    val frostWalker = zombie.level()
-                        .registryAccess()
-                        .lookupOrThrow(Registries.ENCHANTMENT)
-                        .getOrThrow(Enchantments.FROST_WALKER)
+                if (zombie.random.nextFloat() < 0.65f) {
+                    val frostWalker = zombie.level().registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.FROST_WALKER)
                     boots.enchant(frostWalker, 2)
-                    zombie.setItemSlot(EquipmentSlot.FEET, boots)
-                    zombie.setDropChance(EquipmentSlot.FEET, 0.0f)
                 }
+                zombie.setItemSlot(EquipmentSlot.FEET, boots)
+                zombie.setDropChance(EquipmentSlot.FEET, 0.0f)
                 if (zombie.random.nextFloat() < 0.4f) {
                     zombie.setItemSlot(EquipmentSlot.MAINHAND, Items.IRON_SHOVEL.defaultInstance)
                     zombie.setDropChance(EquipmentSlot.MAINHAND, 0.0f)

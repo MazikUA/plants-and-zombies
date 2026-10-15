@@ -3,102 +3,74 @@ package joshxviii.plantz.ai.goal
 import joshxviii.plantz.ai.ZombieState
 import joshxviii.plantz.entity.zombie.PazZombie
 import net.minecraft.core.BlockPos
-import net.minecraft.util.Mth
 import net.minecraft.world.entity.PathfinderMob
 import net.minecraft.world.entity.ai.attributes.Attributes
 import net.minecraft.world.entity.ai.goal.Goal
-import net.minecraft.world.entity.monster.Enemy
 import net.minecraft.world.level.levelgen.Heightmap
+import net.minecraft.world.level.pathfinder.Path
 import net.minecraft.world.phys.Vec3
 import java.util.EnumSet
 
-open class FlyingPathfindingGoal (
+open class FlyingPathfindingGoal(
     private val entity: PathfinderMob,
-    val hoverGroundHeight: Double = 0.0
-): Goal() {
+    val hoverGroundHeight: Double = 1.5,
+    val speedModifier: Double = 1.0
+) : Goal() {
 
-    companion object {
-        const val FORCE_RANDOM_MOVE_DELAY = 100
+    private var targetPos: Vec3? = null
+    private var path: Path? = null
+
+    init {
+        flags = EnumSet.of(Flag.MOVE)
     }
-
-    private val flyingSpeed: Double = entity.getAttribute(Attributes.FLYING_SPEED)?.value ?: 0.0
-    private var flySpeedMultiplier: Double = 1.0
-    private var moveDirection: Vec3 = Vec3.ZERO
-    private var randomMoveDelay = 0
 
     override fun canUse(): Boolean {
         if (entity is PazZombie && entity.state != ZombieState.FLYING) return false
-        if (hoverGroundHeight > 0) {
-            val distanceAboveGround = entity.y - entity.level().getHeight(Heightmap.Types.WORLD_SURFACE, entity.blockPosition()).toDouble()
-            if (distanceAboveGround < hoverGroundHeight) return true
-        }
-        val target = entity.target?: return false
-        return (target.distanceTo(entity) > 1 && entity.hasLineOfSight(target)) && !(entity.onGround() && entity is PazZombie)
+        if (entity.target != null && entity.target!!.isAlive) return false
+        if (!entity.navigation.isDone) return false
+        if (entity.random.nextInt(reducedTickDelay(30)) != 0) return false
+
+        val destination = findFlyingDestination() ?: return false
+        path = entity.navigation.createPath(destination.x, destination.y, destination.z, 0)
+        targetPos = destination
+        return path != null
     }
 
     override fun canContinueToUse(): Boolean {
-        return entity.getMoveControl().hasWanted()
+        if (entity is PazZombie && entity.state != ZombieState.FLYING) return false
+        if (entity.target != null && entity.target!!.isAlive) return false
+        return !entity.navigation.isDone
     }
 
-    open fun move() {
-        val dir = moveDirection
-        val speed = flySpeedMultiplier * flyingSpeed
-        var moveVector = Vec3((dir.x) * speed, (dir.y) * speed * 2, (dir.z) * speed).add(entity.deltaMovement.scale(0.75))
-        if (hoverGroundHeight > 0) {
-            val distanceAboveGround = entity.y - entity.level().getHeight(Heightmap.Types.WORLD_SURFACE, entity.blockPosition()).toDouble()
-            val diff = Mth.clamp((hoverGroundHeight - distanceAboveGround) * .2, -0.3, 0.5)
-            if (diff>0 || entity.target==null) moveVector = moveVector.add(0.0, diff, 0.0)
-        }
-
-        entity.deltaMovement = moveVector.scale(0.5)
+    override fun start() {
+        path?.let { entity.navigation.moveTo(it, speedModifier) }
     }
 
-    override fun tick() {
-        if (!moveTowardsTarget()) moveRandomly()
-        move()
+    override fun stop() {
+        entity.navigation.stop()
+        targetPos = null
+        path = null
     }
 
-    fun moveTowardsTarget(): Boolean {
-        val target = entity.target?: return false
-        val targetPosition = target.eyePosition.subtract(entity.position())
+    private fun findFlyingDestination(): Vec3? {
+        val level = entity.level()
+        for (i in 0..9) {
+            val rx = entity.x + (entity.random.nextDouble() * 16.0 - 8.0)
+            val rz = entity.z + (entity.random.nextDouble() * 16.0 - 8.0)
+            val blockX = rx.toInt()
+            val blockZ = rz.toInt()
 
-        val distance = targetPosition.length()
+            val targetHover = if (hoverGroundHeight > 0.0) hoverGroundHeight else 1.5
+            val surfaceY = level.getHeight(Heightmap.Types.WORLD_SURFACE, blockX, blockZ).toDouble()
+            val ry = surfaceY + targetHover + (entity.random.nextDouble() * 1.0 - 0.5)
 
-        flySpeedMultiplier = if (distance <= 0.75) .5
-        else 1.0
+            if (ry <= level.minY + 2 || ry >= level.maxY - 2) continue
 
-        moveDirection = moveDirection.lerp(targetPosition.normalize(), 0.4)
-
-        entity.lookAt(target, 30.0f, 30.0f)
-        entity.lookControl.setLookAt(targetPosition)
-        entity.moveControl.setWantedPosition(targetPosition.x, targetPosition.y, targetPosition.z, 1.5)
-        entity.moveControl.setWait()
-        return true
-    }
-
-    fun moveRandomly() {
-        randomMoveDelay++
-        var testPos: Vec3 = Vec3.ZERO
-        if ((!entity.getMoveControl().hasWanted() && entity.random.nextInt(reducedTickDelay(43)) == 0) || randomMoveDelay>=FORCE_RANDOM_MOVE_DELAY) {
-            for (i in 0..2) {
-                testPos = entity.eyePosition.add(
-                    entity.random.nextDouble() * entity.random.nextInt(2),
-                    entity.random.nextDouble() * entity.random.nextInt(1) - .5,
-                    entity.random.nextDouble() * entity.random.nextInt(2)
-                )
-                if (!entity.level().isEmptyBlock(BlockPos.containing(testPos))) continue
-                entity.moveControl.setWantedPosition(testPos.x, testPos.y, testPos.z, 0.25)
-                break
+            val destBlockPos = BlockPos.containing(rx, ry, rz)
+            if (level.isEmptyBlock(destBlockPos)) {
+                return Vec3(rx, ry, rz)
             }
-            randomMoveDelay = 0
         }
-        if (entity.getMoveControl().hasWanted()) {
-            val targetPos = Vec3(entity.moveControl.wantedX, entity.moveControl.wantedY, entity.moveControl.wantedZ)
-            val vector = targetPos.subtract(entity.eyePosition)
-            if (vector.length() < 0.2) entity.moveControl.setWait()
-            entity.lookControl.setLookAt(targetPos)
-            moveDirection = moveDirection.lerp(vector.normalize(), 0.1)
-        }
+        return null
     }
-
 }

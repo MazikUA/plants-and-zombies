@@ -49,6 +49,13 @@ class PathfindToFlagGoal(
         return targetPos.distSqr(mob.blockPosition()) > minimumDistance * minimumDistance && isValid && !mob.isAggressive && path != null && !mob.hasEffect(PazEffects.HYPNOTIZE)
     }
 
+    override fun canContinueToUse(): Boolean {
+        mob.target?.let { if (it.isAlive && mob.withinAttackRange(it)) return false }
+        val targetPos = targetFlagPos ?: return false
+        val isValid = mob.level().getBlockState(targetPos).`is`(PLANTZ_FLAG)
+        return targetPos.distSqr(mob.blockPosition()) > minimumDistance * minimumDistance && isValid && !mob.isAggressive && !mob.navigation.isDone && !mob.hasEffect(PazEffects.HYPNOTIZE)
+    }
+
     override fun stop() {
         //targetFlagPos = null
         //mob.isAggressive = false

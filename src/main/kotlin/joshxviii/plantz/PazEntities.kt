@@ -523,7 +523,7 @@ object PazEntities {
             maxHealth = 150.0,
             stepHeight = 1.0,
             movementSpeed = 0.25,
-            flyingSpeed = 0.2,
+            flyingSpeed = 0.25,
             knockbackResistance = 0.6,
             spawnReinforcementsChance = 0.0,
         )
@@ -595,7 +595,7 @@ object PazEntities {
             armor = 7.0,
             followRange = 28.0,
             attackDamage = 3.0,
-            flyingSpeed = 0.18,
+            flyingSpeed = 0.22,
             knockbackResistance = -3.0,
             spawnReinforcementsChance = 0.0,
         )

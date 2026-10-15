@@ -88,7 +88,8 @@ class DestroyFlagGoal(
 
         val reach = mob.attackRange()
         if (flagPos.distSqr(mob.blockPosition()) > reach) flagPos.center.let { mob.moveControl.setWantedPosition(it.x, it.y, it.z, 1.0) }
-        if (flagPos.distSqr(mob.blockPosition()) < if (mob.navigation.path.canReachTarget(flagPos)) reach else reach*reach) {
+        val canReach = mob.navigation.path?.canReachTarget(flagPos) == true
+        if (flagPos.distSqr(mob.blockPosition()) < if (canReach) reach else reach*reach) {
             if (!mob.swinging) {
                 damageFlag(flagPos)
                 mob.swing(mob.usedItemHand)
