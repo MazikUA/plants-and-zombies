@@ -4,6 +4,7 @@ import joshxviii.plantz.PazBlocks
 import joshxviii.plantz.PazCriteria
 import joshxviii.plantz.PazEntities
 import joshxviii.plantz.PazLootTables
+import joshxviii.plantz.PazTags
 import joshxviii.plantz.ai.goal.ActionGoal
 import net.minecraft.core.particles.BlockParticleOption
 import net.minecraft.core.particles.ParticleTypes
@@ -30,7 +31,7 @@ class GraveBuster(type: EntityType<out Plant>, level: Level) : Plant(type, level
     override fun attackGoals() {}
 
     override fun canPlaceOn(block: BlockState): Boolean {
-        return block.`is`(PazBlocks.ZEN_PLANT_POT) || block.`is`(PazBlocks.GRAVESTONE)
+        return block.`is`(PazTags.BlockTags.FARMABLE) || block.`is`(PazBlocks.GRAVESTONE)
     }
 
     override fun tick() {

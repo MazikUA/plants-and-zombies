@@ -58,12 +58,13 @@ class TangleKelp(type: EntityType<out Plant>, level: Level) : Plant(type, level)
 
         if (level() !is ServerLevel) return
 
-        if (tangleTime > 0) tangleTime--
+        if (tangleTime > 0) {
+            tangleTime--
+            val target = target ?: return
+            if (!target.isAlive || !canTargetBePulled(target)) return
 
-        val target = target ?: return
-        if (!target.isAlive || !canTargetBePulled(target)) return
-
-        applyTanglePull(target)
+            applyTanglePull(target)
+        }
     }
 
     override fun doPush(entity: Entity) {
@@ -166,6 +167,6 @@ class TangleKelp(type: EntityType<out Plant>, level: Level) : Plant(type, level)
     }
 
     override fun canSurviveOn(block: BlockState): Boolean {
-        return block.`is`(PazBlocks.ZEN_PLANT_POT) || level().getBlockState(blockPosition()).fluidState.`is`(FluidTags.WATER)
+        return block.`is`(PazTags.BlockTags.FARMABLE) || level().getBlockState(blockPosition()).fluidState.`is`(FluidTags.WATER)
     }
 }
