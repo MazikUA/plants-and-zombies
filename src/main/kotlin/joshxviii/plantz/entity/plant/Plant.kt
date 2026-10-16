@@ -624,6 +624,18 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
     open fun clampToGrid() = true
     open fun cooldownFinished() {}
 
+    fun hurtOnCollide(other: Entity?) {
+        if (other is Zombie && other.swingTime == 0 && !other.isHypnotized()) {// when colliding with a zombie, the zombie will attack the plant
+            val level = other.level() as? ServerLevel
+            if (level != null && other.isAlive) {
+                val damage = other.getAttribute(Attributes.ATTACK_DAMAGE)?.value?.toFloat() ?: 1f
+                if (hurtServer(level, other.damageSources().mobAttack(other), damage)) {
+                    other.swing(InteractionHand.MAIN_HAND)
+                }
+            }
+        }
+    }
+
     private fun updatePlantPower(level: ServerLevel) {
         val nearFlag = hasNearbyPlantzFlag(level)
         if (nearFlag != poweredUp) {

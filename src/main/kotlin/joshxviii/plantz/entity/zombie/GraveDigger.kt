@@ -112,7 +112,7 @@ class GraveDigger(type: EntityType<out GraveDigger>, level: Level) : PazZombie(t
             if (!gravedigger.mainHandItem.`is`(ItemTags.SHOVELS)) return false
             if (gravedigger.digTime>0) return true
             val nearbyGraves: Int = level.getBlockStates(gravedigger.boundingBox.inflate(16.0)).filter { it.`is`(PazBlocks.GRAVESTONE) }.count().toInt()
-            return (gravedigger.target as? Player)?.let { gravedigger.distanceToSqr(it) < 196 } == true && !gravedigger.isDeadOrDying && (gravedigger.target?.isAlive == true) && nearbyGraves < 5
+            return gravedigger.target?.let { gravedigger.distanceToSqr(it) < 196 } == true && !gravedigger.isDeadOrDying && (gravedigger.target?.isAlive == true) && nearbyGraves < 4
         }
 
         override fun tick() {

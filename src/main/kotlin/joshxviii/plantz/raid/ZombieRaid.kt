@@ -124,7 +124,7 @@ class ZombieRaid(
         const val FINAL_WAVE_DURATION: Int = WAVE_DURATION * 2 // 5 minutes
         const val PRE_RAID_TICKS: Int = 100
         const val POST_RAID_TICKS: Int = 80
-        const val SPAWN_DISTANCE: Int = 96
+        const val SPAWN_DISTANCE: Int = 88
         const val GARDEN_HERO_EFFECT_DURATION: Int = 72000
         const val COUNTDOWN_BEFORE_LOSS: Int = 200 //10 seconds
         const val MAXIMUM_WAVE_COUNT: Int = 20

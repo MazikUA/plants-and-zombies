@@ -491,7 +491,7 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
 
         val data = super.finalizeSpawn(level, difficulty, spawnReason, newData)
 
-        if (spawnReason == EntitySpawnReason.REINFORCEMENT) state = ZombieState.EMERGING
+        if (spawnReason == EntitySpawnReason.REINFORCEMENT || spawnReason == EntitySpawnReason.EVENT) state = ZombieState.EMERGING
 
         if (canEquipDuckyInWater() && level.getBlockState(blockPosition()).fluidState.type == Fluids.WATER) {
             setItemSlot(EquipmentSlot.LEGS, PazItems.DUCKY_TUBE.defaultInstance)

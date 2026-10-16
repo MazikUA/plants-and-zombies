@@ -23,15 +23,7 @@ class HypnoShroom(type: EntityType<out Plant>, level: Level) : Plant(type, level
 
     override fun doPush(entity: Entity) {
         super.doPush(entity)
-        if (entity is Zombie && entity.swingTime == 0) {// when colliding with a zombie, the zombie will attack
-            val level = entity.level() as? ServerLevel
-            if (level != null && entity.isAlive) {
-                val damage = entity.getAttribute(Attributes.ATTACK_DAMAGE)?.value?.toFloat() ?: 1f
-                if (hurtServer(level, entity.damageSources().mobAttack(entity), damage)) {
-                    entity.swing(InteractionHand.MAIN_HAND)
-                }
-            }
-        }
+        hurtOnCollide(entity)
     }
 
     override fun actuallyHurt(level: ServerLevel, source: DamageSource, damage: Float) {

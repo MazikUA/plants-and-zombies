@@ -7,6 +7,7 @@ import joshxviii.plantz.PazTags
 import joshxviii.plantz.PazTags.EntityTypes.WALLNUT_DEFLECTABLE
 import joshxviii.plantz.applyImpulse
 import joshxviii.plantz.entity.Sun
+import joshxviii.plantz.isHypnotized
 import joshxviii.plantz.item.GardeningGloveItem
 import joshxviii.plantz.pazResource
 import net.minecraft.core.Direction
@@ -160,15 +161,8 @@ open class WallNut(type: EntityType<out Plant>, level: Level) : Plant(type, leve
     override fun canBeCollidedWith(other: Entity?): Boolean {
         if (isRolling) return super.canBeCollidedWith(other)
 
-        if (other is Zombie && other.swingTime == 0) {// when colliding with a zombie, the zombie will attack the wallnut
-            val level = other.level() as? ServerLevel
-            if (level != null && other.isAlive) {
-                val damage = other.getAttribute(Attributes.ATTACK_DAMAGE)?.value?.toFloat() ?: 1f
-                if (hurtServer(level, other.damageSources().mobAttack(other), damage)) {
-                    other.swing(InteractionHand.MAIN_HAND)
-                }
-            }
-        }
+        hurtOnCollide(other)
+
         if (other is Sun) return false
         return isAlive && other != attachedEntity
     }

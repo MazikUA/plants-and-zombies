@@ -109,8 +109,8 @@ enum class WaveType(
                 WaveSpawnEntry(
                     PazEntities.BROWN_COAT,
                     scaled(5f + wave * 1.6f, omen, credits, min = 3), {
-                        configureDefaultBalloonChance(it)
                         configureBucketBrigade(it)
+                        configureDefaultBalloonChance(it)
                     }),
                 WaveSpawnEntry(
                     PazEntities.NEWSPAPER_ZOMBIE,
@@ -161,8 +161,8 @@ enum class WaveType(
                 WaveSpawnEntry(
                     PazEntities.BROWN_COAT,
                     scaled(5f + wave * 0.9f, omen, credits, min = 5), {
-                        configureDefaultBalloonChance(it)
                         configureWinterWonderland(it)
+                        configureDefaultBalloonChance(it)
                     }),
                 WaveSpawnEntry(
                     PazEntities.IMP,
@@ -192,8 +192,8 @@ enum class WaveType(
                 WaveSpawnEntry(
                     PazEntities.BROWN_COAT,
                     scaled(6f + wave * 1.4f, omen, credits, min = 5), {
-                        configureDefaultBalloonChance(it)
                         configurePirateInvasion(it)
+                        configureDefaultBalloonChance(it)
                     }),
                 WaveSpawnEntry(
                     PazEntities.IMP,
