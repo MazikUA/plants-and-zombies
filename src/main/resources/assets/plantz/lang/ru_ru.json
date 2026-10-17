@@ -184,7 +184,7 @@
   "container.plantz.no_address": "Почтовых ящикох не обнаруженно.",
 
   "plantz.subtitles.projectile.deflected": "Снаряд отражён",
-  "plantz.subtitles.projectile.fire": "Снаряд выпущен",
+  "plantz.subtitles.projectile.shoot": "Снаряд выпущен",
 
   "plantz.subtitles.entity.chomper.attack": "Зубастик кусает",
   "plantz.subtitles.entity.zombie.eat": "Зомби кусает",

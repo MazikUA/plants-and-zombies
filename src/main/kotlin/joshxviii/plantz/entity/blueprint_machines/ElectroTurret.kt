@@ -3,6 +3,7 @@ package joshxviii.plantz.entity.blueprint_machines
 import joshxviii.plantz.ElectricArcParticleOptions
 import joshxviii.plantz.PazDamageTypes
 import joshxviii.plantz.PazEffects
+import joshxviii.plantz.PazSounds
 import joshxviii.plantz.ai.goal.MeleeAttackActionGoal
 import joshxviii.plantz.entity.zombie.ZombieRobot
 import net.minecraft.server.level.ServerLevel
@@ -37,6 +38,7 @@ class ElectroTurret(type: EntityType<out ElectroTurret>, level: Level) : ZombieR
             beforeHitEntityEffect = {
                 it.addEffect(MobEffectInstance(PazEffects.ELECTRIFIED, 180, 0), this)
                 val direction = this.headLookAngle.scale(0.5)
+                playSound(PazSounds.ELECTRIC_ZAP)
                 (level() as? ServerLevel)?.sendParticles(
                     ElectricArcParticleOptions(
                         Vec3(it.getRandomX(0.2), it.randomY, it.getRandomZ(0.2)),

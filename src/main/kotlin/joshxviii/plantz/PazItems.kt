@@ -394,6 +394,7 @@ object PazItems {
                         //TODO make the balloon attach to any entity in front of the dispenser
 
                         if (level.addFreshEntity(balloonEntity)) {
+                            balloonEntity.playSound(PazSounds.BALLOON_INFLATE)
                             dispensed.shrink(1)
                             playAnimation(source, facing)
                             return dispensed

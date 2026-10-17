@@ -184,7 +184,7 @@
   "container.plantz.no_address": "No se encontraron otros buzones.",
 
   "plantz.subtitles.projectile.deflected": "Proyectil desviado",
-  "plantz.subtitles.projectile.fire": "Proyectil disparado",
+  "plantz.subtitles.projectile.shoot": "Proyectil disparado",
 
   "plantz.subtitles.entity.chomper.attack": "Carnivora muerde",
   "plantz.subtitles.entity.zombie.eat": "Zombi muerde",

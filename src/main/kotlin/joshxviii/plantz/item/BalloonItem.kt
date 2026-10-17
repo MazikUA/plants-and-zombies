@@ -2,6 +2,7 @@ package joshxviii.plantz.item
 
 import joshxviii.plantz.PazEntities
 import joshxviii.plantz.PazItems.balloonByColor
+import joshxviii.plantz.PazSounds
 import joshxviii.plantz.entity.Balloon
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
@@ -50,6 +51,7 @@ class BalloonItem(
             balloonEntity.discard()
             return InteractionResult.FAIL
         }
+        balloonEntity.playSound(PazSounds.BALLOON_INFLATE)
         itemStack.consume(1, player)
 
         balloonEntity.setLeashedTo(player, true)

@@ -4,6 +4,7 @@ import LeashableEntity
 import joshxviii.plantz.PazDataSerializers.DATA_DYE_COLOR
 import joshxviii.plantz.PazEntities
 import joshxviii.plantz.PazServerParticles
+import joshxviii.plantz.PazSounds
 import joshxviii.plantz.entity.zombie.BrownCoatVariant
 import joshxviii.plantz.entity.zombie.PazZombie
 import joshxviii.plantz.item.BalloonItem
@@ -17,9 +18,11 @@ import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.entity.*
 import net.minecraft.world.entity.Leashable.LeashData
 import net.minecraft.world.entity.ai.attributes.Attributes
+import net.minecraft.world.entity.item.ItemEntity
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.DyeColor
 import net.minecraft.world.item.ItemStack
+import net.minecraft.world.level.ItemLike
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.levelgen.Heightmap
 import net.minecraft.world.level.storage.ValueInput
@@ -65,7 +68,7 @@ class Balloon(
 
     fun pop() {
         val level = level() as? ServerLevel ?: return
-        playSound(SoundEvents.LAVA_POP) // TODO custom sounds
+        playSound(PazSounds.BALLOON_POP)
         level.sendParticles(
             PazServerParticles.POP,
             x, y + boundingBox.ysize * 0.5, z,

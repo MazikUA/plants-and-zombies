@@ -167,7 +167,7 @@ class SuperBrainz(type: EntityType<out SuperBrainz>, level: Level) : PazZombie(t
             this,
             damageType = DamageTypes.MOB_ATTACK,
             actionDelay = 8,
-            actionSuccessEffect = {
+            beforeHitEntityEffect = {
                 playSound(PazSounds.SUPER_BRAINZ_PUNCH)
             },
             usePredicate = {
@@ -190,18 +190,23 @@ class SuperBrainz(type: EntityType<out SuperBrainz>, level: Level) : PazZombie(t
             },
             particleFactory = { startPos, endPos ->
                 val laserStart = calculateUpVector(this.xRot + 95, this.yHeadRot + 25).scale(0.9).add(startPos)
-                if (variant != SuperBrainzVariant.ELECTRO) (level() as ServerLevel).sendParticles(
-                    BeamParticleOptions(endPos.offsetRandom(random, .25f),
-                        color = variant.beamColor, width = 0.28f, lifeTime = 10),
-                    laserStart.x, laserStart.y, laserStart.z,
-                    1, 0.0, 0.0, 0.0, 0.0
-                )
-                else (level() as ServerLevel).sendParticles(
-                    ElectricArcParticleOptions(endPos.offsetRandom(random, .25f),
-                        color = variant.beamColor, width = 0.14f),
-                    laserStart.x, laserStart.y, laserStart.z,
-                    1, 0.0, 0.0, 0.0, 0.0
-                )
+                if (variant == SuperBrainzVariant.ELECTRO) {
+                    playSound(PazSounds.ELECTRIC_ZAP)
+                    (level() as ServerLevel).sendParticles(
+                        ElectricArcParticleOptions(endPos.offsetRandom(random, .25f),
+                            color = variant.beamColor, width = 0.14f),
+                        laserStart.x, laserStart.y, laserStart.z,
+                        1, 0.0, 0.0, 0.0, 0.0
+                    )
+                }
+                else {
+                    (level() as ServerLevel).sendParticles(
+                        BeamParticleOptions(endPos.offsetRandom(random, .25f),
+                            color = variant.beamColor, width = 0.28f, lifeTime = 10),
+                        laserStart.x, laserStart.y, laserStart.z,
+                        1, 0.0, 0.0, 0.0, 0.0
+                    )
+                }
                 (level() as ServerLevel).sendParticles(
                     NukeSmokeParticleOptions(color = variant.beamColor, scale = 0.1f),
                     endPos.x, endPos.y, endPos.z,

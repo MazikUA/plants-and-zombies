@@ -4,7 +4,6 @@ import joshxviii.plantz.entity.gnome.GnomeSoundVariant
 import net.minecraft.core.Holder
 import net.minecraft.core.Registry
 import net.minecraft.core.registries.BuiltInRegistries
-import net.minecraft.sounds.Music
 import net.minecraft.sounds.SoundEvent
 import net.minecraft.sounds.SoundEvents
 
@@ -12,10 +11,15 @@ object PazSounds {
 
     @JvmField val WATERING_CAN = register("item.watering_can")
 
-    @JvmField val PROJECTILE_FIRE = register("entity.projectile.fire")
+    @JvmField val BALLOON_INFLATE = register("item.balloon.inflate")
+    @JvmField val BALLOON_POP = register("item.balloon.pop")
+
+    @JvmField val PROJECTILE_SHOOT = register("entity.projectile.shoot")
     @JvmField val PROJECTILE_HIT_CONE = register("entity.projectile.hit_cone")
     @JvmField val PROJECTILE_HIT_BUCKET = register("entity.projectile.hit_bucket")
     @JvmField val PROJECTILE_HIT_PAPER = register("entity.projectile.hit_paper")
+
+    @JvmField val ELECTRIC_ZAP = register("entity.projectile.electric_zap")
 
     @JvmField val CHOMPER_ATTACK = register("entity.chomper.attack")
     @JvmField val SCAREDYSHROOM_HIDE = register("entity.scaredyshroom.hide")
@@ -50,6 +54,10 @@ object PazSounds {
     @JvmField val ALL_STAR_HURT = register("entity.all_star.hurt")
     @JvmField val ALL_STAR_DEATH = register("entity.all_star.death")
     @JvmField val ALL_STAR_WHISTLE = register("entity.all_star.whistle")
+    @JvmField val SUPER_BRAINZ_AMBIENT = register("entity.super_brainz.ambient")
+    @JvmField val SUPER_BRAINZ_HURT = register("entity.super_brainz.hurt")
+    @JvmField val SUPER_BRAINZ_DEATH = register("entity.super_brainz.death")
+    @JvmField val SUPER_BRAINZ_PUNCH = register("entity.super_brainz.punch")
     @JvmField val GARGANTUAR_AMBIENT = register("entity.gargantuar.ambient")
     @JvmField val GARGANTUAR_HURT = register("entity.gargantuar.hurt")
     @JvmField val GARGANTUAR_DEATH = register("entity.gargantuar.death")
@@ -67,7 +75,6 @@ object PazSounds {
 
     @JvmField val SPECIAL_WAVE = registerForHolder("event.raid.special_wave")
     @JvmField var TACO_REWARD = register("event.raid.taco_reward")
-
 
     @JvmField val MUSIC_DISC_GRASSY_GROOVE = registerForHolder("music_disc.grassy_groove")
 

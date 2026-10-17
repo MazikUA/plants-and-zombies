@@ -46,6 +46,7 @@ class LightningReed(type: EntityType<out Plant>, level: Level) : Plant(type, lev
                 it.addEffect(MobEffectInstance(PazEffects.ELECTRIFIED, 100, 1), this)
                 val eyeHeight = eyeHeight.toDouble()
                 val direction = this.headLookAngle.scale(0.5)
+                playSound(PazSounds.ELECTRIC_ZAP)
                 (level() as? ServerLevel)?.sendParticles(
                     ElectricArcParticleOptions(
                         Vec3(it.getRandomX(0.2), it.randomY, it.getRandomZ(0.2)),

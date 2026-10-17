@@ -184,7 +184,7 @@
   "container.plantz.no_address": "Başka posta kutusu bulunamadı.",
 
   "plantz.subtitles.projectile.deflected": "Mermi saptırıldı",
-  "plantz.subtitles.projectile.fire": "Mermi ateşlendi",
+  "plantz.subtitles.projectile.shoot": "Mermi ateşlendi",
 
   "plantz.subtitles.entity.chomper.attack": "Chomper ısırdı",
   "plantz.subtitles.entity.zombie.eat": "Zombi ısırdı",

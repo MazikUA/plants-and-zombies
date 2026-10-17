@@ -345,7 +345,7 @@
   "container.plantz.time_machine.wip": "???",
 
   "plantz.subtitles.projectile.deflected": "Projectile deflected",
-  "plantz.subtitles.projectile.fire": "Projectile fired",
+  "plantz.subtitles.projectile.shoot": "Projectile fired",
 
   "plantz.subtitles.entity.chomper.attack": "Chomper bites",
   "plantz.subtitles.entity.zombie.eat": "Zombie bites",

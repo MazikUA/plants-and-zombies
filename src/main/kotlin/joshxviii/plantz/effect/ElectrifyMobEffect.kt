@@ -4,6 +4,7 @@ import joshxviii.plantz.ElectricArcParticleOptions
 import joshxviii.plantz.PazDamageTypes
 import joshxviii.plantz.PazEffects
 import joshxviii.plantz.PazServerParticles
+import joshxviii.plantz.PazSounds
 import joshxviii.plantz.PazTags
 import joshxviii.plantz.hasSameRootOwner
 import net.minecraft.core.particles.ParticleOptions
@@ -50,6 +51,7 @@ class ElectrifyMobEffect(
                 }
             }
             zap(level, it, causeEntity = rootCauseEntity)
+            rootCauseEntity?.playSound(PazSounds.ELECTRIC_ZAP)
             level.sendParticles(
                 ElectricArcParticleOptions(// electric arc particle
                     Vec3(it.getRandomX(0.2), it.randomY, it.getRandomZ(0.2)),
