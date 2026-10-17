@@ -16,7 +16,7 @@ import net.minecraft.world.item.component.TooltipProvider
 import java.util.function.Consumer
 
 data class SunCost(
-    private val sunCost: Int = 0,
+    private val sunCost: Int = -1,
 ) : TooltipProvider {
     override fun addToTooltip(
         context: Item.TooltipContext,
@@ -29,7 +29,8 @@ data class SunCost(
     }
 
     fun getSunCost(forType: EntityType<*>?): Int {
-        return PazConfig.getSunCost(forType).let { if(it == -1) sunCost else it }
+        return if (sunCost > 0) sunCost
+        else PazConfig.getSunCost(forType).let { if(it == -1) 0 else it }
     }
 
     companion object {

@@ -11,11 +11,8 @@ import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.PathfinderMob
 import net.minecraft.world.entity.ai.attributes.Attributes
 import net.minecraft.world.entity.projectile.Projectile
-import net.minecraft.world.entity.projectile.ProjectileUtil
 import net.minecraft.world.item.ItemStack
-import net.minecraft.world.item.Items
 import net.minecraft.world.phys.Vec3
-import java.util.EnumSet
 import java.util.function.Predicate
 import kotlin.math.atan
 import kotlin.math.sqrt
@@ -36,7 +33,7 @@ class ProjectileAttackGoal(
     val inaccuracy: Float = 0.8f,
     val attackRadius: Float = usingEntity.attributes.getValue(Attributes.FOLLOW_RANGE).toFloat(),
     val useHighArc: Boolean = false,
-    val soundEvent: SoundEvent? = PazSounds.PROJECTILE_FIRE,
+    val soundEvent: SoundEvent? = PazSounds.PROJECTILE_SHOOT,
     val leadShots: Boolean = true,
 ) : ActionGoal(usingEntity, cooldownTime, actionDelay, actionStartEffect, actionSuccessEffect, actionEndEffect, actionPredicate, delayedEffectDelay, delayedEffect) {
     var distanceSqr: Double = 0.0

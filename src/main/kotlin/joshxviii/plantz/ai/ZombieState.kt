@@ -15,7 +15,8 @@ import java.util.function.IntFunction
 enum class ZombieState(val title: String, val id: Int) : StringRepresentable {
     IDLE("idle", 0),
     EMERGING("emerging", 1),
-    FLYING("floating", 2);
+    RETREATING("retreating", 2),
+    FLYING("flying", 3);
     override fun getSerializedName(): String = this.title
     companion object {
         val CODEC: Codec<ZombieState> = StringRepresentable.fromEnum(ZombieState::values)

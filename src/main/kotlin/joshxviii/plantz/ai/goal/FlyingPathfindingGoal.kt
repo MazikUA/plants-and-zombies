@@ -25,7 +25,7 @@ open class FlyingPathfindingGoal(
     }
 
     override fun canUse(): Boolean {
-        if (entity is PazZombie && entity.state != ZombieState.FLYING) return false
+        if (entity is PazZombie && !entity.isFlying) return false
         if (entity.target != null && entity.target!!.isAlive) return false
         if (!entity.navigation.isDone) return false
         if (entity.random.nextInt(reducedTickDelay(30)) != 0) return false
@@ -37,7 +37,7 @@ open class FlyingPathfindingGoal(
     }
 
     override fun canContinueToUse(): Boolean {
-        if (entity is PazZombie && entity.state != ZombieState.FLYING) return false
+        if (entity is PazZombie && !entity.isFlying) return false
         if (entity.target != null && entity.target!!.isAlive) return false
         return !entity.navigation.isDone
     }

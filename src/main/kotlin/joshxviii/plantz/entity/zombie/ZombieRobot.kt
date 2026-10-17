@@ -119,6 +119,7 @@ abstract class ZombieRobot(type: EntityType<out ZombieRobot>, level: Level) : Pa
 
     override fun getPickResult(): ItemStack = BlueprintItem.stackFor(this.type)
 
+    override fun canEquipBalloons(): Boolean = false
     override fun canEquipDuckyInWater(): Boolean = false
     override fun canPickUpLoot(): Boolean = false
     override fun canBreakDoors(): Boolean = false

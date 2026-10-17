@@ -17,12 +17,11 @@ import net.minecraft.world.level.block.state.BlockState
 class ZombieDrone(type: EntityType<out ZombieDrone>, level: Level) : ZombieRobot(type, level) {
 
     init {
-        state = ZombieState.FLYING
     }
 
     override fun tick() {
         super.tick()
-        if (state != ZombieState.FLYING) state = ZombieState.FLYING
+        isFlying = true
 
         if (actionTime>0 || swinging) {
             actionAnimation.startIfStopped(tickCount)

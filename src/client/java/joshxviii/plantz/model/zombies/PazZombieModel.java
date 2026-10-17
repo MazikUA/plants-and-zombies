@@ -20,7 +20,8 @@ import static joshxviii.plantz.UtilsKt.pazResource;
 public class PazZombieModel<S extends PazZombieRenderState> extends ZombieModel<S> {
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(pazResource("paz_zombie"), "main");
 
-    final KeyframeAnimation initAnimation;
+    final KeyframeAnimation emergeAnimation;
+    final KeyframeAnimation retreatAnimation;
     final KeyframeAnimation floatAnimation;
 
     public PazZombieModel(
@@ -30,7 +31,8 @@ public class PazZombieModel<S extends PazZombieRenderState> extends ZombieModel<
         var mainRoot = root.hasChild("root") ? root.getChild("root") : root;
         super(mainRoot);
 
-        this.initAnimation = Objects.requireNonNullElse(initAnimationOverride, PazZombieAnimations.emerge).bake(mainRoot);
+        this.emergeAnimation = Objects.requireNonNullElse(initAnimationOverride, PazZombieAnimations.emerge).bake(mainRoot);
+        this.retreatAnimation = PazZombieAnimations.emerge.bake(mainRoot);
         this.floatAnimation = PazZombieAnimations.balloon_float.bake(mainRoot);
 
     }
@@ -95,12 +97,12 @@ public class PazZombieModel<S extends PazZombieRenderState> extends ZombieModel<
             this.rightLeg.visible = true;
         }
         super.setupAnim(state);
-        if (state.getZombieState() == ZombieState.FLYING) {
+        if (state.isFlying()) {
             var animationPos = state.walkAnimationPos;
             var animationSpeed = state.walkAnimationSpeed + 0.2f;
             floatAnimation.applyWalk(animationPos, animationSpeed, 1f, 2f);
         }
-        initAnimation.apply(state.getEmergeAnimationState(), state.ageInTicks);
-
+        emergeAnimation.apply(state.getEmergeAnimationState(), state.ageInTicks);
+        retreatAnimation.apply(state.getRetreatAnimationState(), state.ageInTicks);
     }
 }

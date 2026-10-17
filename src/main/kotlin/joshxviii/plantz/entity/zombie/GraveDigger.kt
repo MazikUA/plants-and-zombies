@@ -61,6 +61,8 @@ class GraveDigger(type: EntityType<out GraveDigger>, level: Level) : PazZombie(t
 
     override fun tick() {
         super.tick()
+
+        //TODO after digging 4-5 gravestone the grave digger should retreat
         if (digTime>0) {
             val buildPos = calculateUpVector(90f, this.yRot).scale(1.0).add(position())
             if (digTime<DIG_TIME*.9 && digTime>=26) (level() as? ServerLevel)?.sendParticles(
@@ -140,7 +142,6 @@ class GraveDigger(type: EntityType<out GraveDigger>, level: Level) : PazZombie(t
             digTime = DIG_DELAY_TIME + gravedigger.random.nextInt(20)
             val level = gravedigger.level() as ServerLevel
             val graveStone = createFallingBlock(level, gravePos.center, PazBlocks.GRAVESTONE.defaultBlockState().setValue(FACING, Direction.fromYRot(angleToTarget * Mth.RAD_TO_DEG - 90)))?: return
-            if(!level.gameRules.get(GameRules.MOB_GRIEFING)) graveStone.disableDrop()
             graveStone.setHurtsEntities(2.5f, 10)
             graveStone.dropItem = false
             gravedigger.playSound(SoundEvents.MUDDY_MANGROVE_ROOTS_BREAK, 1.4f, 0.9f)

@@ -97,7 +97,7 @@ public class GargantuarModel<S extends PazZombieRenderState> extends PazZombieMo
 		walkAnimation.applyWalk(animationPos, animationSpeed, 2.0f, 2.0f);
 
 		if (!(state instanceof GargantuarRenderState gargState)) return;
-		initAnimation.apply(gargState.getEmergeAnimationState(), gargState.ageInTicks);
+		emergeAnimation.apply(gargState.getEmergeAnimationState(), gargState.ageInTicks);
 		punchAnimation.apply(gargState.getPunchAnimationState(), gargState.ageInTicks);
 		smashAnimation.apply(gargState.getSmashAnimationState(), gargState.ageInTicks);
 		throwAnimation.apply(gargState.getThrowImpAnimationState(), gargState.ageInTicks);

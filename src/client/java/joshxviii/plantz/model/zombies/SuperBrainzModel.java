@@ -101,7 +101,7 @@ public class SuperBrainzModel<S extends PazZombieRenderState> extends PazZombieM
         if (!(state instanceof SuperBrainzRenderState superBrainzState)) return;
         float animationPos = state.walkAnimationPos;
         float animationSpeed = state.walkAnimationSpeed;
-        if (superBrainzState.getZombieState() == ZombieState.FLYING)
+        if (superBrainzState.isFlying())
             flyAnimation.applyWalk(animationPos, animationSpeed, 2f, 2f);
         else {
             this.head.yRot = state.yRot * Mth.DEG_TO_RAD;
@@ -109,7 +109,7 @@ public class SuperBrainzModel<S extends PazZombieRenderState> extends PazZombieM
         }
 
         laserAttackAnimation.apply(superBrainzState.getLaserAttackAnimationState(), state.ageInTicks);
-        if (superBrainzState.getLaserAttackAnimationState().isStarted() && superBrainzState.getZombieState() != ZombieState.FLYING) {
+        if (superBrainzState.getLaserAttackAnimationState().isStarted() && !superBrainzState.isFlying()) {
             this.rightArm.getAllParts().forEach(ModelPart::resetPose);
             this.rightArm.y += 3;
             this.rightArm.z -= 3;

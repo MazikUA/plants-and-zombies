@@ -275,7 +275,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         output.putInt("plantz:CoffeeBuff", coffeeBuff)
         output.putInt("plantz:Cooldown", cooldown)
         output.putInt("plantz:State", state.ordinal)
-        output.putBoolean("plantz:isAsleep", isAsleep)
+        output.putBoolean("plantz:IsAsleep", isAsleep)
     }
 
     override fun readAdditionalSaveData(input: ValueInput) {
@@ -286,7 +286,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         coffeeBuff = input.getInt("plantz:CoffeeBuff").getOrElse { 0 }
         cooldown = input.getInt("plantz:Cooldown").getOrElse { this.entityData.get(COOLDOWN) }.coerceAtLeast(0)
         state = PlantState.entries[input.getInt("plantz:State").getOrElse { 1 }].takeIf { it != PlantState.ACTION }?: PlantState.IDLE
-        isAsleep = input.getBooleanOr("plantz:isAsleep", false)
+        isAsleep = input.getBooleanOr("plantz:IsAsleep", false)
         poweredUp = input.getBooleanOr("plantz:IsPoweredUp", false)
         attachedPlayerReference = Optional.ofNullable((EntityReference.read<LivingEntity>(input, "plantz:AttachedPlayer"))).getOrNull()
     }

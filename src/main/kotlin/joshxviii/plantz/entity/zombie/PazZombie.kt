@@ -2,9 +2,11 @@ package joshxviii.plantz.entity.zombie
 
 import joshxviii.plantz.*
 import joshxviii.plantz.PazDataSerializers.DATA_ZOMBIE_STATE
+import joshxviii.plantz.ai.PlantState
 import joshxviii.plantz.ai.ZombieState
 import joshxviii.plantz.ai.goal.FlyingPathfindingGoal
 import joshxviii.plantz.entity.Balloon
+import joshxviii.plantz.entity.plant.Plant.Companion.SLEEPING
 import joshxviii.plantz.item.BalloonItem
 import joshxviii.plantz.raid.ZombieRaid.Companion.SPAWN_DISTANCE
 import joshxviii.plantz.raid.getZombieRaids
@@ -12,6 +14,7 @@ import net.minecraft.core.BlockPos
 import net.minecraft.core.particles.BlockParticleOption
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.network.syncher.EntityDataAccessor
+import net.minecraft.network.syncher.EntityDataSerializers
 import net.minecraft.network.syncher.SynchedEntityData
 import net.minecraft.resources.Identifier
 import net.minecraft.server.level.ServerLevel
@@ -54,11 +57,13 @@ import net.minecraft.world.level.storage.ValueInput
 import net.minecraft.world.level.storage.ValueOutput
 import net.minecraft.world.phys.Vec3
 import java.util.*
+import kotlin.jvm.optionals.getOrElse
 import kotlin.math.max
 
 abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie(type, level) {
 
     val emergeAnimation : AnimationState = AnimationState()
+    val retreatAnimation : AnimationState = AnimationState()
     val floatAnimation : AnimationState = AnimationState()
     var moveDir = Vec3.ZERO
     var moveDirO = Vec3.ZERO
@@ -201,6 +206,7 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
         }
 
         val ZOMBIE_STATE: EntityDataAccessor<ZombieState> = SynchedEntityData.defineId<ZombieState>(PazZombie::class.java, DATA_ZOMBIE_STATE)
+        val FLYING: EntityDataAccessor<Boolean> = SynchedEntityData.defineId<Boolean>(PazZombie::class.java, EntityDataSerializers.BOOLEAN)
     }
 
     override fun getAmbientSound(): SoundEvent {
@@ -248,6 +254,10 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
             updateNavigationForState(value)
         }
 
+    var isFlying: Boolean
+        get() = this.entityData.get(FLYING)
+        set(value) = this.entityData.set(FLYING, value)
+
     protected val groundNavigation: PathNavigation by lazy { super.createNavigation(level()) }
     protected val flyingNavigation: FlyingPathNavigation by lazy {
         val nav = FlyingPathNavigation(this, level())
@@ -262,7 +272,7 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
     protected val noLookControl = object : LookControl(this) {}
 
     fun updateNavigationForState(zombieState: ZombieState) {
-        if (zombieState == ZombieState.FLYING) {
+        if (isFlying) {
             if (this.navigation !== flyingNavigation) {
                 this.navigation.stop()
                 this.navigation = flyingNavigation
@@ -273,7 +283,7 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
                 this.navigation.stop()
                 this.navigation = groundNavigation
             }
-            this.moveControl = if (zombieState == ZombieState.EMERGING) noMoveControl else groundMoveControl
+            this.moveControl = if (zombieState == ZombieState.EMERGING || zombieState == ZombieState.RETREATING) noMoveControl else groundMoveControl
             if (this !is ZombieRobot && this !is PirateCaptainGhost) {
                 this.isNoGravity = false
             }
@@ -292,8 +302,8 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
     }
 
     override fun getMoveControl(): MoveControl {
-        if (state == ZombieState.EMERGING) return noMoveControl
-        if (state == ZombieState.FLYING) return flyingMoveControl
+        if (state == ZombieState.EMERGING || state == ZombieState.RETREATING) return noMoveControl
+        if (isFlying) return flyingMoveControl
         return super.getMoveControl()
     }
 
@@ -324,6 +334,12 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
 
         val serverLevel = level() as? ServerLevel
 
+        if (canEquipBalloons()) {
+            if (balloons.isNotEmpty()) isFlying = true
+            balloons.removeIf { !it.isAlive || it.leashHolder != this }
+            if (balloons.isEmpty()) isFlying = false
+        }
+
         if (isEyeInFluid(FluidTags.WATER)) {
             waterTime++
             if (waterTime>=250 && canEquipDuckyInWater()) {
@@ -342,24 +358,23 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
         when (state) {
             ZombieState.IDLE -> {
                 emergeAnimation.stop()
+                retreatAnimation.stop()
                 floatAnimation.stop()
                 if (this !is ZombieRobot && this !is PirateCaptainGhost && this.isNoGravity) {
                     this.isNoGravity = false
                 }
-                if (serverLevel!=null && this !is SuperBrainz && balloons.isNotEmpty()) state = ZombieState.FLYING
+                if (isFlying) state = ZombieState.FLYING
             }
             ZombieState.FLYING -> {
                 floatAnimation.startIfStopped(tickCount)
-                if (serverLevel!=null && this !is SuperBrainz && this !is ZombieRobot ) {
-                    balloons.removeIf { !it.isAlive || it.leashHolder != this }
-                    if (balloons.isEmpty()) state = ZombieState.IDLE
-                }
+                if (!isFlying) state = ZombieState.IDLE
             }
-            ZombieState.EMERGING -> {
+            ZombieState.EMERGING, ZombieState.RETREATING -> {
                 if (this !is ZombieRobot && this !is PirateCaptainGhost && this.isNoGravity) {
                     this.isNoGravity = false
                 }
-                emergeAnimation.startIfStopped(tickCount)
+                if (state == ZombieState.EMERGING) emergeAnimation.startIfStopped(tickCount)
+                if (state == ZombieState.RETREATING) retreatAnimation.startIfStopped(tickCount)
                 if (tickCount < 15) {
                     if(tickCount==1) playSound(SoundEvents.ROOTED_DIRT_HIT, 1.0f, 0.2f)
                     serverLevel?.sendParticles(
@@ -367,7 +382,10 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
                         x, y + 0.05, z, 8, 0.25, 0.0, 0.25, 0.4
                     )
                 }
-                if (tickCount > emergingTime()) state = ZombieState.IDLE
+                if (tickCount > emergingTime()) {
+                    if (state == ZombieState.RETREATING) discard()
+                    state = ZombieState.IDLE
+                }
             }
         }
     }
@@ -396,7 +414,7 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
     }
 
     override fun travel(travelVector: Vec3) {
-        if (state == ZombieState.FLYING && this.isEffectiveAi) {
+        if (isFlying && this.isEffectiveAi) {
             val flyingSpeed = attributes.getValue(Attributes.FLYING_SPEED).toFloat() * this.speed * 0.25f
             if (this.isInWater) {
                 this.moveRelative(flyingSpeed * 0.8f, travelVector)
@@ -421,14 +439,19 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
     override fun defineSynchedData(entityData: SynchedEntityData.Builder) {
         super.defineSynchedData(entityData)
         entityData.define(ZOMBIE_STATE, ZombieState.IDLE)
+        entityData.define(FLYING, false)
     }
 
     override fun addAdditionalSaveData(output: ValueOutput) {
         super.addAdditionalSaveData(output)
+        output.putInt("plantz:State", state.ordinal)
+        output.putBoolean("plantz:IsFlying", entityData.get(FLYING))
     }
 
     override fun readAdditionalSaveData(input: ValueInput) {
         super.readAdditionalSaveData(input)
+        isFlying = input.getBooleanOr("plantz:IsFlying", false)
+        state = ZombieState.entries[input.getInt("plantz:State").getOrElse { 1 }]
     }
 
     override fun hurtServer(level: ServerLevel, source: DamageSource, damage: Float): Boolean {
@@ -456,6 +479,7 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
 
     open fun emergingTime(): Int = 40
     open fun canEquipDuckyInWater() = true
+    open fun canEquipBalloons() = true
 
     override fun maxUpStep(): Float = if (isInWater) 0.5f else super.maxUpStep()
     override fun isSunSensitive(): Boolean = false

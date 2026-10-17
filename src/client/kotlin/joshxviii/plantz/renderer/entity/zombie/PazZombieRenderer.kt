@@ -77,7 +77,9 @@ open class PazZombieRenderer(
         super.extractRenderState(entity, state, partialTicks)
         state.headOnly = false
         state.zombieState = entity.state
+        state.isFlying = entity.isFlying
         state.emergeAnimationState.copyFrom(entity.emergeAnimation)
+        state.retreatAnimationState.copyFrom(entity.retreatAnimation)
         state.floatAnimationState.copyFrom(entity.floatAnimation)
         state.movementDirection = Mth.lerp(partialTicks.toDouble() * .5, entity.moveDirO, entity.moveDir)
         if (entity is DiscoZombie) state.actionAnimationState.copyFrom(entity.summonAnimation)
@@ -141,8 +143,10 @@ open class PazZombieRenderState : ZombieRenderState() {
     var customName: String = ""
     var textureExtra: List<String> = listOf()
     var isAngry: Boolean = false
+    var isFlying: Boolean = false
     var zombieState: ZombieState = ZombieState.IDLE
     val emergeAnimationState: AnimationState = AnimationState()
+    val retreatAnimationState: AnimationState = AnimationState()
     val floatAnimationState: AnimationState = AnimationState()
     val actionAnimationState: AnimationState = AnimationState()
 

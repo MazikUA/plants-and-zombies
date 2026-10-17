@@ -12,7 +12,10 @@ import net.minecraft.network.syncher.EntityDataSerializers
 import net.minecraft.network.syncher.SynchedEntityData
 import net.minecraft.resources.Identifier
 import net.minecraft.server.level.ServerLevel
+import net.minecraft.sounds.SoundEvent
+import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.DifficultyInstance
+import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.damagesource.DamageTypes
 import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
@@ -89,7 +92,7 @@ class SuperBrainz(type: EntityType<out SuperBrainz>, level: Level) : PazZombie(t
     override fun tick() {
         super.tick()
         if (beamCooldown>0) beamCooldown--
-        if(beamAttackTime>0 && state != ZombieState.FLYING) {
+        if(beamAttackTime>0 && !isFlying) {
             if (beamAttackTime==1) applyBeamModifiers()
             laserAttackAnimation.startIfStopped(tickCount)
             val laserStart = calculateUpVector(this.xRot + 95, this.yHeadRot + 25).scale(0.9).add(eyePosition)
@@ -117,21 +120,20 @@ class SuperBrainz(type: EntityType<out SuperBrainz>, level: Level) : PazZombie(t
 
         updateCapeState()
         val level = level() as? ServerLevel?: return
-        if (tickCount % 20 == 0) when (state) {
-            ZombieState.IDLE -> {
-                target?.let {
-                    if (it.y > y + 2.5) state = ZombieState.FLYING
-                }
-                if (moveControl.wantedY > y + 2.5) state = ZombieState.FLYING
-            }
-            ZombieState.FLYING -> {
+        if (tickCount % 20 == 0)
+            if (isFlying) {
                 val floorHeight = y - level.getHeight(Heightmap.Types.WORLD_SURFACE, blockPosition()).toDouble()
                 val targetOnGround = target == null || target!!.y <= y + 1.5
-                if (floorHeight < 2.0 && targetOnGround) state = ZombieState.IDLE
+                if (floorHeight < 2.0 && targetOnGround) isFlying = false
             }
-            else -> {}
-        }
-        if (state == ZombieState.FLYING && tickCount%2==0) level.sendParticles(
+            else {
+                target?.let {
+                    if (it.y > y + 2.5) isFlying = true
+                }
+                if (moveControl.wantedY > y + 2.5) isFlying = true
+            }
+
+        if (isFlying && tickCount%2==0) level.sendParticles(
             ParticleTypes.WHITE_SMOKE,
             x, boundingBox.ysize*0.5+y, z, 2, 0.1, 0.2, 0.1, 0.05
         )
@@ -165,6 +167,9 @@ class SuperBrainz(type: EntityType<out SuperBrainz>, level: Level) : PazZombie(t
             this,
             damageType = DamageTypes.MOB_ATTACK,
             actionDelay = 8,
+            actionSuccessEffect = {
+                playSound(PazSounds.SUPER_BRAINZ_PUNCH)
+            },
             usePredicate = {
                 punchTime<=0 && beamAttackTime<=0
             },
@@ -181,7 +186,7 @@ class SuperBrainz(type: EntityType<out SuperBrainz>, level: Level) : PazZombie(t
             damageType = PazDamageTypes.ZOMBIE_ENERGY,
             damageMultiplier = 0.2f,
             actionPredicate = {
-                state != ZombieState.FLYING && beamCooldown<=0 && punchTime<=0
+                !isFlying && beamCooldown<=0 && punchTime<=0
             },
             particleFactory = { startPos, endPos ->
                 val laserStart = calculateUpVector(this.xRot + 95, this.yHeadRot + 25).scale(0.9).add(startPos)
@@ -219,6 +224,20 @@ class SuperBrainz(type: EntityType<out SuperBrainz>, level: Level) : PazZombie(t
         ))
     }
 
+    override fun getAmbientSound(): SoundEvent {
+        return PazSounds.SUPER_BRAINZ_AMBIENT
+    }
+    override fun getHurtSound(source: DamageSource): SoundEvent {
+        return PazSounds.SUPER_BRAINZ_HURT
+    }
+    override fun getDeathSound(): SoundEvent {
+        return PazSounds.SUPER_BRAINZ_DEATH
+    }
+    override fun getStepSound(): SoundEvent {
+        return SoundEvents.ZOMBIE_STEP
+    }
+
+    override fun canEquipBalloons(): Boolean = false
     override fun addBehaviourGoals() {
         addBehaviourGoalsNoMelee()
     }
