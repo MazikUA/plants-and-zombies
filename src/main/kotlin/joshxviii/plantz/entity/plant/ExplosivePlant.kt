@@ -23,6 +23,7 @@ import net.minecraft.world.InteractionHand
 import net.minecraft.world.InteractionResult
 import net.minecraft.world.damagesource.DamageType
 import net.minecraft.world.entity.EntityType
+import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.Items
 import net.minecraft.world.level.ExplosionDamageCalculator
@@ -35,16 +36,17 @@ import kotlin.time.times
 abstract class ExplosivePlant(type: EntityType<out ExplosivePlant>, level: Level) : Plant(type, level) {
     companion object {
 
-        fun Plant.scaledExplosion(
+        fun LivingEntity.scaledExplosion(
             waveColor: Int = 0xD0370D,
             blastColor: Int = 0xFFE88D,
             smokeColor: Int = 0xB87878
         ) {
             val level = level() as? ServerLevel ?: return
-            addParticlesAroundSelf(
-                particle = ParticleTypes.LARGE_SMOKE,
-                amount = 20*sqrt(scale).toInt()..24*sqrt(scale).toInt(),
-                speed = 0.02,
+            level.sendParticles(
+                ParticleTypes.LARGE_SMOKE,
+                x, y, z,
+                (20*sqrt(scale).toInt()..24*sqrt(scale).toInt()).random(),
+                0.5, 0.5, 0.5, 0.02
             )
             level.sendParticles(NukeWaveParticleOptions(color = waveColor, scale = 2f * scale),
                 x, y, z, 1, 0.0, 0.0, 0.0, 0.0

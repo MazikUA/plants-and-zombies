@@ -6,6 +6,7 @@ import joshxviii.plantz.PazEntities
 import joshxviii.plantz.PazServerParticles
 import joshxviii.plantz.PazSounds
 import joshxviii.plantz.entity.zombie.BrownCoatVariant
+import joshxviii.plantz.entity.zombie.ImpVariant
 import joshxviii.plantz.entity.zombie.PazZombie
 import joshxviii.plantz.item.BalloonItem
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup.level
@@ -43,6 +44,12 @@ class Balloon(
             BrownCoatVariant.DESERT to listOf(DyeColor.ORANGE, DyeColor.BROWN),
             BrownCoatVariant.SNOW to listOf(DyeColor.LIGHT_BLUE, DyeColor.WHITE),
             BrownCoatVariant.BUCCANEER to listOf(DyeColor.BLACK, DyeColor.RED)
+        )
+
+        val impBallons = mapOf(
+            ImpVariant.IMP to listOf(DyeColor.RED, DyeColor.YELLOW, DyeColor.BLUE),
+            ImpVariant.YETI to listOf(DyeColor.LIGHT_BLUE, DyeColor.WHITE),
+            ImpVariant.PIRATE to listOf(DyeColor.BLACK, DyeColor.RED)
         )
 
         private const val MAX_PULL_PITCH = 25.0f

@@ -125,7 +125,7 @@ object RaidMusicManager {
 
         return when (waveType) {
             WaveType.DEFAULT -> when {
-                (currentWave == totalWaves || currentWave in 12..ZombieRaid.MAXIMUM_WAVE_COUNT) ->
+                (currentWave == 10 || currentWave == totalWaves || currentWave in 12..ZombieRaid.MAXIMUM_WAVE_COUNT) ->
                     RaidMusicLayer.HIGH
                 currentWave in 6..11 ->
                     RaidMusicLayer.MEDIUM

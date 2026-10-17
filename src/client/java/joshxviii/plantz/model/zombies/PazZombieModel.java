@@ -32,7 +32,7 @@ public class PazZombieModel<S extends PazZombieRenderState> extends ZombieModel<
         super(mainRoot);
 
         this.emergeAnimation = Objects.requireNonNullElse(initAnimationOverride, PazZombieAnimations.emerge).bake(mainRoot);
-        this.retreatAnimation = PazZombieAnimations.emerge.bake(mainRoot);
+        this.retreatAnimation = PazZombieAnimations.retreat.bake(mainRoot);
         this.floatAnimation = PazZombieAnimations.balloon_float.bake(mainRoot);
 
     }

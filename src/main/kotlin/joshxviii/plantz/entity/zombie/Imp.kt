@@ -2,6 +2,8 @@ package joshxviii.plantz.entity.zombie
 
 import joshxviii.plantz.*
 import joshxviii.plantz.PazDataSerializers.IMP_VARIANT
+import joshxviii.plantz.entity.Balloon
+import joshxviii.plantz.entity.plant.ExplosivePlant.Companion.scaledExplosion
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.network.syncher.EntityDataAccessor
 import net.minecraft.network.syncher.EntityDataSerializers
@@ -80,16 +82,16 @@ class Imp(type: EntityType<out Imp> = PazEntities.IMP, level: Level) : PazZombie
     override fun tick() {
         super.tick()
         if (hasBarrel) {
-            val level = level()
             target?.let {
                 if (distanceToSqr(it) < 1.0) {
-                    explode(level as ServerLevel)
+                    explode()
                 }
             }
         }
     }
 
-    fun explode(level: ServerLevel) {
+    fun explode() {
+        val level = level() as? ServerLevel?: return
         applyImpulse(0.0, 1.0, 0.0, 1f, 0.5f)
         level.explode(
             this,
@@ -103,17 +105,8 @@ class Imp(type: EntityType<out Imp> = PazEntities.IMP, level: Level) : PazZombie
             WeightedList.of(),
             SoundEvents.GENERIC_EXPLODE
         )
-        if (level is ServerLevel) {
-            level.sendParticles(NukeWaveParticleOptions(color = 0xD0370D, scale = 2f),
-                x, y, z, 1, 0.0, 0.0, 0.0, 0.0
-            )
-            level.sendParticles(NukeBlastParticleOptions(color = 0xFFE88D, scale = 1f),
-                x, y, z, 1, 0.0, 0.0, 0.0, 0.0
-            )
-            level.sendParticles(NukeSmokeParticleOptions(color = 0xB87878, scale = 0.7f),
-                x, y+1, z, 16, 0.0, 0.5, 0.0, 0.0
-            )
-        }
+
+        scaledExplosion()
         hasBarrel = false
     }
 
@@ -121,6 +114,11 @@ class Imp(type: EntityType<out Imp> = PazEntities.IMP, level: Level) : PazZombie
 
     override fun canFreeze(): Boolean {
         return variant != ImpVariant.YETI && super.canFreeze()
+    }
+
+    override fun tickDeath() {
+        if (lastDamageSource?.directEntity != null && deathTime == 0 && hasBarrel) explode()
+        else super.tickDeath()
     }
 
     override fun actuallyHurt(level: ServerLevel, source: DamageSource, damage: Float) {
@@ -183,6 +181,11 @@ class Imp(type: EntityType<out Imp> = PazEntities.IMP, level: Level) : PazZombie
                 else if (random.nextFloat() < 0.01 && getItemBySlot(EquipmentSlot.HEAD).isEmpty) {
                     setItemSlot(EquipmentSlot.HEAD, Items.BUCKET.defaultInstance)
                 }
+            }
+
+            val spawnBalloons = (spawnReason != EntitySpawnReason.EVENT && spawnReason != EntitySpawnReason.REINFORCEMENT && random.nextFloat() < 0.08)
+            if (spawnBalloons) Balloon.impBallons[variant]?.let{
+                spawnBalloons(1, it)
             }
         }
 

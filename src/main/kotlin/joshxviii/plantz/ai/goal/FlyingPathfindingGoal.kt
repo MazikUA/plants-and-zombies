@@ -60,9 +60,9 @@ open class FlyingPathfindingGoal(
             val blockX = rx.toInt()
             val blockZ = rz.toInt()
 
-            val targetHover = if (hoverGroundHeight > 0.0) hoverGroundHeight else 1.5
+            val targetHover = (if (hoverGroundHeight > 0.0) hoverGroundHeight else 1.5)
             val surfaceY = level.getHeight(Heightmap.Types.WORLD_SURFACE, blockX, blockZ).toDouble()
-            val ry = surfaceY + targetHover + (entity.random.nextDouble() * 1.0 - 0.5)
+            val ry = surfaceY + targetHover + (entity.random.nextDouble() * 1.0 - 0.5) - 3.0
 
             if (ry <= level.minY + 2 || ry >= level.maxY - 2) continue
 

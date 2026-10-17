@@ -120,7 +120,7 @@ class SuperBrainz(type: EntityType<out SuperBrainz>, level: Level) : PazZombie(t
 
         updateCapeState()
         val level = level() as? ServerLevel?: return
-        if (tickCount % 20 == 0)
+        if (tickCount % 60 == 0)
             if (isFlying) {
                 val floorHeight = y - level.getHeight(Heightmap.Types.WORLD_SURFACE, blockPosition()).toDouble()
                 val targetOnGround = target == null || target!!.y <= y + 1.5
@@ -128,9 +128,9 @@ class SuperBrainz(type: EntityType<out SuperBrainz>, level: Level) : PazZombie(t
             }
             else {
                 target?.let {
-                    if (it.y > y + 2.5) isFlying = true
+                    if (it.y > y + 3.5) isFlying = true
                 }
-                if (moveControl.wantedY > y + 2.5) isFlying = true
+                if (moveControl.wantedY > y + 3.5) isFlying = true
             }
 
         if (isFlying && tickCount%2==0) level.sendParticles(

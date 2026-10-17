@@ -8,16 +8,16 @@
 
   "item.balloon.inflate": {
     "sounds": [
-      { "name": "plantz:item/balloon/infalte1", "volume": 1.0, "pitch": 1.0},
-      { "name": "plantz:item/balloon/infalte2", "volume": 1.0, "pitch": 1.0},
-      { "name": "plantz:item/balloon/infalte3", "volume": 1.0, "pitch": 1.0}
-    ], "subtitle": "plantz.subtitles.item.watering_can"
+      { "name": "plantz:item/balloon/inflate1", "volume": 0.4, "pitch": 1.1},
+      { "name": "plantz:item/balloon/inflate2", "volume": 0.4, "pitch": 1.1},
+      { "name": "plantz:item/balloon/inflate3", "volume": 0.4, "pitch": 1.1}
+    ], "subtitle": "plantz.subtitles.item.balloon.inflate"
   },
   "item.balloon.pop": {
     "sounds": [
-      { "name": "plantz:item/balloon/pop1", "volume": 1.0, "pitch": 1.0},
-      { "name": "plantz:item/balloon/pop2", "volume": 1.0, "pitch": 1.0}
-    ], "subtitle": "plantz.subtitles.item.watering_can"
+      { "name": "plantz:item/balloon/pop1", "volume": 1.2, "pitch": 1.0},
+      { "name": "plantz:item/balloon/pop2", "volume": 1.2, "pitch": 1.0}
+    ], "subtitle": "plantz.subtitles.item.balloon.pop"
   },
 
   "entity.projectile.hit_paper": {
@@ -268,9 +268,9 @@
 
   "entity.super_brainz.ambient": {
     "sounds": [
-      { "name": "plantz:entity/super_brainz/ambient_1", "volume": 1.0 },
-      { "name": "plantz:entity/super_brainz/ambient_2", "volume": 1.0 },
-      { "name": "plantz:entity/super_brainz/ambient_3", "volume": 1.0 }
+      { "name": "plantz:entity/super_brainz/ambient_1", "volume": 1.2 },
+      { "name": "plantz:entity/super_brainz/ambient_2", "volume": 1.2 },
+      { "name": "plantz:entity/super_brainz/ambient_3", "volume": 1.2 }
     ], "subtitle": "plantz.subtitles.entity.super_brainz.ambient"
   },
   "entity.super_brainz.hurt": {
@@ -282,9 +282,9 @@
   },
   "entity.super_brainz.punch": {
     "sounds": [
-      { "name": "plantz:entity/super_brainz/punch_1", "volume": 1.0 },
-      { "name": "plantz:entity/super_brainz/punch_2", "volume": 1.0 },
-      { "name": "plantz:entity/super_brainz/punch_3", "volume": 1.0 }
+      { "name": "plantz:entity/super_brainz/punch_1", "volume": 1.2 },
+      { "name": "plantz:entity/super_brainz/punch_2", "volume": 1.2 },
+      { "name": "plantz:entity/super_brainz/punch_3", "volume": 1.2 }
     ], "subtitle": "plantz.subtitles.entity.super_brainz.hurt"
   },
   "entity.super_brainz.death": {

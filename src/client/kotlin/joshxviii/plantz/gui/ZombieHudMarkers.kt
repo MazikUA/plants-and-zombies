@@ -3,11 +3,13 @@ package joshxviii.plantz.gui
 import com.mojang.blaze3d.pipeline.RenderPipeline
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.vertex.VertexConsumer
+import com.mojang.math.Axis
 import joshxviii.plantz.PazBlocks
 import joshxviii.plantz.PazConfig
 import joshxviii.plantz.PazNetwork
 import joshxviii.plantz.PazRenderPipelines
 import joshxviii.plantz.ZombieRaider
+import joshxviii.plantz.entity.zombie.PazZombie
 import joshxviii.plantz.renderer.entity.zombie.PazZombieRenderState
 import joshxviii.plantz.renderer.entity.zombie.PazZombieRenderer
 import net.minecraft.client.Minecraft
@@ -37,7 +39,7 @@ import kotlin.math.tan
 
 object ZombieHudMarkers {
 
-    private const val ICON_SIZE = 8
+    const val ICON_SIZE = 8
 
     private const val MIN_DISTANCE = 10.0
     private const val MAX_DISTANCE = 96.0
@@ -98,13 +100,25 @@ object ZombieHudMarkers {
         if (use3dIcon) graphics.guiRenderState.addPicturesInPictureState(GuiEntityRenderState(state, Vector3f((cx.toFloat() - w * 0.5f) / baseScale, zombie.eyeHeight + (cy.toFloat() - h * 0.5f ) / baseScale, 0f), Quaternionf().rotateX(Mth.PI), null, 0, 0, w, h, baseScale, null))
         else submitHead(graphics, zombie, model, texture, zombie.getItemBySlot(EquipmentSlot.HEAD), cx, cy, baseScale * state.scale)
 
-        if (zombie.mainHandItem.`is`(PazBlocks.BRAINZ_FLAG.asItem()) || zombie.offhandItem.`is`(PazBlocks.BRAINZ_FLAG.asItem())) {
-            graphics.pose().pushMatrix()
-            graphics.pose().translate(cx.toFloat(), cy.toFloat())
-            graphics.pose().scale(baseScale/24f)
-            graphics.item(PazBlocks.BRAINZ_FLAG.asItem().defaultInstance, -4, -4)
-            graphics.pose().popMatrix()
-        }
+        if (zombie.mainHandItem.`is`(PazBlocks.BRAINZ_FLAG.asItem()) || zombie.offhandItem.`is`(PazBlocks.BRAINZ_FLAG.asItem())) submitItem(graphics,
+            PazBlocks.BRAINZ_FLAG.asItem().defaultInstance, cx, cy, baseScale)
+
+        val balloon = (zombie as? PazZombie)?.balloons?.firstOrNull()
+        if (balloon != null) submitItem(graphics, balloon.pickResult, cx, cy-8, baseScale)
+    }
+
+    private fun submitItem(
+        graphics: GuiGraphicsExtractor,
+        item: ItemStack,
+        cx: Double,
+        cy: Double,
+        scale: Float
+    ) {
+        graphics.pose().pushMatrix()
+        graphics.pose().translate(cx.toFloat(), cy.toFloat())
+        graphics.pose().scale(scale/24f)
+        graphics.item(item, -4, -4)
+        graphics.pose().popMatrix()
     }
 
     private fun submitHead(
@@ -118,34 +132,9 @@ object ZombieHudMarkers {
         scale: Float,
         outlinePad: Float = 0f
     ) {
-        val mc = Minecraft.getInstance()
-
-        graphics.guiRenderState.addGuiElement(object : GuiElementRenderState {
-            override fun buildVertices(vertexConsumer: VertexConsumer) {
-                model.resetPose()
-                val pose = PoseStack()
-                pose.pushPose()
-                pose.translate(cx, cy, if (outlinePad>0f) 149.0 else 150.0)
-                pose.translate(0.0, (ICON_SIZE + outlinePad)*0.5, 0.0)
-                pose.scale(scale, scale, scale)
-                if (outlinePad>0f) pose.scale(outlinePad, outlinePad, outlinePad)
-                model.head.setPos(0f, 0f, 0f)
-                model.head.render(pose, vertexConsumer, LightCoordsUtil.FULL_BRIGHT, OverlayTexture.NO_OVERLAY)
-                mc.itemModelResolver.updateForTopItem(ItemStackRenderState(), itemStack, ItemDisplayContext.HEAD, mc.level, zombie, 0)
-
-                pose.popPose()
-            }
-
-            override fun pipeline(): RenderPipeline = if (outlinePad>0f) PazRenderPipelines.HEAD_MARKER_OUTLINE else PazRenderPipelines.HEAD_MARKER
-
-            override fun textureSetup(): TextureSetup {
-                val t = mc.textureManager.getTexture(texture)
-                return TextureSetup.singleTexture(t.textureView, t.sampler)
-            }
-
-            override fun scissorArea(): ScreenRectangle? = null
-            override fun bounds(): ScreenRectangle = ScreenRectangle(0, 0, mc.window.guiScaledWidth, mc.window.guiScaledHeight)
-        })
+        graphics.guiRenderState.addGuiElement(
+            HeadHudMarker(zombie, model, texture, itemStack, cx, cy, scale, outlinePad)
+        )
     }
 
     fun collect(client: Minecraft): List<Marker> {
@@ -167,7 +156,7 @@ object ZombieHudMarkers {
                 if (dist !in (MIN_DISTANCE*MIN_DISTANCE)..(MAX_DISTANCE*MAX_DISTANCE)) continue
                 add(Marker(pos, entity))
             }
-        }
+        }.sortedByDescending { it.zombie.distanceToSqr(cam) }
     }
 
     fun isViewObscured(camPos: Vec3, target: LivingEntity): Boolean {

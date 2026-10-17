@@ -44,3 +44,4 @@ replay_*.log
 /external-assets/world_save/Neighborville/players
 /.kotlin
 /dev_build.number
+/lib

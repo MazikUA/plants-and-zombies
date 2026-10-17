@@ -28,7 +28,7 @@ import net.minecraft.world.item.enchantment.Enchantments
 import net.minecraft.world.item.enchantment.providers.VanillaEnchantmentProviders
 import net.minecraft.world.level.storage.loot.LootTable
 import java.util.function.IntFunction
-import kotlin.math.max
+import kotlin.math.pow
 
 enum class WaveType(
     private val minWave: Int,
@@ -51,7 +51,7 @@ enum class WaveType(
                 WaveSpawnEntry(
                     PazEntities.BROWN_COAT,
                     scaled(4f + wave * 1.8f, omen, credits, min = 3), {
-                        if (wave > 4) ::configureDefaultBalloonChance
+                        configureDefaultBalloonChance(it, raid)
                     }),
                 WaveSpawnEntry(
                     PazEntities.NEWSPAPER_ZOMBIE,
@@ -63,8 +63,9 @@ enum class WaveType(
                 ),
                 WaveSpawnEntry(
                     PazEntities.IMP,
-                    if (wave > 4) scaled(1f + (wave - 4) * 0.7f, omen, credits) else 0
-                ),
+                    if (wave > 4) scaled(1f + (wave - 4) * 0.7f, omen, credits) else 0, {
+                        configureDefaultBalloonChance(it, raid)
+                    }),
                 WaveSpawnEntry(
                     PazEntities.ALL_STAR,
                     if (wave > 4) scaled(1f + (wave - 4) * 0.5f, omen, credits) else 0
@@ -79,8 +80,8 @@ enum class WaveType(
                 ),
                 WaveSpawnEntry(
                     PazEntities.GARGANTUAR,
-                    if (wave == 10) 1 else if (wave == 11) 0 // always spawn during wave 10
-                    else if (wave > 11) scaled(1f + (wave - 11) * 0.3f, omen, credits, min = 0) else 0
+                    if (wave == 9) 1 else if (wave == 10) 0 // always spawn during wave 10
+                    else if (wave > 10) scaled(1f + (wave - 5) * 0.3f, omen, credits, min = 0) else 0
                 ),
                 WaveSpawnEntry(
                     PazEntities.ENGINEER_ZOMBIE,
@@ -110,7 +111,7 @@ enum class WaveType(
                     PazEntities.BROWN_COAT,
                     scaled(5f + wave * 1.6f, omen, credits, min = 3), {
                         configureBucketBrigade(it)
-                        configureDefaultBalloonChance(it)
+                        configureDefaultBalloonChance(it, raid)
                     }),
                 WaveSpawnEntry(
                     PazEntities.NEWSPAPER_ZOMBIE,
@@ -139,8 +140,10 @@ enum class WaveType(
                 ),
                 WaveSpawnEntry(
                     PazEntities.IMP,
-                    scaled(4f + wave * 0.8f, omen, credits, min = 1),
-                    ::configureHalftimeShowdown
+                    scaled(4f + wave * 0.8f, omen, credits, min = 1), {
+                        configureHalftimeShowdown(it)
+                        configureDefaultBalloonChance(it, raid)
+                    }
                 )
             )
         },
@@ -162,12 +165,14 @@ enum class WaveType(
                     PazEntities.BROWN_COAT,
                     scaled(5f + wave * 0.9f, omen, credits, min = 5), {
                         configureWinterWonderland(it)
-                        configureDefaultBalloonChance(it)
+                        configureDefaultBalloonChance(it, raid)
                     }),
                 WaveSpawnEntry(
                     PazEntities.IMP,
-                    scaled(2f + wave * 0.7f, omen, credits, min = 2),
-                    ::configureWinterWonderland
+                    scaled(2f + wave * 0.7f, omen, credits, min = 2), {
+                        configureWinterWonderland(it)
+                        configureDefaultBalloonChance(it, raid)
+                    }
                 ),
                 WaveSpawnEntry(
                     PazEntities.ZOMBIE_YETI,
@@ -193,13 +198,14 @@ enum class WaveType(
                     PazEntities.BROWN_COAT,
                     scaled(6f + wave * 1.4f, omen, credits, min = 5), {
                         configurePirateInvasion(it)
-                        configureDefaultBalloonChance(it)
+                        configureDefaultBalloonChance(it, raid)
                     }),
                 WaveSpawnEntry(
                     PazEntities.IMP,
-                    scaled(3f + wave * 0.6f, omen, credits, min = 2),
-                    ::configurePirateInvasion
-                ),
+                    scaled(3f + wave * 0.6f, omen, credits, min = 2), {
+                        configurePirateInvasion(it)
+                        configureDefaultBalloonChance(it, raid)
+                    }),
                 WaveSpawnEntry(
                     PazEntities.PIRATE_CAPTAIN,
                     if (credits) scaled(2f + wave * 0.4f, omen, true, min = 1) else 0
@@ -300,11 +306,17 @@ enum class WaveType(
 
 
         // configurations
-        fun configureDefaultBalloonChance(zombie: Zombie) {
-            if (zombie is BrownCoat) {
-                val random = zombie.random
-                if (random.nextFloat() < 0.08f) Balloon.browncoatBallons[zombie.variant]?.let {
-                    zombie.spawnBalloons(zombie.random.nextIntBetweenInclusive(2, 3), it)
+        fun configureDefaultBalloonChance(zombie: Zombie, raid: ZombieRaid) {
+            val wave = raid.wavesSpawned
+            if (wave < 2) return
+            val balloonChance = 0.35 * ((wave.toDouble() / ZombieRaid.MAXIMUM_WAVE_COUNT).pow(.5)).coerceIn(0.0, 1.0).toFloat()
+            val random = raid.random
+            if (random.nextFloat() < balloonChance) {
+                if (zombie is BrownCoat) Balloon.browncoatBallons[zombie.variant]?.let {
+                    zombie.spawnBalloons(raid.random.nextIntBetweenInclusive(2, 3), it)
+                }
+                if (zombie is Imp) Balloon.impBallons[zombie.variant]?.let {
+                    zombie.spawnBalloons(1, it)
                 }
             }
         }
