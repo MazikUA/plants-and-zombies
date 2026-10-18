@@ -58,7 +58,6 @@ class ZombieRaid(
     private var active: Boolean = false,
     var ticksActive: Long = 0,
     var zombieRaidOmenLevel: Int = 0,
-    var wavesSpawned: Int = 0,
     var waveTypes: MutableList<WaveType> = mutableListOf(),
     var raidCooldownTicks: Int = PRE_RAID_TICKS,
     var postRaidTicks: Int = 0,
@@ -101,7 +100,6 @@ class ZombieRaid(
                 Codec.BOOL.fieldOf("active").forGetter<ZombieRaid> { it.active },
                 Codec.LONG.fieldOf("ticks_active").forGetter<ZombieRaid> { it.ticksActive },
                 Codec.INT.fieldOf("raid_omen_level").forGetter<ZombieRaid> { it.zombieRaidOmenLevel },
-                Codec.INT.fieldOf("waves_spawned").forGetter<ZombieRaid> { it.wavesSpawned },
                 WaveType.CODEC.listOf().fieldOf("wave_types").forGetter<ZombieRaid> { it.waveTypes },
                 Codec.INT.fieldOf("cooldown_ticks").forGetter<ZombieRaid> { it.raidCooldownTicks },
                 Codec.INT.fieldOf("post_raid_ticks").forGetter<ZombieRaid> { it.postRaidTicks },
@@ -127,6 +125,7 @@ class ZombieRaid(
         const val PRE_RAID_TICKS: Int = 100
         const val POST_RAID_TICKS: Int = 80
         const val SPAWN_DISTANCE: Int = 88
+        const val RAID_DISTANCE: Int = 144
         const val GARDEN_HERO_EFFECT_DURATION: Int = 72000
         const val COUNTDOWN_BEFORE_LOSS: Int = 200 //10 seconds
         const val MAXIMUM_WAVE_COUNT: Int = 20
@@ -138,7 +137,6 @@ class ZombieRaid(
     val zombieRaidEvent = ServerBossEvent(Mth.createInsecureUUID(random), ZOMBIE_RAID_BAR_START, BossEvent.BossBarColor.GREEN, BossEvent.BossBarOverlay.NOTCHED_10)
     // TODO either save the wave map or save the raid ID on the zombie. needed for vanishing zombies and loading in the raid's health
     private val waveZombieMap: MutableMap<Int, MutableSet<Zombie>> = Maps.newHashMap<Int, MutableSet<Zombie>>()
-    var waveSpawnPos : BlockPos? = null
 
     enum class ZombieRaidStatus(private val state: String) : StringRepresentable {
         ONGOING("ongoing"),
@@ -206,8 +204,7 @@ class ZombieRaid(
         }
 
         if (
-            ((getTotalZombiesAlive() == 0 && raidCooldownTicks > 0) ||
-                    (waveTimer == 0 && wavesSpawned < numWaves)) && wavesSpawned < numWaves
+            ((getTotalZombiesAlive() == 0 && raidCooldownTicks > 0) || waveTimer == 0) && !isFinalWave()
         ) {
             raidCooldownTicks-- // pre-loading time
             waveTimer = 0
@@ -258,7 +255,7 @@ class ZombieRaid(
             val spawnPos = findRandomSpawnPos(level, 20) ?: center
             spawnNextWave(level, spawnPos)
             zombieRaidEvent.players.forEach { player ->
-                PazCriteria.RAID_WAVE_TRIGGER.trigger(player, wavesSpawned)
+                PazCriteria.RAID_WAVE_TRIGGER.trigger(player, currentWaveNumber())
             }
         }
         else if (waveTimer <= 0) {// destroy flag when timer runs out
@@ -266,12 +263,10 @@ class ZombieRaid(
         }
     }
 
-    fun isFinalWave(): Boolean = wavesSpawned >= numWaves
-
     private fun validPlayer(): Predicate<ServerPlayer> {
         return Predicate { player: ServerPlayer ->
             val pos = player.blockPosition()
-            player.isAlive && player.level().getZombieRaids().getNearbyRaid(pos, SPAWN_DISTANCE * SPAWN_DISTANCE) === this
+            player.isAlive && player.level().getZombieRaids().getNearbyRaid(pos, RAID_DISTANCE) === this
         }
     }
 
@@ -317,29 +312,31 @@ class ZombieRaid(
     }
 
     private fun spawnNextWave(level: ServerLevel, pos: BlockPos) {
-        wavesSpawned++
-        waveTimer = if (isFinalWave()) FINAL_WAVE_DURATION else WAVE_DURATION
-        var leaderSet = false
-        totalZombieHealth = 0.0f
         val creditsUnlocked = hasRaidStarterSeenCredits(level)
         val waveType = pickWaveType(creditsUnlocked)
-        if (waveType != WaveType.DEFAULT) announceSpecialWave(waveType)
         waveTypes = waveTypes.toMutableList()
         waveTypes.add(waveType)
+        val wave = currentWaveNumber()
+        waveTimer = if (isFinalWave()) FINAL_WAVE_DURATION else WAVE_DURATION
+        if (waveType != WaveType.DEFAULT) announceSpecialWave(waveType)
+        else if (wave % 10 == 0) announceBossWave()
+        var leaderSet = false
+        totalZombieHealth = 0.0f
+
         val waveEntries = waveType.spawnEntries(this, creditsUnlocked)
 
         for ((type, count, configure) in waveEntries) {
             for (i in 0..<count) {
                 val zombie = type.create(level, EntitySpawnReason.EVENT) ?: break
                 if (!leaderSet) {
-                    setLeader(wavesSpawned, zombie)
+                    setLeader(wave, zombie)
                     leaderSet = true
                 }
                 val randX = pos.x + random.nextInt(11) - 5
                 val randZ = pos.z + random.nextInt(11) - 5
                 val randY = level.getHeight(Heightmap.Types.OCEAN_FLOOR, randX, randZ)
                 val randomPos = MutableBlockPos(randX,randY,randZ)
-                joinRaid(level, zombie, wavesSpawned, false, randomPos, configure)
+                joinRaid(level, zombie, wave, false, randomPos, configure)
             }
         }
     }
@@ -347,7 +344,7 @@ class ZombieRaid(
     fun joinRaid(
         level: ServerLevel,
         zombie: Zombie,
-        waveNumber: Int = wavesSpawned,
+        waveNumber: Int = currentWaveNumber(),
         exists: Boolean = true,
         pos: BlockPos? = null,
         configure: (Zombie) -> Unit = {},
@@ -407,7 +404,7 @@ class ZombieRaid(
     }
     fun getLeader(wave: Int): Zombie? = waveToLeaderMap[wave]
 
-    private fun addWaveMob(zombie: Zombie, wave: Int = wavesSpawned, level: ServerLevel): Boolean {
+    private fun addWaveMob(zombie: Zombie, wave: Int = currentWaveNumber(), level: ServerLevel): Boolean {
         waveZombieMap.computeIfAbsent(wave) { Sets.newHashSet<Zombie>() }
         val zombies = waveZombieMap[wave] as MutableSet<Zombie>
         if (zombies.contains(zombie)) return false
@@ -430,8 +427,7 @@ class ZombieRaid(
         val data = ZombieRaidClientData(
             id = zombieRaidEvent.id,
             status = if (terminate) ZombieRaidStatus.TERMINATE else status,
-            currentWaveType = waveTypes.lastOrNull()?: WaveType.DEFAULT,
-            wavesSpawned = wavesSpawned,
+            waveTypes = waveTypes,
             activeTime = ticksActive.toInt(),
             numWaves = numWaves,
             waveTimer = waveTimer,
@@ -447,6 +443,8 @@ class ZombieRaid(
         }
     }
 
+    fun currentWaveNumber(): Int = waveTypes.size
+    fun isFinalWave(): Boolean = currentWaveNumber() >= numWaves
     fun getTotalZombiesAlive(): Int = waveZombieMap.values.stream().mapToInt { it.map { z -> if (z.isAlive) 1 else 0 }.sum() }.sum()
     fun getHealthOfZombies(): Float =
         if (status != ZombieRaidStatus.NEXT_WAVE)// zombie health bar
@@ -472,8 +470,14 @@ class ZombieRaid(
     }
 
     private fun announceSpecialWave(wave: WaveType) {
-        val title: Component = Component.translatable("event.plantz.zombie_raid.special_wave.title").apply { withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD) }
+        val title: Component = Component.translatable("event.plantz.zombie_raid.special_wave").apply { withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD) }
         val subtitle: Component = wave.popupMessage().copy().apply { withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.BOLD) }
+        showTitleMessage(title, subtitle)
+    }
+
+    private fun announceBossWave(bossName: Component = (if (currentWaveNumber()<20) PazEntities.GARGANTUAR else PazEntities.GARGANTUAR).description) {
+        val title = Component.translatable("event.plantz.zombie_raid.boss_wave").apply { withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD) }
+        val subtitle = Component.translatable("event.plantz.zombie_raid.boss_title", bossName).apply { withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.BOLD) }
         showTitleMessage(title, subtitle)
     }
 

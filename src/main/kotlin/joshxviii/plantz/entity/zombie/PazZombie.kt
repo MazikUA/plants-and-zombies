@@ -6,7 +6,7 @@ import joshxviii.plantz.ai.ZombieState
 import joshxviii.plantz.ai.goal.FlyingPathfindingGoal
 import joshxviii.plantz.entity.Balloon
 import joshxviii.plantz.item.BalloonItem
-import joshxviii.plantz.raid.ZombieRaid.Companion.SPAWN_DISTANCE
+import joshxviii.plantz.raid.ZombieRaid.Companion.RAID_DISTANCE
 import joshxviii.plantz.raid.getZombieRaids
 import net.minecraft.core.BlockPos
 import net.minecraft.core.particles.BlockParticleOption
@@ -514,7 +514,7 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
         )
         val level = level() as ServerLevel
         if (newData.isRaider) {
-            val raid = level.getZombieRaids().getNearbyRaid(blockPosition(), (SPAWN_DISTANCE * SPAWN_DISTANCE * 2))
+            val raid = level.getZombieRaids().getNearbyRaid(blockPosition(), RAID_DISTANCE)
             raid?.joinRaid(level, this)
         }
 

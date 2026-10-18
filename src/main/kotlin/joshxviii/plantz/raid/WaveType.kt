@@ -44,7 +44,7 @@ enum class WaveType(
         creditsRequired = false,
         weightFn = { _, credits -> if (credits) 1.2f else 1.75f },
         spawnFn = { raid, credits ->
-            val wave = raid.wavesSpawned
+            val wave = raid.currentWaveNumber()
             val omen = raid.zombieRaidOmenLevel
 
             listOf(
@@ -97,13 +97,13 @@ enum class WaveType(
     ),
     BUCKET_BRIGADE(
         minWave = 1,
-        maxWave = 3,
+        maxWave = 4,
         creditsRequired = false,
         weightFn = { raid, _ ->
             0.11f + (raid.zombieRaidOmenLevel * 0.02f)
         },
         spawnFn = { raid, credits ->
-            val wave = raid.wavesSpawned
+            val wave = raid.currentWaveNumber()
             val omen = raid.zombieRaidOmenLevel
 
             listOf(
@@ -124,13 +124,13 @@ enum class WaveType(
     ),
     HALFTIME_SHOWDOWN(
         minWave = 2,
-        maxWave = 5,
+        maxWave = 6,
         creditsRequired = false,
         weightFn = { raid, credits ->
             0.11f + (raid.zombieRaidOmenLevel * 0.04f) + if (credits) 0.04f else 0f
         },
         spawnFn = { raid, credits ->
-            val wave = raid.wavesSpawned
+            val wave = raid.currentWaveNumber()
             val omen = raid.zombieRaidOmenLevel
 
             listOf(
@@ -150,14 +150,14 @@ enum class WaveType(
         lootTableFn = { _, _ -> PazLootTables.MAIL_REWARD_HALFTIME }
     ),
     WINTER_WONDERLAND(
-        minWave = 4,
+        minWave = 5,
         maxWave = 9,
         creditsRequired = false,
         weightFn = { raid, credits ->
             0.12f + (raid.zombieRaidOmenLevel * 0.04f) + if (credits) 0.05f else 0f
         },
         spawnFn = { raid, credits ->
-            val wave = raid.wavesSpawned
+            val wave = raid.currentWaveNumber()
             val omen = raid.zombieRaidOmenLevel
 
             listOf(
@@ -183,14 +183,14 @@ enum class WaveType(
         lootTableFn = { _, _ -> PazLootTables.MAIL_REWARD_WINTER }
     ),
     PIRATE_INVASION(
-        minWave = 8,
-        maxWave = 14,
+        minWave = 9,
+        maxWave = 15,
         creditsRequired = false,
         weightFn = { raid, credits ->
             0.13f + (raid.zombieRaidOmenLevel * 0.05f) + if (credits) 0.08f else 0f
         },
         spawnFn = { raid, credits ->
-            val wave = raid.wavesSpawned
+            val wave = raid.currentWaveNumber()
             val omen = raid.zombieRaidOmenLevel
 
             listOf(
@@ -212,7 +212,8 @@ enum class WaveType(
                 ),
                 WaveSpawnEntry(
                     PazEntities.GARGANTUAR,
-                    if (wave > 9) scaled(0.6f + wave * 0.1f, omen, credits, min = 0) else 0,
+                    if (wave == 10) 1 else
+                    if (wave > 10) scaled(0.6f + wave * 0.1f, omen, credits, min = 0) else 0,
                     ::configurePirateInvasion
                 )
             )
@@ -220,14 +221,14 @@ enum class WaveType(
         lootTableFn = { _, _ -> PazLootTables.MAIL_REWARD_PIRATE }
     ),
     ROBO_ARMY(
-        minWave = 11,
-        maxWave = 15,
+        minWave = 12,
+        maxWave = 16,
         creditsRequired = true,
         weightFn = { raid, credits ->
             if (!credits) 0f else 0.2f + (raid.zombieRaidOmenLevel * 0.05f)
         },
         spawnFn = { raid, credits ->
-            val wave = raid.wavesSpawned
+            val wave = raid.currentWaveNumber()
             val omen = raid.zombieRaidOmenLevel
 
             listOf(
@@ -252,14 +253,14 @@ enum class WaveType(
         lootTableFn = { _, _ -> PazLootTables.MAIL_REWARD_ARMY }
     ),
     LEAGUE_OF_AWESOME(
-        minWave = 12,
+        minWave = 13,
         maxWave = 20,
         creditsRequired = true,
         weightFn = { raid, credits ->
             if (!credits) 0f else 0.2f + (raid.zombieRaidOmenLevel * 0.05f)
         },
         spawnFn = { raid, credits ->
-            val wave = raid.wavesSpawned
+            val wave = raid.currentWaveNumber()
             val omen = raid.zombieRaidOmenLevel
 
             listOf(
@@ -304,10 +305,9 @@ enum class WaveType(
             return (raw * jitter).toInt().coerceIn(min, max)
         }
 
-
         // configurations
         fun configureDefaultBalloonChance(zombie: Zombie, raid: ZombieRaid) {
-            val wave = raid.wavesSpawned
+            val wave = raid.currentWaveNumber()
             if (wave < 3) return
             val balloonChance = 0.3 * ((wave.toDouble() / ZombieRaid.MAXIMUM_WAVE_COUNT).pow(.5)).coerceIn(0.0, 1.0).toFloat()
             val random = raid.random
@@ -421,7 +421,7 @@ enum class WaveType(
 
 
     fun isAvailable(raid: ZombieRaid, creditsUnlocked: Boolean): Boolean {
-        return raid.wavesSpawned in minWave..maxWave && (!creditsRequired || creditsUnlocked)
+        return raid.currentWaveNumber()+1 in minWave..maxWave && (!creditsRequired || creditsUnlocked)
     }
 
     fun weight(raid: ZombieRaid, creditsUnlocked: Boolean): Float = weightFn(raid, creditsUnlocked)

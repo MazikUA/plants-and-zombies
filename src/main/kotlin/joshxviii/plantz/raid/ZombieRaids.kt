@@ -103,17 +103,17 @@ class ZombieRaids(
     }
 
     private fun getOrCreateRaid(level: ServerLevel, pos: BlockPos): ZombieRaid {
-        val zombieRaid = level.getZombieRaids().getNearbyRaid(pos, 64)
+        val zombieRaid = level.getZombieRaids().getNearbyRaid(pos, 16)
         return zombieRaid ?: ZombieRaid(center = pos, difficulty = level.difficulty)
     }
 
     private val uniqueId: Int
         get() = ++nextId
 
-    fun getNearbyRaid(pos: BlockPos, maxDistSqr: Int): ZombieRaid? {
+    fun getNearbyRaid(pos: BlockPos, maxDist: Int): ZombieRaid? {
         if (zombieRaidMap.isEmpty()) return null
         var closest: ZombieRaid? = null
-        var closestDistanceSqr = maxDistSqr.toDouble()
+        var closestDistanceSqr = (maxDist * maxDist).toDouble()
 
         for (raid in zombieRaidMap.values) {
             val distance = raid.center.distSqr(pos)

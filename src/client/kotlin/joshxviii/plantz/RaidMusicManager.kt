@@ -20,7 +20,6 @@ import net.minecraft.client.resources.sounds.SoundInstance
 import net.minecraft.client.resources.sounds.SoundInstance.Attenuation
 import net.minecraft.client.sounds.MusicManager
 import net.minecraft.client.sounds.SoundEngine
-import net.minecraft.client.sounds.WeighedSoundEvents
 import net.minecraft.core.Holder
 import net.minecraft.sounds.SoundEvent
 import net.minecraft.sounds.SoundSource
@@ -120,8 +119,8 @@ object RaidMusicManager {
 
     fun getMusicFromRaidContext(raidEvent: ZombieRaidClientData): RaidMusicLayer {
         val totalWaves = raidEvent.numWaves
-        val currentWave = raidEvent.wavesSpawned
-        val waveType = raidEvent.currentWaveType
+        val currentWave = raidEvent.currentWaveNumber()
+        val waveType = raidEvent.currentWaveType()
 
         return when (waveType) {
             WaveType.DEFAULT -> when {
@@ -139,6 +138,7 @@ object RaidMusicManager {
             WaveType.ROBO_ARMY -> RaidMusicLayer.ARMY
             WaveType.LEAGUE_OF_AWESOME -> RaidMusicLayer.LEAGUE
             WaveType.ZOMBOSS -> RaidMusicLayer.ZOMBOSS
+            else -> RaidMusicLayer.LOW
         }
     }
 

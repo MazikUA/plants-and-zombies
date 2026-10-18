@@ -28,8 +28,8 @@ class FlagBlockEntity(
 
     companion object {
         const val MAX_HEALTH: Float = 400f
-        const val HEAL_COOLDOWN_TIME = 300
-        const val HEAL_TIME = 20
+        const val HEAL_COOLDOWN_TIME = 360
+        const val HEAL_TIME = 60
 
         const val MAX_FLAG_OMEN_DISTANCE = 24.0
     }
