@@ -75,6 +75,7 @@
   - While the effect is active, interacting with a mailbox will grant hero rewards based on the effect's level.
 - Updated the Zombie Raid event.
   - The amount of waves a raid has is now determined by: (zombie omen level * 2) + (the game's difficulty) + (2 if the end credits have been seen).
+  - Using another Bad Omen potion during a raid will extend the raid's wave. Unless the raid is already in its final wave.
   - After the end credits have been seen, waves during a raid will be more difficult.
   - After losing a raid, all the zombies in the raid will vanish and no rewards will be given.
   - Added Special wave types:

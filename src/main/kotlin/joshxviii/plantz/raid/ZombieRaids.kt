@@ -20,7 +20,6 @@ import net.minecraft.world.level.dimension.DimensionType
 import net.minecraft.world.level.gamerules.GameRules
 import net.minecraft.world.level.saveddata.SavedData
 import net.minecraft.world.level.saveddata.SavedDataType
-import org.spongepowered.asm.mixin.Unique
 import java.util.*
 import java.util.function.Function
 
@@ -39,10 +38,7 @@ class ZombieRaids(
     }
 
     private constructor(raids: MutableList<ZombieRaidWithId>, nextId: Int, tick: Int) : this() {
-        for (raid in raids) {
-            zombieRaidMap.put(raid.id, raid.raid)
-        }
-
+        for ((id, raid1) in raids) zombieRaidMap.put(id, raid1)
         this.nextId = nextId
         this.tick = tick
     }
@@ -84,7 +80,7 @@ class ZombieRaids(
             val raid = getOrCreateRaid(level, flagPosition)
             if (raid.startedBy == null) raid.startedBy = player.uuid
 
-            if (!raid.started && !zombieRaidMap.containsValue(raid)) {
+            if (raid.status == ZombieRaid.ZombieRaidStatus.INIT && !zombieRaidMap.containsValue(raid)) {
                 zombieRaidMap.put(uniqueId, raid)
                 level.players().filter { it.blockPosition().distSqr(flagPosition) < 96*96 } .forEach {
                     it.sendSystemMessage(ZombieRaid.getStartMessage(player.seenCredits))
@@ -92,9 +88,7 @@ class ZombieRaids(
                 }
             }
 
-            if (!raid.started || raid.zombieRaidOmenLevel > 0) {
-                raid.absorbRaidOmen(player)
-            }
+            raid.absorbRaidOmen(player)
 
             raid.starterHasSeenCredits = raid.starterHasSeenCredits || player.seenCredits
             setDirty()
@@ -104,7 +98,7 @@ class ZombieRaids(
 
     private fun getOrCreateRaid(level: ServerLevel, pos: BlockPos): ZombieRaid {
         val zombieRaid = level.getZombieRaids().getNearbyRaid(pos, 16)
-        return zombieRaid ?: ZombieRaid(center = pos, difficulty = level.difficulty)
+        return zombieRaid ?: ZombieRaid(center = pos)
     }
 
     private val uniqueId: Int
