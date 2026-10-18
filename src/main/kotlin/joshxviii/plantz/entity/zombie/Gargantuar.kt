@@ -243,6 +243,7 @@ class Gargantuar(type: EntityType<out Gargantuar>, level: Level) : PazZombie(typ
     }
 
     override fun emergingTime(): Int = 80
+    override fun canEquipBalloons(): Boolean = false
     override fun canEquipDuckyInWater(): Boolean = false
     override fun getSoundVolume(): Float =  2.5f
 

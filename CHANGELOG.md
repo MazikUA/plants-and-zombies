@@ -107,7 +107,8 @@
   - Uses the dye blaster.
 - Added Grave Digger
   - Has a chance to spawn at night.
-  - Will dig up gravestone when attacking players.
+  - Will dig up gravestones while targeting an entity.
+  - After the grave digger has dug up 4–6 graves, it will retreat.
 - Added Robo Zombie
   - Spawns during the "Robo Army" special wave.
 - Added Pirate Captain Zombie

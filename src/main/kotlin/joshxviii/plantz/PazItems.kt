@@ -16,21 +16,14 @@ import joshxviii.plantz.PazEntities.ROBO_ZOMBIE
 import joshxviii.plantz.PazEntities.SOLDIER_ZOMBIE
 import joshxviii.plantz.PazEntities.SUPER_BRAINZ
 import joshxviii.plantz.PazEntities.ZOMBIE_YETI
-import joshxviii.plantz.block.entity.SunBatteryBlockEntity
-import joshxviii.plantz.entity.Balloon
+import joshxviii.plantz.entity.zombie.PazZombie
 import joshxviii.plantz.item.*
-import joshxviii.plantz.item.component.BrainzAlloyCost
-import joshxviii.plantz.item.component.BlocksProjectileDamage
-import joshxviii.plantz.item.component.StoredSun
-import joshxviii.plantz.item.component.StoredWater
-import joshxviii.plantz.item.component.SunCost
-import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
+import joshxviii.plantz.item.component.*
 import net.fabricmc.fabric.api.item.v1.DefaultItemComponentEvents
 import net.fabricmc.fabric.api.registry.FuelValueEvents
 import net.fabricmc.fabric.impl.item.ItemComponentTooltipProviderRegistryImpl
-import net.minecraft.ChatFormatting
+import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
-import net.minecraft.core.Holder
 import net.minecraft.core.Registry
 import net.minecraft.core.component.DataComponents
 import net.minecraft.core.dispenser.BlockSource
@@ -38,15 +31,11 @@ import net.minecraft.core.dispenser.DefaultDispenseItemBehavior
 import net.minecraft.core.dispenser.MinecartDispenseItemBehavior
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.core.registries.Registries
-import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceKey
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.sounds.SoundEvents
-import net.minecraft.world.InteractionResult
-import net.minecraft.world.entity.EntitySpawnReason
-import net.minecraft.world.entity.EntityType
-import net.minecraft.world.entity.EquipmentSlot
-import net.minecraft.world.entity.EquipmentSlotGroup
+import net.minecraft.sounds.SoundSource
+import net.minecraft.world.entity.*
 import net.minecraft.world.entity.ai.attributes.AttributeModifier
 import net.minecraft.world.entity.ai.attributes.Attributes
 import net.minecraft.world.food.FoodProperties
@@ -55,16 +44,15 @@ import net.minecraft.world.item.Item.BASE_ATTACK_DAMAGE_ID
 import net.minecraft.world.item.Item.BASE_ATTACK_SPEED_ID
 import net.minecraft.world.item.Items.GLASS_BOTTLE
 import net.minecraft.world.item.component.ItemAttributeModifiers
-import net.minecraft.world.item.component.SwingAnimation
-import net.minecraft.world.item.component.Tool
 import net.minecraft.world.item.component.UseCooldown
-import net.minecraft.world.item.component.Weapon
 import net.minecraft.world.item.equipment.ArmorMaterials
 import net.minecraft.world.item.equipment.ArmorType
 import net.minecraft.world.item.equipment.EquipmentAssets
 import net.minecraft.world.item.equipment.Equippable
 import net.minecraft.world.level.block.ComposterBlock
 import net.minecraft.world.level.block.DispenserBlock
+import net.minecraft.world.level.gameevent.GameEvent
+import net.minecraft.world.phys.AABB
 import java.util.function.Function
 
 object PazItems {
@@ -397,6 +385,17 @@ object PazItems {
                             balloonEntity.playSound(PazSounds.BALLOON_INFLATE)
                             dispensed.shrink(1)
                             playAnimation(source, facing)
+
+                            for (entity in level.getEntitiesOfClass(
+                                LivingEntity::class.java,
+                                AABB(balloonPos),
+                                EntitySelector.NO_SPECTATORS
+                            )) {
+                                if (entity is PazZombie && !entity.canEquipBalloons()) continue
+                                balloonEntity.setLeashedTo(entity, true)
+                                break
+                            }
+
                             return dispensed
                         } else {
                             balloonEntity.discard()

@@ -32,6 +32,7 @@ class BalloonItem(
         val player: Player? = context.player
         val itemStack: ItemStack = context.itemInHand
 
+
         if (level !is ServerLevel || player == null) return InteractionResult.PASS
 
         val spawnPos = if (level.getBlockState(pos).getCollisionShape(level, pos).isEmpty) pos

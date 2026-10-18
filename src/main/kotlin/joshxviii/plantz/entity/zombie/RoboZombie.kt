@@ -126,6 +126,7 @@ class RoboZombie(type: EntityType<out RoboZombie>, level: Level) : PazZombie(typ
         addBehaviourGoalsNoMelee()
     }
 
+    override fun canEquipBalloons(): Boolean = false
     override fun canEquipDuckyInWater(): Boolean = false
     override fun canPickUpLoot(): Boolean = false
 
