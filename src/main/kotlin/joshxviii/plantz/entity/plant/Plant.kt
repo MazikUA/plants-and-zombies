@@ -93,6 +93,8 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
             return isValid
         }
 
+
+
         /**
          * General Plant spawn rules. Should use this is for other plants custom spawn rules.
          * Ensure plant groups are spread out and not clumped too close together. And then roll a 60% chance.

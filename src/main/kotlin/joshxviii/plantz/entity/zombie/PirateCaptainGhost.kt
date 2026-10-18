@@ -66,6 +66,10 @@ class PirateCaptainGhost(type: EntityType<out PirateCaptainGhost>, level: Level)
         val result = super.doHurtTarget(level, target)
         return result
     }
+
+    override fun canEquipDuckyInWater(): Boolean = false
+    override fun canEquipBalloons(): Boolean = false
+
     override fun isAffectedByBlocks(): Boolean = !isRemoved
     override fun canPickUpLoot(): Boolean = false
     override fun isLeftHanded(): Boolean = false

@@ -3,7 +3,11 @@ package joshxviii.plantz.entity.zombie
 import joshxviii.plantz.*
 import joshxviii.plantz.PazDataSerializers.DATA_ZOMBIE_STATE
 import joshxviii.plantz.ai.ZombieState
+import joshxviii.plantz.ai.control.PazFlyingMoveControl
+import joshxviii.plantz.ai.control.PazMoveControl
 import joshxviii.plantz.ai.goal.FlyingPathfindingGoal
+import joshxviii.plantz.ai.pathfinding.PazFlyingPathNavigation
+import joshxviii.plantz.ai.pathfinding.PazGroundPathNavigation
 import joshxviii.plantz.entity.Balloon
 import joshxviii.plantz.item.BalloonItem
 import joshxviii.plantz.raid.ZombieRaid.Companion.RAID_DISTANCE
@@ -256,16 +260,16 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
             updateNavigation()
         }
 
-    protected val groundNavigation: PathNavigation by lazy { super.createNavigation(level()) }
+    protected val groundNavigation: PathNavigation = navigation
     protected val flyingNavigation: FlyingPathNavigation by lazy {
-        val nav = FlyingPathNavigation(this, level())
+        val nav = PazFlyingPathNavigation(this, level())
         nav.setCanOpenDoors(false)
         nav.setCanFloat(true)
         nav
     }
 
-    protected val groundMoveControl: MoveControl by lazy { MoveControl(this) }
-    protected val flyingMoveControl: FlyingMoveControl by lazy { FlyingMoveControl(this, 20, true) }
+    protected val groundMoveControl: MoveControl by lazy { PazMoveControl(this) }
+    protected val flyingMoveControl: FlyingMoveControl by lazy { PazFlyingMoveControl(this, 20, true) }
     protected val noMoveControl = object : MoveControl(this) { override fun getSpeedModifier(): Double = 0.0 }
     protected val noLookControl = object : LookControl(this) {}
 
@@ -295,7 +299,7 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
     }
 
     override fun createNavigation(level: Level): PathNavigation {
-        return super.createNavigation(level)
+        return PazGroundPathNavigation(this, level)
     }
 
     override fun getMoveControl(): MoveControl {

@@ -100,8 +100,8 @@ class ZombieRaid(
 
         fun getWaveSpawnCount(difficulty: Difficulty, raid: ZombieRaid): Int {
             //if (creditsUnlocked && omenLevel >= 5) return 20 // Force Zomboss wave with lvl 5 omen and after credits are unlocked
-            val baseWaves = 3 + difficulty.id
-            val omenBonus = Mth.ceil(raid.zombieRaidOmenLevel * 2)
+            val baseWaves = 2 + difficulty.id
+            val omenBonus = Mth.floor(raid.zombieRaidOmenLevel * 2)
             val creditsBonus = if (raid.starterHasSeenCredits) 2 else 0
             return (baseWaves + omenBonus + creditsBonus).coerceAtMost(MAXIMUM_WAVE_COUNT)
         }
@@ -347,7 +347,7 @@ class ZombieRaid(
         zombieRaidOmenLevel += if (status == ZombieRaidStatus.INIT)
             effect.amplifier+1f
         else
-            (.333f * effect.amplifier)
+            (.5f * effect.amplifier)
         return true
     }
 
