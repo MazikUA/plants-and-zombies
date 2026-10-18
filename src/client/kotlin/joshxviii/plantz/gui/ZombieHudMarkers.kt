@@ -1,6 +1,7 @@
 package joshxviii.plantz.gui
 
 import com.mojang.blaze3d.pipeline.RenderPipeline
+import com.mojang.blaze3d.pipeline.TextureTarget
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.vertex.VertexConsumer
 import com.mojang.math.Axis
@@ -10,20 +11,26 @@ import joshxviii.plantz.PazNetwork
 import joshxviii.plantz.PazRenderPipelines
 import joshxviii.plantz.ZombieRaider
 import joshxviii.plantz.entity.zombie.PazZombie
+import joshxviii.plantz.pazResource
 import joshxviii.plantz.renderer.entity.zombie.PazZombieRenderState
 import joshxviii.plantz.renderer.entity.zombie.PazZombieRenderer
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.navigation.ScreenRectangle
 import net.minecraft.client.gui.render.TextureSetup
 import net.minecraft.client.model.HumanoidModel
+import net.minecraft.client.renderer.entity.ZombieRenderer
 import net.minecraft.client.renderer.item.ItemStackRenderState
 import net.minecraft.client.renderer.state.gui.GuiElementRenderState
 import net.minecraft.client.renderer.state.gui.pip.GuiEntityRenderState
 import net.minecraft.client.renderer.texture.OverlayTexture
 import net.minecraft.resources.Identifier
+import net.minecraft.server.packs.resources.ResourceManager
+import net.minecraft.server.packs.resources.ResourceManagerReloadListener
 import net.minecraft.util.LightCoordsUtil
 import net.minecraft.util.Mth
+import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.EquipmentSlot
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.monster.zombie.Zombie
@@ -61,7 +68,7 @@ object ZombieHudMarkers {
         }
     }
 
-    fun headIcon(graphics: GuiGraphicsExtractor, zombie: Zombie, x: Int, y: Int, use3dIcon: Boolean = false) {
+    fun headIcon(graphics: GuiGraphicsExtractor, zombie: Zombie, x: Int, y: Int) {
         val mc = Minecraft.getInstance()
         val partial = mc.deltaTracker.getGameTimeDeltaPartialTick(false)
         val state = (mc.entityRenderDispatcher.extractEntity(zombie, partial) as? PazZombieRenderState)?.also {// state to render model as
@@ -92,13 +99,14 @@ object ZombieHudMarkers {
         val h = mc.window.guiScaledHeight
 
         // outline
-        submitHead(graphics, zombie, model, texture, zombie.getItemBySlot(EquipmentSlot.HEAD), cx, cy, baseScale * state.scale, outlinePad = 1.15f)
+        //submitHead(graphics, zombie, model, texture, zombie.getItemBySlot(EquipmentSlot.HEAD), cx, cy, baseScale * state.scale, outlinePad = 1.15f)
 
         // head icon
         // TODO [use3dIcon] uses a copied render of the entity model with everything except the head removed.
         //  it definitely has an impact on performance, but I can't find a better way to render worn head items like the cones/football helmets.
-        if (use3dIcon) graphics.guiRenderState.addPicturesInPictureState(GuiEntityRenderState(state, Vector3f((cx.toFloat() - w * 0.5f) / baseScale, zombie.eyeHeight + (cy.toFloat() - h * 0.5f ) / baseScale, 0f), Quaternionf().rotateX(Mth.PI), null, 0, 0, w, h, baseScale, null))
-        else submitHead(graphics, zombie, model, texture, zombie.getItemBySlot(EquipmentSlot.HEAD), cx, cy, baseScale * state.scale)
+
+        // TODO I should probably take a screen shot when resources are loaded of each entity in the zombie raider tag list and save the head marker image to reuse here
+        submitHead(graphics, zombie, model, texture, zombie.getItemBySlot(EquipmentSlot.HEAD), cx, cy, baseScale * state.scale)
 
         if (zombie.mainHandItem.`is`(PazBlocks.BRAINZ_FLAG.asItem()) || zombie.offhandItem.`is`(PazBlocks.BRAINZ_FLAG.asItem())) submitItem(graphics,
             PazBlocks.BRAINZ_FLAG.asItem().defaultInstance, cx, cy, baseScale)

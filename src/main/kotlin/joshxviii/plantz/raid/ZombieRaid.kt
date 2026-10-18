@@ -317,6 +317,7 @@ class ZombieRaid(
     }
 
     private fun spawnNextWave(level: ServerLevel, pos: BlockPos) {
+        wavesSpawned++
         waveTimer = if (isFinalWave()) FINAL_WAVE_DURATION else WAVE_DURATION
         var leaderSet = false
         totalZombieHealth = 0.0f
@@ -331,18 +332,16 @@ class ZombieRaid(
             for (i in 0..<count) {
                 val zombie = type.create(level, EntitySpawnReason.EVENT) ?: break
                 if (!leaderSet) {
-                    setLeader(wavesSpawned + 1, zombie)
+                    setLeader(wavesSpawned, zombie)
                     leaderSet = true
                 }
                 val randX = pos.x + random.nextInt(11) - 5
                 val randZ = pos.z + random.nextInt(11) - 5
                 val randY = level.getHeight(Heightmap.Types.OCEAN_FLOOR, randX, randZ)
                 val randomPos = MutableBlockPos(randX,randY,randZ)
-                joinRaid(level, zombie, wavesSpawned + 1, false, randomPos, configure)
+                joinRaid(level, zombie, wavesSpawned, false, randomPos, configure)
             }
         }
-
-        wavesSpawned++
     }
 
     fun joinRaid(

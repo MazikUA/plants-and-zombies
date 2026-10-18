@@ -59,11 +59,11 @@ enum class WaveType(
                 ),
                 WaveSpawnEntry(
                     PazEntities.DIGGER_ZOMBIE,
-                    if (wave > 2) scaled(1f + wave * 0.4f, omen, credits) else 0
+                    if (wave > 3) scaled(1f + wave * 0.4f, omen, credits) else 0
                 ),
                 WaveSpawnEntry(
                     PazEntities.IMP,
-                    if (wave > 4) scaled(1f + (wave - 4) * 0.7f, omen, credits) else 0, {
+                    if (wave > 3) scaled(1f + (wave - 3) * 0.7f, omen, credits) else 0, {
                         configureDefaultBalloonChance(it, raid)
                     }),
                 WaveSpawnEntry(
@@ -76,20 +76,20 @@ enum class WaveType(
                 ),
                 WaveSpawnEntry(
                     PazEntities.GRAVE_DIGGER,
-                    if (wave > 5 && Math.random() > 0.2) 1 else 0
+                    if (wave > 4 && Math.random() > 0.2) 1 else 0
                 ),
                 WaveSpawnEntry(
                     PazEntities.GARGANTUAR,
-                    if (wave == 9) 1 else if (wave == 10) 0 // always spawn during wave 10
-                    else if (wave > 10) scaled(1f + (wave - 5) * 0.3f, omen, credits, min = 0) else 0
+                    if (wave == 10) 1 // always spawn at wave 10
+                    else if (wave > 10) scaled(1f + (wave - 13) * 0.3f, omen, credits, min = 0) else 0
                 ),
                 WaveSpawnEntry(
                     PazEntities.ENGINEER_ZOMBIE,
-                    if (wave > 6) scaled(1f + (wave - 6) * 0.4f, omen, true) else 0
+                    if (wave > 7) scaled(1f + (wave - 7) * 0.4f, omen, true) else 0
                 ),
                 WaveSpawnEntry(
                     PazEntities.SOLDIER_ZOMBIE,
-                    if (credits && wave > 7) scaled(1f + (wave - 7) * 0.5f, omen, true) else 0
+                    if (credits && wave > 8) scaled(1f + (wave - 8) * 0.5f, omen, true) else 0
                 )
             )
         },
@@ -299,7 +299,7 @@ enum class WaveType(
         fun creditsBonus(credits: Boolean): Float = if (credits) 1.25f else 1f // credits bonus
 
         fun scaled(base: Float, omen: Int, credits: Boolean, min: Int = 0, max: Int = Int.MAX_VALUE): Int {
-            val raw = base * omenScale(omen) * creditsBonus(credits)
+            val raw = base.coerceAtLeast(0f) * omenScale(omen) * creditsBonus(credits)
             val jitter = 0.85f + Math.random().toFloat() * 0.3f // +-15 %
             return (raw * jitter).toInt().coerceIn(min, max)
         }
