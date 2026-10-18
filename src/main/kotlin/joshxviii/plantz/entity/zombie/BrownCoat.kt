@@ -79,11 +79,11 @@ class BrownCoat(type: EntityType<out BrownCoat>, level: Level) : PazZombie(type,
         )
 
         if (getItemBySlot(EquipmentSlot.HEAD).isEmpty){
-            if (random.nextFloat() < 0.25) {
+            if (random.nextFloat() < 0.18) {
                 setItemSlot(EquipmentSlot.HEAD, PazBlocks.CONE.asItem().defaultInstance)
                 setDropChance(EquipmentSlot.HEAD, 0.07f)
             }
-            else if (random.nextFloat() < 0.1 && getItemBySlot(EquipmentSlot.HEAD).isEmpty) {
+            else if (random.nextFloat() < 0.07 && getItemBySlot(EquipmentSlot.HEAD).isEmpty) {
                 setItemSlot(EquipmentSlot.HEAD, Items.BUCKET.defaultInstance)
             }
         }

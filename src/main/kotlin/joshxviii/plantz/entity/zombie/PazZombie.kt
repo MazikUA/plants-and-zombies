@@ -382,7 +382,10 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
                 retreatAnimation.startIfStopped(tickCount)
                 emergeAnimation.stop()
                 floatAnimation.stop()
-                if (retreatTime++ > 28) discard()
+                if (retreatTime++ > 28) {
+                    serverLevel?.sendParticles(ParticleTypes.LARGE_SMOKE, x, y, z, 10, 0.5, 0.5, 0.5, 0.02)
+                    discard()
+                }
 
                 if(retreatTime%8==0) playSound(SoundEvents.ROOTED_DIRT_HIT, 1.0f, 0.2f)
                 serverLevel?.sendParticles(

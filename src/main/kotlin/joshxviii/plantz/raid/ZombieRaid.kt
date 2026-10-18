@@ -388,8 +388,10 @@ class ZombieRaid(
         waveZombieMap.values.forEach { zombies ->
             zombies.forEach { zombie ->
                 if (zombie is PazZombie) zombie.state = ZombieState.RETREATING
-                else zombie.discard()
-                level.sendParticles(ParticleTypes.LARGE_SMOKE, zombie.x, zombie.y, zombie.z, 10, 0.5, 0.5, 0.5, 0.02)
+                else {
+                    level.sendParticles(ParticleTypes.LARGE_SMOKE, zombie.x, zombie.y, zombie.z, 10, 0.5, 0.5, 0.5, 0.02)
+                    zombie.discard()
+                }
             }
         }
         totalZombieHealth = 0f

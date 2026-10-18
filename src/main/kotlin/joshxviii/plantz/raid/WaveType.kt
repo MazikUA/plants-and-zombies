@@ -50,12 +50,12 @@ enum class WaveType(
             listOf(
                 WaveSpawnEntry(
                     PazEntities.BROWN_COAT,
-                    scaled(4f + wave * 1.8f, omen, credits, min = 3), {
+                    scaled((7f * wave).pow(.7f), omen, credits, min = 3), {
                         configureDefaultBalloonChance(it, raid)
                     }),
                 WaveSpawnEntry(
                     PazEntities.NEWSPAPER_ZOMBIE,
-                    scaled(1f + wave * 0.5f, omen, credits, min = 0)
+                    scaled(wave * 0.5f, omen, credits, min = 0)
                 ),
                 WaveSpawnEntry(
                     PazEntities.DIGGER_ZOMBIE,
@@ -308,8 +308,8 @@ enum class WaveType(
         // configurations
         fun configureDefaultBalloonChance(zombie: Zombie, raid: ZombieRaid) {
             val wave = raid.wavesSpawned
-            if (wave < 2) return
-            val balloonChance = 0.35 * ((wave.toDouble() / ZombieRaid.MAXIMUM_WAVE_COUNT).pow(.5)).coerceIn(0.0, 1.0).toFloat()
+            if (wave < 3) return
+            val balloonChance = 0.3 * ((wave.toDouble() / ZombieRaid.MAXIMUM_WAVE_COUNT).pow(.5)).coerceIn(0.0, 1.0).toFloat()
             val random = raid.random
             if (random.nextFloat() < balloonChance) {
                 if (zombie is BrownCoat) Balloon.browncoatBallons[zombie.variant]?.let {
