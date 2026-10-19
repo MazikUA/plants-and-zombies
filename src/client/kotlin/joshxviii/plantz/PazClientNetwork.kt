@@ -20,7 +20,7 @@ object PazClientNetwork {
         }
 
         ClientPlayNetworking.registerGlobalReceiver(ZombieRaidResponsePayload.ID) { payload, context ->
-            if (ZombieRaidClientCache.get(payload.data.id) == null) RaidMusicManager.start()
+            if (!ZombieRaidClientCache.isActive()) RaidMusicManager.restart()
             ZombieRaidClientCache.put(payload.data)
             if (payload.data.status == ZombieRaid.ZombieRaidStatus.TERMINATE) ZombieRaidClientCache.remove(payload.data.id)
         }
