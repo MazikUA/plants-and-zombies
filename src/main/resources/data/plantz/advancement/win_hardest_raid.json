@@ -4,18 +4,18 @@
       "id": "plantz:brainz_flag"
     },
     "title": {
-      "translate": "advancements.plantz.start_hardest_raid"
+      "translate": "advancements.plantz.win_hardest_raid"
     },
     "description": {
-      "translate": "advancements.plantz.start_hardest_raid.description"
+      "translate": "advancements.plantz.win_hardest_raid.description"
     },
     "frame": "challenge",
     "hidden": true
   },
   "parent": "plantz:win_zombie_raid",
   "criteria": {
-    "start_hardest_raid": {
-      "trigger": "plantz:start_hardest_raid"
+    "win_hardest_raid": {
+      "trigger": "plantz:win_hardest_raid"
     }
   },
   "sends_telemetry_event": false

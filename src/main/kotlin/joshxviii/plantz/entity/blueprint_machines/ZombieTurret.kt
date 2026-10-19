@@ -14,9 +14,6 @@ import net.minecraft.world.phys.Vec2
 
 class ZombieTurret(type: EntityType<out ZombieTurret>, level: Level) : ZombieRobot(type, level) {
 
-    companion object {
-    }
-
     override fun tick() {
         super.tick()
 

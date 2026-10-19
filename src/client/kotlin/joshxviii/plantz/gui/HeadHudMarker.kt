@@ -3,6 +3,7 @@ package joshxviii.plantz.gui
 import com.mojang.blaze3d.pipeline.RenderPipeline
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.vertex.VertexConsumer
+import com.mojang.math.Axis
 import joshxviii.plantz.PazRenderPipelines
 import joshxviii.plantz.gui.ZombieHudMarkers.ICON_SIZE
 import net.minecraft.client.Minecraft
@@ -14,7 +15,6 @@ import net.minecraft.client.renderer.state.gui.GuiElementRenderState
 import net.minecraft.client.renderer.texture.OverlayTexture
 import net.minecraft.resources.Identifier
 import net.minecraft.util.LightCoordsUtil
-import net.minecraft.util.Mth
 import net.minecraft.world.entity.monster.zombie.Zombie
 import net.minecraft.world.item.ItemDisplayContext
 import net.minecraft.world.item.ItemStack
@@ -32,25 +32,22 @@ class HeadHudMarker(
     val mc = Minecraft.getInstance()
 
     override fun buildVertices(vertexConsumer: VertexConsumer) {
-
-        //val time = mc.level?.nextSubTickCount()?: 0
-
         model.resetPose()
         val pose = PoseStack()
         pose.pushPose()
         pose.translate(cx, cy, if (outlinePad>0f) 149.0 else 150.0)
         pose.translate(0.0, (ICON_SIZE + outlinePad)*0.5, 0.0)
+        pose.mulPose(Axis.YP.rotationDegrees(180.0f))
         pose.scale(scale, scale, scale)
         if (outlinePad>0f) pose.scale(outlinePad, outlinePad, outlinePad)
         model.head.setPos(0f, 0f, 0f)
-        //model.head.yRot = time / Mth.PI * .001f
         model.head.render(pose, vertexConsumer, LightCoordsUtil.FULL_BRIGHT, OverlayTexture.NO_OVERLAY)
         mc.itemModelResolver.updateForTopItem(ItemStackRenderState(), itemStack, ItemDisplayContext.HEAD, mc.level, zombie, 0)
 
         pose.popPose()
     }
 
-    override fun pipeline(): RenderPipeline = if (outlinePad>0f) PazRenderPipelines.HEAD_MARKER_OUTLINE else PazRenderPipelines.HEAD_MARKER
+    override fun pipeline(): RenderPipeline = if (outlinePad>0f) PazRenderPipelines.HEAD_MARKER_OUTLINE else PazRenderPipelines.HEAD_MARKER_BAKE
 
     override fun textureSetup(): TextureSetup {
         val t = mc.textureManager.getTexture(texture)

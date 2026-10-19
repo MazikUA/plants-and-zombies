@@ -8,13 +8,17 @@ import joshxviii.plantz.ai.goal.SleepGoal
 import joshxviii.plantz.api.SeedMutationManager
 import joshxviii.plantz.entity.Sun
 import joshxviii.plantz.item.SeedPacketItem
+import joshxviii.plantz.raid.isNearRaid
 import net.minecraft.ChatFormatting
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
+import net.minecraft.core.Registry
 import net.minecraft.core.component.DataComponents
 import net.minecraft.core.particles.BlockParticleOption
 import net.minecraft.core.particles.ParticleOptions
 import net.minecraft.core.particles.ParticleTypes
+import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.core.registries.Registries
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.chat.Component
 import net.minecraft.network.syncher.EntityDataAccessor
@@ -49,7 +53,6 @@ import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal
 import net.minecraft.world.entity.ai.village.poi.PoiManager
 import net.minecraft.world.entity.item.ItemEntity
 import net.minecraft.world.entity.monster.Enemy
-import net.minecraft.world.entity.monster.Shulker
 import net.minecraft.world.entity.monster.zombie.Zombie
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
@@ -93,12 +96,25 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
             return isValid
         }
 
+        fun checkMushroomSpawnRules(
+            type: EntityType<out Plant>,
+            level: LevelAccessor,
+            spawnReason: EntitySpawnReason,
+            pos: BlockPos,
+            random: RandomSource
+        ): Boolean {
+            val blockBelow = level.getBlockState(pos.below())
+            val isValid = checkValidSpawn(level, pos, spawnReason, random) && blockBelow.`is`(PazTags.BlockTags.CAVE_SPAWNABLE_ON)
+            return isValid
+        }
+
         /**
          * General Plant spawn rules. Should use this is for other plants custom spawn rules.
          * Ensure plant groups are spread out and not clumped too close together. And then roll a 60% chance.
          */
         fun checkValidSpawn(level: LevelAccessor, pos: BlockPos, spawnReason: EntitySpawnReason, random: RandomSource): Boolean {
             val blockAtPos = level.getBlockState(pos)
+            if (level.isNearRaid(pos)) return false
             return (level.getEntitiesOfClass(Plant::class.java, AABB(pos).inflate(42.0)) { it.tickCount > 0 }.isEmpty()
                     && blockAtPos.getCollisionShape(level, pos.above()).isEmpty) || EntitySpawnReason.isSpawner(spawnReason) && random.nextFloat() < 0.6f
         }
@@ -153,6 +169,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
 
     var clientOldAttachPosition: BlockPos? = null
     private var nutrientSupply = NUTRIENT_SUPPLY_MAX
+    private var loadedFromSave = false
 
     val isGrowingSeeds: Boolean
         get() = testGrowConditions() != PlantGrowNeeds.SOIL
@@ -289,6 +306,12 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         isAsleep = input.getBooleanOr("plantz:IsAsleep", false)
         poweredUp = input.getBooleanOr("plantz:IsPoweredUp", false)
         attachedPlayerReference = Optional.ofNullable((EntityReference.read<LivingEntity>(input, "plantz:AttachedPlayer"))).getOrNull()
+        loadedFromSave = true
+    }
+
+    fun vanish(level: ServerLevel) {
+        level.sendParticles(PazServerParticles.ZOMBIE_OMEN, x, y, z, 10, 0.5, 0.5, 0.5, 0.02)
+        discard()
     }
 
     override fun getAmbientSound(): SoundEvent? = super.getAmbientSound()// TODO make custom sounds
@@ -436,6 +459,15 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         val level = this.level()
 
         if (level is ServerLevel) {
+            // wild plants that were in unloaded chunks when a raid started get vanished once they load back in
+            if (loadedFromSave) {
+                loadedFromSave = false
+                if (!isTame && level.isNearRaid(blockPosition())) {
+                    vanish(level)
+                    return
+                }
+            }
+
             updatePlantPower(level)
 
             if (cooldown > 0 && !isAsleep) cooldown--

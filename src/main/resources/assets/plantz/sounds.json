@@ -44,13 +44,13 @@
 
   "entity.projectile.electric_zap": {
     "sounds": [
-      { "name": "plantz:projectile/electric_zap/electric_zap_1", "volume": 1.0, "pitch": 1.0 },
-      { "name": "plantz:projectile/electric_zap/electric_zap_2", "volume": 1.0, "pitch": 1.0 },
-      { "name": "plantz:projectile/electric_zap/electric_zap_3", "volume": 1.0, "pitch": 1.0 },
-      { "name": "plantz:projectile/electric_zap/electric_zap_4", "volume": 1.0, "pitch": 1.0 },
-      { "name": "plantz:projectile/electric_zap/electric_zap_5", "volume": 1.0, "pitch": 1.0 },
-      { "name": "plantz:projectile/electric_zap/electric_zap_6", "volume": 1.0, "pitch": 1.0 },
-      { "name": "plantz:projectile/electric_zap/electric_zap_7", "volume": 1.0, "pitch": 1.0 }
+      { "name": "plantz:projectile/electric_zap/electric_zap_1", "volume": 1.0, "pitch": 0.8 },
+      { "name": "plantz:projectile/electric_zap/electric_zap_2", "volume": 1.0, "pitch": 0.8 },
+      { "name": "plantz:projectile/electric_zap/electric_zap_3", "volume": 1.0, "pitch": 0.8 },
+      { "name": "plantz:projectile/electric_zap/electric_zap_4", "volume": 1.0, "pitch": 0.8 },
+      { "name": "plantz:projectile/electric_zap/electric_zap_5", "volume": 1.0, "pitch": 0.8 },
+      { "name": "plantz:projectile/electric_zap/electric_zap_6", "volume": 1.0, "pitch": 0.8 },
+      { "name": "plantz:projectile/electric_zap/electric_zap_7", "volume": 1.0, "pitch": 0.8 }
     ], "subtitle": "plantz.subtitles.projectile.electric_zap"
   },
 

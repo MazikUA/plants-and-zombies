@@ -2,6 +2,7 @@ package joshxviii.plantz.block.entity
 
 import joshxviii.plantz.PazBlocks
 import joshxviii.plantz.PazEffects
+import joshxviii.plantz.raid.ZombieRaid
 import net.minecraft.core.BlockPos
 import net.minecraft.core.HolderLookup
 import net.minecraft.nbt.CompoundTag
@@ -16,6 +17,7 @@ import net.minecraft.world.level.block.LevelEvent
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket
+import net.minecraft.world.Difficulty
 import net.minecraft.world.level.storage.ValueInput
 import net.minecraft.world.level.storage.ValueOutput
 import net.minecraft.world.phys.AABB
@@ -27,28 +29,30 @@ class FlagBlockEntity(
 ) : BlockEntity(PazBlocks.FLAG_BLOCK_ENTITY, worldPosition, blockState) {
 
     companion object {
-        const val MAX_HEALTH: Float = 400f
-        const val HEAL_COOLDOWN_TIME = 300
-        const val HEAL_TIME = 20
+        const val MAX_HEALTH: Float = 40f
+        const val HEAL_COOLDOWN_TIME = 360
+        const val HEAL_TIME = 60
 
         const val MAX_FLAG_OMEN_DISTANCE = 24.0
     }
 
-    var health : Float = MAX_HEALTH
-        set(value) {
-            field = value.coerceAtMost(MAX_HEALTH)
+    var maxHealth : Float = MAX_HEALTH
+        private set
+    var health : Float = maxHealth
+        private set(value) {
+            field = value.coerceAtMost(maxHealth)
         }
-    var resetTime : Int = 0
+    private var resetTime : Int = 0
 
     fun tick(level: Level, pos: BlockPos, state: BlockState) {
         if (level.isClientSide) return
         if (resetTime > 0) {
             resetTime--
             if (resetTime == 0) {
-                health += MAX_HEALTH * 0.01f
+                health += maxHealth * 0.01f
 
                 level.destroyBlockProgress(0, pos, healthToDestroyProgress())
-                if (health >= MAX_HEALTH) level.destroyBlockProgress(0, pos, -1)
+                if (health >= maxHealth) level.destroyBlockProgress(0, pos, -1)
                 else resetTime = HEAL_TIME
                 syncToClient()
             }
@@ -62,10 +66,11 @@ class FlagBlockEntity(
             }
             level.destroyBlock(pos, false)
             level.destroyBlockProgress(0, pos, -1)
-        } else if (health < MAX_HEALTH) {
+        } else if (health < maxHealth) {
             level.destroyBlockProgress(0, pos, healthToDestroyProgress())
         }
 
+        if (level.difficulty == Difficulty.PEACEFUL) return
         if (blockState.`is`(PazBlocks.PLANTZ_FLAG)) replaceBadOmenEffect()
     }
 
@@ -93,18 +98,34 @@ class FlagBlockEntity(
         l.playSound(null, blockPos, blockState.soundType.hitSound, SoundSource.BLOCKS, 1.0f, l.random.nextFloat() * 0.2f + 0.6f)
     }
 
-    private fun healthToDestroyProgress(): Int = floor((1f - (health / MAX_HEALTH)) * 10f).toInt()
+    fun destroy() {
+        hurt(maxHealth)
+    }
+
+    fun setMaxHealth(isRaid: Boolean = false, refill: Boolean = false) {
+        val newMax = (if (isRaid) ZombieRaid.FLAG_MAX_HEALTH else MAX_HEALTH).toFloat()
+        if (maxHealth == newMax && !refill) return
+        maxHealth = newMax
+        if (refill) health = newMax
+        setChanged()
+        syncToClient()
+    }
+
+    private fun healthToDestroyProgress(): Int = floor((1f - (health / maxHealth)) * 10f).toInt()
 
     override fun saveAdditional(output: ValueOutput) {
         super.saveAdditional(output)
-        output.putFloat("Health", health)
-        output.putInt("ResetTime", resetTime)
+        output.putFloat("health", health)
+        output.putFloat("max_health", maxHealth)
+        output.putInt("heal_reset_time", resetTime)
     }
 
     override fun loadAdditional(input: ValueInput) {
         super.loadAdditional(input)
-        health = input.getFloatOr("Health", MAX_HEALTH)
-        resetTime = input.getIntOr("ResetTime", 0)
+        // max health must be read first, the health setter clamps to it
+        maxHealth = input.getFloatOr("max_health", MAX_HEALTH)
+        health = input.getFloatOr("health", maxHealth)
+        resetTime = input.getIntOr("heal_reset_time", 0)
     }
 
     override fun getUpdatePacket(): ClientboundBlockEntityDataPacket? {

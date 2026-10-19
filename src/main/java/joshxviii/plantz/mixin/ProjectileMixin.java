@@ -3,6 +3,7 @@ package joshxviii.plantz.mixin;
 import joshxviii.plantz.PazComponents;
 import joshxviii.plantz.PazItems;
 import joshxviii.plantz.PazSounds;
+import joshxviii.plantz.entity.projectile.PazProjectile;
 import joshxviii.plantz.item.component.BlocksProjectileDamage;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -12,6 +13,7 @@ import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ProjectileDeflection;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -39,7 +41,14 @@ public class ProjectileMixin {
                 for (EquipmentSlot slot : slots) {
                     ItemStack item = livingEntity.getItemBySlot(slot);
                     BlocksProjectileDamage component = item.getComponents().get(PazComponents.BLOCKS_PROJECTILE_DAMAGE);
-                    if (component==null) continue;
+                    var pierceLevel = 0;
+                    if (projectile instanceof AbstractArrow) {
+                        pierceLevel = ((AbstractArrow) projectile).getPierceLevel();
+                    }
+                    if (projectile instanceof PazProjectile) {
+                        pierceLevel = ((PazProjectile) projectile).getPierceLevel();
+                    }
+                    if (component==null || pierceLevel>0) continue;
                     if (component.getMustBeUsing() && !livingEntity.isUsingItem()) continue;
 
                     EquipmentSlotGroup validSlot = component.getSlot();

@@ -52,7 +52,7 @@ object ZombieRaidOverlay {
         val barWidth = 98
         val barHeight = 5
 
-        val flagHealthPercent = (raidEvent.flagHealth / FlagBlockEntity.MAX_HEALTH).coerceIn(0f, 1f)
+        val flagHealthPercent = if (raidEvent.status == ZombieRaid.ZombieRaidStatus.LOSS) 0f else (raidEvent.flagHealth / ZombieRaid.FLAG_MAX_HEALTH).coerceIn(0f, 1f)
         val flagBarWidth = Mth.floor(barWidth * flagHealthPercent)
         val flagHealthX = x + 17 + (barWidth - flagBarWidth)
         val flagHealthY = y + 15
@@ -90,7 +90,7 @@ object ZombieRaidOverlay {
         }
         if (raidEvent.status != ZombieRaid.ZombieRaidStatus.NEXT_WAVE) graphics.outlineText(font, timer, textX, textY, color = textColor)
 
-        val waveText = "${raidEvent.wavesSpawned} / ${raidEvent.numWaves}"
+        val waveText = "${raidEvent.currentWaveNumber()} / ${raidEvent.numWaves}"
         val waveX = screenWidth / 2 - font.width(waveText) / 2
         graphics.text(font, waveText, waveX, textY+14, -1)
         if (PazConfig.SHOW_DEBUG_INFO) {

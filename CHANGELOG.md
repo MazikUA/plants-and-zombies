@@ -61,8 +61,8 @@
   - Some plants can be transformed into other plants under certain conditions.
 - Added Seed Packet Mutations
   - When zen-gardening a plant, seeds for a different plant may be produced instead.
-    - Wall Nut has a 5% chance to produce Explode-O-Nut seeds.
-    - Explode-O-Nut has an 80% chance to produce Wall Nut seeds.
+    - Wall Nut has an 8% chance to produce Explode-O-Nut seeds.
+    - Explode-O-Nut has an 40% chance to produce Wall Nut seeds.
     - Electric Peashooter has a 95% chance to produce Peashooter seeds.
     - Peashooter has a 10% chance to produce Repeater seeds. 33% for Fire Peashooter in hot biomes. 40% for Electric Peashooter while thundering.
     - Repeater has a 60% chance to produce Peashooter seeds.
@@ -74,7 +74,9 @@
 - Added the Hero of the Garden effect.
   - While the effect is active, interacting with a mailbox will grant hero rewards based on the effect's level.
 - Updated the Zombie Raid event.
-  - The amount of waves a raid has is now determined by: (zombie omen level * 2) + (the game's difficulty) + (2 if the end credits have been seen).
+  - Wild plants within the radius of the raid will vanish, and new plants will not spawn in the area until the raid has finished.
+  - The amount of waves a raid has is determined by: 2 + (zombie omen level * 2) + (the game's difficulty) + (2 if the end credits have been seen).
+  - Using another Bad Omen potion during a raid will extend the raid's wave. Unless the raid is already in its final wave.
   - After the end credits have been seen, waves during a raid will be more difficult.
   - After losing a raid, all the zombies in the raid will vanish and no rewards will be given.
   - Added Special wave types:
@@ -107,7 +109,8 @@
   - Uses the dye blaster.
 - Added Grave Digger
   - Has a chance to spawn at night.
-  - Will dig up gravestone when attacking players.
+  - Will dig up gravestones while targeting an entity.
+  - After the grave digger has dug up 4–6 graves, it will retreat.
 - Added Robo Zombie
   - Spawns during the "Robo Army" special wave.
 - Added Pirate Captain Zombie
@@ -116,6 +119,7 @@
   - Spawns during the "League of Awesome" special zombie raid.
 - Zombies will now attack Wall Nuts when walking into them.
 ### Technical Changes
+- Items that have the Block Projectile item component will no longer deflect piercing projectiles.
 - Added BrainzAlloyCost item component.
 - Added configuration options.
   - `paz-server.json`:

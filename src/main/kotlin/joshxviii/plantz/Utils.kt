@@ -3,9 +3,7 @@ package joshxviii.plantz
 import joshxviii.plantz.PazMain.MODID
 import joshxviii.plantz.entity.plant.Plant
 import joshxviii.plantz.entity.plant.saveAsCompoundTag
-import joshxviii.plantz.networking.ZombieRaidClientData
 import joshxviii.plantz.raid.WaveType
-import joshxviii.plantz.raid.ZombieRaid
 import net.minecraft.ChatFormatting
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Vec3i

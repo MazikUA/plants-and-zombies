@@ -107,7 +107,7 @@ class DiscoZombie(type: EntityType<out DiscoZombie>, level: Level) : PazZombie(t
         companion object {
             const val DEFAULT_AMOUNT = 3
             const val SUMMON_DISTANCE = 2
-            const val SUMMON_DELAY_TIME = 75
+            const val SUMMON_DELAY_TIME = 105
             val backupTargeting: TargetingConditions = TargetingConditions.forNonCombat().range(16.0).ignoreInvisibilityTesting()
         }
         var summonTime = summoner.random.nextInt(20,60)
@@ -135,7 +135,7 @@ class DiscoZombie(type: EntityType<out DiscoZombie>, level: Level) : PazZombie(t
         }
 
         private fun trySummonBackup() {
-            summonTime = SUMMON_DELAY_TIME + summoner.random.nextInt(40)
+            summonTime = SUMMON_DELAY_TIME + summoner.random.nextInt(50)
             val target = summoner.target?: return
             val angleToTarget = (summoner.yRot * Math.PI.toFloat()) / 180.0f
             val minY = min(target.y, summoner.y) - 2.0

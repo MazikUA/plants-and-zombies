@@ -45,6 +45,21 @@ object PazRenderPipelines {
             .build()
     )
 
+    //TODO Use this for taking a screenshot of the zombie models
+    @JvmField
+    val HEAD_MARKER_BAKE: RenderPipeline = RenderPipelines.register(
+        RenderPipeline.builder(RenderPipelines.ENTITY_SNIPPET)
+            .withLocation(pazResource("pipeline/head_marker_bake"))
+            .withSampler("Sampler1")
+            .withShaderDefine("ALPHA_CUTOUT", 0.1F)
+            .withShaderDefine("NO_CARDINAL_LIGHTING")
+            .withShaderDefine("EMISSIVE")
+            .withShaderDefine("NO_OVERLAY")
+            .withCull(false)
+            .build()
+    )
+
+    //TODO use these two for rendering the image on the HUD
     @JvmField
     val HEAD_MARKER: RenderPipeline = RenderPipelines.register(
         RenderPipeline.builder(RenderPipelines.GUI_TEXTURED_SNIPPET)

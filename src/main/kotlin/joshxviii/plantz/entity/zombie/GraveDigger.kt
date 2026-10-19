@@ -1,6 +1,7 @@
 package joshxviii.plantz.entity.zombie
 
 import joshxviii.plantz.PazBlocks
+import joshxviii.plantz.ai.ZombieState
 import joshxviii.plantz.applyImpulse
 import joshxviii.plantz.block.GravestoneBlock.Companion.FACING
 import joshxviii.plantz.createFallingBlock
@@ -26,12 +27,16 @@ import net.minecraft.world.item.Items
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.ServerLevelAccessor
 import net.minecraft.world.level.gamerules.GameRules
+import net.minecraft.world.level.storage.ValueInput
+import net.minecraft.world.level.storage.ValueOutput
 import net.minecraft.world.phys.Vec3
 
 class GraveDigger(type: EntityType<out GraveDigger>, level: Level) : PazZombie(type, level) {
 
     companion object {
         val DIG_TIME_ID: EntityDataAccessor<Int> = SynchedEntityData.defineId<Int>(GraveDigger::class.java, EntityDataSerializers.INT)
+        val DUG_GRAVES_ID: EntityDataAccessor<Int> = SynchedEntityData.defineId<Int>(GraveDigger::class.java, EntityDataSerializers.INT)
+        val MAX_GRAVES_ID: EntityDataAccessor<Int> = SynchedEntityData.defineId<Int>(GraveDigger::class.java, EntityDataSerializers.INT)
         const val DIG_TIME = 80
     }
 
@@ -40,9 +45,31 @@ class GraveDigger(type: EntityType<out GraveDigger>, level: Level) : PazZombie(t
         get() = this.entityData.get(DIG_TIME_ID)
         set(value) = this.entityData.set(DIG_TIME_ID, value)
 
+    var dugGraves: Int
+        get() = this.entityData.get(DUG_GRAVES_ID)
+        set(value) = this.entityData.set(DUG_GRAVES_ID, value)
+
+    var maxGraves: Int
+        get() = this.entityData.get(MAX_GRAVES_ID)
+        set(value) = this.entityData.set(MAX_GRAVES_ID, value)
+
     override fun defineSynchedData(entityData: SynchedEntityData.Builder) {
         super.defineSynchedData(entityData)
         entityData.define(DIG_TIME_ID, 0)
+        entityData.define(DUG_GRAVES_ID, 0)
+        entityData.define(MAX_GRAVES_ID, 0)
+    }
+
+    override fun readAdditionalSaveData(input: ValueInput) {
+        super.readAdditionalSaveData(input)
+        maxGraves = input.getIntOr("max_graves", this.entityData.get(MAX_GRAVES_ID))
+        dugGraves = input.getIntOr("dug_graves", 0)
+    }
+
+    override fun addAdditionalSaveData(output: ValueOutput) {
+        super.addAdditionalSaveData(output)
+        output.putInt("max_graves", maxGraves)
+        output.putInt("dug_graves", dugGraves)
     }
 
     override fun getMoveControl(): MoveControl = if (digTime>0) noMoveControl else super.getMoveControl()
@@ -59,10 +86,15 @@ class GraveDigger(type: EntityType<out GraveDigger>, level: Level) : PazZombie(t
         //addBehaviourGoalsNoMelee()
     }
 
+    var retreatDelay = -1
     override fun tick() {
         super.tick()
 
-        //TODO after digging 4-5 gravestone the grave digger should retreat
+        if (dugGraves >= maxGraves) {
+            if(retreatDelay++ > 60) state = ZombieState.RETREATING
+            return
+        }
+
         if (digTime>0) {
             val buildPos = calculateUpVector(90f, this.yRot).scale(1.0).add(position())
             if (digTime<DIG_TIME*.9 && digTime>=26) (level() as? ServerLevel)?.sendParticles(
@@ -97,6 +129,8 @@ class GraveDigger(type: EntityType<out GraveDigger>, level: Level) : PazZombie(t
         setItemSlot(EquipmentSlot.MAINHAND, Items.STONE_SHOVEL.defaultInstance)
         setDropChance(EquipmentSlot.MAINHAND, 0.0f)
 
+        maxGraves = random.nextIntBetweenInclusive(4, 6)
+
         return data
     }
 
@@ -112,9 +146,9 @@ class GraveDigger(type: EntityType<out GraveDigger>, level: Level) : PazZombie(t
             val level = gravedigger.level() as ServerLevel
             if (!level.gameRules.get(GameRules.MOB_GRIEFING)) return false
             if (!gravedigger.mainHandItem.`is`(ItemTags.SHOVELS)) return false
+            if (gravedigger.dugGraves >= gravedigger.maxGraves) return false
             if (gravedigger.digTime>0) return true
-            val nearbyGraves: Int = level.getBlockStates(gravedigger.boundingBox.inflate(16.0)).filter { it.`is`(PazBlocks.GRAVESTONE) }.count().toInt()
-            return gravedigger.target?.let { gravedigger.distanceToSqr(it) < 196 } == true && !gravedigger.isDeadOrDying && (gravedigger.target?.isAlive == true) && nearbyGraves < 4
+            return gravedigger.target?.let { gravedigger.distanceToSqr(it) < 196 } == true && !gravedigger.isDeadOrDying && (gravedigger.target?.isAlive == true)
         }
 
         override fun tick() {
@@ -139,11 +173,12 @@ class GraveDigger(type: EntityType<out GraveDigger>, level: Level) : PazZombie(t
         }
 
         private fun tryDigGrave(gravePos: BlockPos, angleToTarget: Double) {
+            gravedigger.dugGraves++
             digTime = DIG_DELAY_TIME + gravedigger.random.nextInt(20)
             val level = gravedigger.level() as ServerLevel
             val graveStone = createFallingBlock(level, gravePos.center, PazBlocks.GRAVESTONE.defaultBlockState().setValue(FACING, Direction.fromYRot(angleToTarget * Mth.RAD_TO_DEG - 90)))?: return
             graveStone.setHurtsEntities(2.5f, 10)
-            graveStone.dropItem = false
+            graveStone.dropItem = true
             gravedigger.playSound(SoundEvents.MUDDY_MANGROVE_ROOTS_BREAK, 1.4f, 0.9f)
             graveStone.playSound(SoundEvents.TUFF_BRICKS_BREAK, 1.4f, 0.8f)
 

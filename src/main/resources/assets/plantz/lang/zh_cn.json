@@ -37,9 +37,8 @@
   "advancements.plantz.taco_time.description": "坚守到第10波，获胜即可赢取双倍奖励！",
   "advancements.plantz.win_zombie_raid": "庭院无忧",
   "advancements.plantz.win_zombie_raid.description": "击退僵尸袭击！",
-  "advancements.plantz.start_hardest_raid": "僵王博士的军队",
-  "advancements.plantz.start_hardest_raid.description": "以最高难度开始一场僵尸袭击！",
-
+  "advancements.plantz.win_hardest_raid": "僵王博士的军队",
+  "advancements.plantz.win_hardest_raid.description": "以最高难度开始一场僵尸袭击！",
   "message.plantz.too_damaged": "%s损坏太严重，无法移栽！",
   "message.plantz.empty_packet": "这个种子包是空的！",
   "message.plantz.already_planted": "这里已经种了植物！",

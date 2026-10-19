@@ -6,7 +6,6 @@ import joshxviii.plantz.PazBlocks
 import joshxviii.plantz.PazConfig
 import joshxviii.plantz.block.FlagBlock
 import joshxviii.plantz.block.entity.FlagBlockEntity
-import joshxviii.plantz.block.entity.FlagBlockEntity.Companion.MAX_HEALTH
 import joshxviii.plantz.model.FlagBlockModel
 import joshxviii.plantz.pazResource
 import net.minecraft.client.renderer.SubmitNodeCollector
@@ -50,6 +49,7 @@ class FlagRenderer(
         val blockState = blockEntity.blockState
         val gameTime = if (blockEntity.getLevel() != null) blockEntity.getLevel()!!.gameTime else 0L
         state.health = blockEntity.health
+        state.maxHealth = blockEntity.maxHealth
         state.phase = (Math.floorMod((pos.x*7 + pos.y*9 + pos.z*13).toLong() + gameTime, 90L).toFloat() + partialTicks) / 90.0f
         state.angle = -RotationSegment.convertToDegrees(blockState.getValue(FlagBlock.ROTATION))
         if (blockState.`is`(PazBlocks.PLANTZ_FLAG)) state.sprite = PLANTZ_FLAG_MATERIAL
@@ -64,7 +64,7 @@ class FlagRenderer(
     ) {
         if (PazConfig.SHOW_DEBUG_INFO) submitNodeCollector.submitNameTag(
             poseStack, Vec3(0.5,1.0,0.5), -20,
-            Component.literal("${state.health} / $MAX_HEALTH").withColor(0xFFFFFFF),
+            Component.literal("${state.health} / ${state.maxHealth}").withColor(0xFFFFFFF),
             true, -1, 20.0, camera
         )
 
@@ -87,6 +87,7 @@ class FlagRenderer(
 
 class FlagRenderState : BlockEntityRenderState() {
     var health: Float = 0f
+    var maxHealth: Float = 0f
     var phase: Float = 0f
     var sprite: SpriteId? = null
     var angle: Float = 0f

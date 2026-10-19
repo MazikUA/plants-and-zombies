@@ -87,14 +87,12 @@ public class GraveDiggerModel<S extends PazZombieRenderState> extends PazZombieM
 
 	@Override
 	public void setupAnim(@NotNull S state) {
+		state.isAggressive = false;
 		super.setupAnim(state);
-		this.resetPose();
 		if (this.big_hat != null) this.big_hat.visible = (state.headItem.isEmpty() && state.headEquipment.isEmpty());
 		idleAnimation.applyStatic();
 
-		AnimationUtils.animateZombieArms(this.leftArm, this.rightArm, false, state);
-
-		walkAnimation.applyWalk(state.walkAnimationPos, state.walkAnimationSpeed, 2f, 2f);
+		walkAnimation.applyWalk(state.walkAnimationPos, state.walkAnimationSpeed, 1.5f, 1.5f);
 		actionAnimation.apply(state.getActionAnimationState(), state.ageInTicks);
 	}
 }
