@@ -61,7 +61,7 @@ class Balloon(
         private const val HOLDER_PULL_STIFFNESS = 0.004
         private const val MAX_HOLDER_PULL_FORCE = 0.04
         private const val MAX_HOLDER_UPWARD_VELOCITY = 0.08
-        private const val POPPING_HEIGHT = 96
+        private const val POPPING_HEIGHT = 80
     }
 
     var clientTiltZ: Float = 0f
@@ -88,7 +88,7 @@ class Balloon(
     private fun checkPoppingHeight() {
         if (tickCount > 200) {
             val floorHeight = y - level().getHeight(Heightmap.Types.WORLD_SURFACE, blockPosition()).toDouble()
-            if (floorHeight > POPPING_HEIGHT) pop()
+            if (floorHeight > POPPING_HEIGHT * if (isLeashed) 1f else 0.5f) pop()
         }
     }
 

@@ -12,10 +12,13 @@ import joshxviii.plantz.raid.isNearRaid
 import net.minecraft.ChatFormatting
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
+import net.minecraft.core.Registry
 import net.minecraft.core.component.DataComponents
 import net.minecraft.core.particles.BlockParticleOption
 import net.minecraft.core.particles.ParticleOptions
 import net.minecraft.core.particles.ParticleTypes
+import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.core.registries.Registries
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.chat.Component
 import net.minecraft.network.syncher.EntityDataAccessor
@@ -90,6 +93,18 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         ): Boolean {
             val blockBelow = level.getBlockState(pos.below())
             val isValid = checkValidSpawn(level, pos, spawnReason, random) && blockBelow.`is`(PLANTABLE) && pos.y > level.seaLevel - 8
+            return isValid
+        }
+
+        fun checkMushroomSpawnRules(
+            type: EntityType<out Plant>,
+            level: LevelAccessor,
+            spawnReason: EntitySpawnReason,
+            pos: BlockPos,
+            random: RandomSource
+        ): Boolean {
+            val blockBelow = level.getBlockState(pos.below())
+            val isValid = checkValidSpawn(level, pos, spawnReason, random) && blockBelow.`is`(PazTags.BlockTags.CAVE_SPAWNABLE_ON)
             return isValid
         }
 

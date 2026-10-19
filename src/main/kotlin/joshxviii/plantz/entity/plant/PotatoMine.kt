@@ -1,6 +1,5 @@
 package joshxviii.plantz.entity.plant
 
-import joshxviii.plantz.PazEntities
 import joshxviii.plantz.PazSounds
 import joshxviii.plantz.PazTags
 import joshxviii.plantz.hasSameRootOwner
@@ -78,6 +77,6 @@ class PotatoMine(type: EntityType<out ExplosivePlant>, level: Level) : Explosive
     }
 
     override fun canSurviveOn(block: BlockState): Boolean {
-        return super.canSurviveOn(block) || block.`is`(PazTags.BlockTags.SURVIVES_ON_POTATOMINE)
+        return super.canSurviveOn(block) || block.`is`(PazTags.BlockTags.POTATOMINE_SPAWNABLE_ON)
     }
 }

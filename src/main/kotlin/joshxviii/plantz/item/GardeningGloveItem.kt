@@ -3,8 +3,6 @@ package joshxviii.plantz.item
 import joshxviii.plantz.getItemCount
 import joshxviii.plantz.removeItemFromInventory
 import net.minecraft.ChatFormatting
-import net.minecraft.core.Holder
-import net.minecraft.core.HolderSet
 import net.minecraft.core.component.DataComponentGetter
 import net.minecraft.core.component.DataComponents
 import net.minecraft.core.registries.BuiltInRegistries
@@ -20,10 +18,7 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.ItemUseAnimation
 import net.minecraft.world.item.component.Tool
 import net.minecraft.world.item.context.UseOnContext
-import net.minecraft.world.level.block.Block
-import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.block.CropBlock
-import java.util.List
 
 class GardeningGloveItem(properties: Properties) : Item(properties) {
 
@@ -79,15 +74,15 @@ class GardeningGloveItem(properties: Properties) : Item(properties) {
         val blockState = level.getBlockState(context.clickedPos)
         val cropAge = blockState.getValueOrElse(CropBlock.AGE, 0)
         val seedItem = blockState.getCloneItemStack(level, context.clickedPos, false).item
-        if (cropAge >= 7 && (player?.hasInfiniteMaterials() ?: false || (player?.getItemCount(seedItem) ?: 0) > 0)) {
+        if (cropAge >= 7 && (player?.hasInfiniteMaterials() ?: false )) {
             if (isHolding) {
-                player?.sendOverlayMessage(Component.translatable("message.plantz.glove_full").withStyle(ChatFormatting.RED))
+                player.sendOverlayMessage(Component.translatable("message.plantz.glove_full").withStyle(ChatFormatting.RED))
                 return InteractionResult.PASS
             }
             val blockPos = context.clickedPos
             val blockState = level.getBlockState(blockPos)
             if (!level.isClientSide) {
-                if(level.destroyBlock(blockPos, true, player)) player?.let {
+                if(level.destroyBlock(blockPos, true, player)) player.let {
                     GardeningGloveItem.hurtAndDropPlant(stack, player, context.hand)
                     if (player.hasInfiniteMaterials() || it.removeItemFromInventory(seedItem) > 0) level.setBlockAndUpdate(blockPos, blockState.setValue(CropBlock.AGE, 0))
                 }

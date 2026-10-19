@@ -422,7 +422,7 @@ object PazEntities {
             .clientTrackingRange(8),
         attributes = PazZombie.Companion.PazZombieAttributes(
             attackDamage = 3.5,
-            maxHealth = 20.0,
+            maxHealth = 12.0,
             movementSpeed = 0.3,
             followRange = 24.0,
             spawnReinforcementsChance = 0.0,
