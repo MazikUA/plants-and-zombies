@@ -61,8 +61,8 @@
   - Some plants can be transformed into other plants under certain conditions.
 - Added Seed Packet Mutations
   - When zen-gardening a plant, seeds for a different plant may be produced instead.
-    - Wall Nut has a 5% chance to produce Explode-O-Nut seeds.
-    - Explode-O-Nut has an 80% chance to produce Wall Nut seeds.
+    - Wall Nut has an 8% chance to produce Explode-O-Nut seeds.
+    - Explode-O-Nut has an 40% chance to produce Wall Nut seeds.
     - Electric Peashooter has a 95% chance to produce Peashooter seeds.
     - Peashooter has a 10% chance to produce Repeater seeds. 33% for Fire Peashooter in hot biomes. 40% for Electric Peashooter while thundering.
     - Repeater has a 60% chance to produce Peashooter seeds.
@@ -74,7 +74,7 @@
 - Added the Hero of the Garden effect.
   - While the effect is active, interacting with a mailbox will grant hero rewards based on the effect's level.
 - Updated the Zombie Raid event.
-  - Wild plants within the radius of the raid will vanish and new plants will not spawn in the area until the raid has finished.
+  - Wild plants within the radius of the raid will vanish, and new plants will not spawn in the area until the raid has finished.
   - The amount of waves a raid has is determined by: 2 + (zombie omen level * 2) + (the game's difficulty) + (2 if the end credits have been seen).
   - Using another Bad Omen potion during a raid will extend the raid's wave. Unless the raid is already in its final wave.
   - After the end credits have been seen, waves during a raid will be more difficult.

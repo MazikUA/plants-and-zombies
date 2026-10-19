@@ -4,7 +4,11 @@ import net.minecraft.world.entity.Mob
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation
 import net.minecraft.world.level.Level
+import net.minecraft.world.level.pathfinder.FlyNodeEvaluator
+import net.minecraft.world.level.pathfinder.NodeEvaluator
 import net.minecraft.world.level.pathfinder.Path
+import net.minecraft.world.level.pathfinder.PathFinder
+import net.minecraft.world.phys.Vec3
 import kotlin.math.abs
 
 /**
@@ -31,6 +35,18 @@ open class PazGroundPathNavigation(mob: Mob, level: Level) : GroundPathNavigatio
 }
 
 open class PazFlyingPathNavigation(mob: Mob, level: Level) : FlyingPathNavigation(mob, level) {
+    var passThroughBlocks: Boolean = false
+    override fun createPathFinder(maxVisitedNodes: Int): PathFinder {
+        if (passThroughBlocks) {
+            this.nodeEvaluator = GhostNodeEvaluator()
+            return PathFinder(this.nodeEvaluator, maxVisitedNodes)
+        }
+        return super.createPathFinder(maxVisitedNodes)
+    }
+    override fun canMoveDirectly(startPos: Vec3, stopPos: Vec3): Boolean {
+        if (passThroughBlocks) return true
+        return super.canMoveDirectly(startPos, stopPos)
+    }
     override fun followThePath() {
         val path = path ?: return
         path.advanceIfHorizontallyReached(mob)
