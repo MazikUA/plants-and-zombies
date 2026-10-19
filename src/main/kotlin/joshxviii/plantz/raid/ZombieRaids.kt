@@ -74,7 +74,7 @@ class ZombieRaids(
             if (!level.gameRules.get(GameRules.RAIDS) || level.difficulty == Difficulty.PEACEFUL) raid.stop()
 
             if (raid.isStopped()) {
-                (level.getBlockEntity(raid.center) as? FlagBlockEntity)?.resetHealth()
+                (level.getBlockEntity(raid.center) as? FlagBlockEntity)?.setMaxHealth(refill = true)
                 raidIterator.remove()
                 setDirty()
             } else raid.tick(level)

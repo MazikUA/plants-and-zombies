@@ -2,7 +2,7 @@ package joshxviii.plantz.block.entity
 
 import joshxviii.plantz.PazBlocks
 import joshxviii.plantz.PazEffects
-import joshxviii.plantz.raid.getZombieRaids
+import joshxviii.plantz.raid.ZombieRaid
 import net.minecraft.core.BlockPos
 import net.minecraft.core.HolderLookup
 import net.minecraft.nbt.CompoundTag
@@ -17,7 +17,6 @@ import net.minecraft.world.level.block.LevelEvent
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket
-import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.Difficulty
 import net.minecraft.world.level.storage.ValueInput
 import net.minecraft.world.level.storage.ValueOutput
@@ -38,11 +37,12 @@ class FlagBlockEntity(
     }
 
     var maxHealth : Float = MAX_HEALTH
+        private set
     var health : Float = maxHealth
-        set(value) {
+        private set(value) {
             field = value.coerceAtMost(maxHealth)
         }
-    var resetTime : Int = 0
+    private var resetTime : Int = 0
 
     fun tick(level: Level, pos: BlockPos, state: BlockState) {
         if (level.isClientSide) return
@@ -66,7 +66,7 @@ class FlagBlockEntity(
             }
             level.destroyBlock(pos, false)
             level.destroyBlockProgress(0, pos, -1)
-        } else if (health < MAX_HEALTH) {
+        } else if (health < maxHealth) {
             level.destroyBlockProgress(0, pos, healthToDestroyProgress())
         }
 
@@ -102,9 +102,11 @@ class FlagBlockEntity(
         hurt(maxHealth)
     }
 
-    fun resetHealth() {
-        maxHealth = MAX_HEALTH
-        health = maxHealth
+    fun setMaxHealth(isRaid: Boolean = false, refill: Boolean = false) {
+        val newMax = (if (isRaid) ZombieRaid.FLAG_MAX_HEALTH else MAX_HEALTH).toFloat()
+        if (maxHealth == newMax && !refill) return
+        maxHealth = newMax
+        if (refill) health = newMax
         setChanged()
         syncToClient()
     }
@@ -120,8 +122,9 @@ class FlagBlockEntity(
 
     override fun loadAdditional(input: ValueInput) {
         super.loadAdditional(input)
-        health = input.getFloatOr("health", maxHealth)
+        // max health must be read first, the health setter clamps to it
         maxHealth = input.getFloatOr("max_health", MAX_HEALTH)
+        health = input.getFloatOr("health", maxHealth)
         resetTime = input.getIntOr("heal_reset_time", 0)
     }
 

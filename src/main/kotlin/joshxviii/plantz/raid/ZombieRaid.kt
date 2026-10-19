@@ -188,13 +188,10 @@ class ZombieRaid(
 
     fun updateRaid(level: ServerLevel) {
 
-        if (status == ZombieRaidStatus.INIT) {
-            (level.getBlockEntity(center) as? FlagBlockEntity)?.let {
-                it.maxHealth = FLAG_MAX_HEALTH.toFloat()
-                it.health = it.maxHealth
-            }
-            vanishAllWildPlants(level)
-        }
+        if (!isStopped()) (level.getBlockEntity(center) as? FlagBlockEntity)
+            ?.setMaxHealth(isRaid = true, refill = status == ZombieRaidStatus.INIT)
+
+        if (status == ZombieRaidStatus.INIT) vanishAllWildPlants(level)
 
         if (isStopped()) return
         if (level.tickRateManager().isFrozen) return
