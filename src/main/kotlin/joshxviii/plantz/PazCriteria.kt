@@ -1,7 +1,6 @@
 package joshxviii.plantz
 
 import joshxviii.plantz.advancement.*
-import net.minecraft.advancements.CriteriaTriggers
 import net.minecraft.advancements.CriterionTrigger
 import net.minecraft.core.Registry
 import net.minecraft.core.registries.BuiltInRegistries
@@ -39,7 +38,7 @@ object PazCriteria {
     val WIN_ZOMBIE_RAID = registerCriteria("win_zombie_raid", SimpleCriterionTrigger(SimpleCheckCriteria.CODEC))
 
     @JvmField
-    val START_HARDEST_RAID = registerCriteria("start_hardest_raid", SimpleCriterionTrigger(SimpleCheckCriteria.CODEC))
+    val WIN_HARDEST_RAID = registerCriteria("win_hardest_raid", SimpleCriterionTrigger(SimpleCheckCriteria.CODEC))
 
     fun <T, E : SimpleCriterionCondition<T>> registerCriteria(
         name: String,

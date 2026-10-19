@@ -74,6 +74,7 @@
 - Added the Hero of the Garden effect.
   - While the effect is active, interacting with a mailbox will grant hero rewards based on the effect's level.
 - Updated the Zombie Raid event.
+  - Wild plants within the radius of the raid will vanish and new plants will not spawn in the area until the raid has finished.
   - The amount of waves a raid has is determined by: 2 + (zombie omen level * 2) + (the game's difficulty) + (2 if the end credits have been seen).
   - Using another Bad Omen potion during a raid will extend the raid's wave. Unless the raid is already in its final wave.
   - After the end credits have been seen, waves during a raid will be more difficult.
@@ -118,6 +119,7 @@
   - Spawns during the "League of Awesome" special zombie raid.
 - Zombies will now attack Wall Nuts when walking into them.
 ### Technical Changes
+- Items that have the Block Projectile item component will no longer deflect piercing projectiles.
 - Added BrainzAlloyCost item component.
 - Added configuration options.
   - `paz-server.json`:

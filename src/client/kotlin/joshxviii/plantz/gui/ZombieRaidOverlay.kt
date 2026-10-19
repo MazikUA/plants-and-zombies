@@ -52,7 +52,7 @@ object ZombieRaidOverlay {
         val barWidth = 98
         val barHeight = 5
 
-        val flagHealthPercent = if (raidEvent.status == ZombieRaid.ZombieRaidStatus.LOSS) 0f else (raidEvent.flagHealth / FlagBlockEntity.MAX_HEALTH_RAID).coerceIn(0f, 1f)
+        val flagHealthPercent = if (raidEvent.status == ZombieRaid.ZombieRaidStatus.LOSS) 0f else (raidEvent.flagHealth / ZombieRaid.FLAG_MAX_HEALTH).coerceIn(0f, 1f)
         val flagBarWidth = Mth.floor(barWidth * flagHealthPercent)
         val flagHealthX = x + 17 + (barWidth - flagBarWidth)
         val flagHealthY = y + 15

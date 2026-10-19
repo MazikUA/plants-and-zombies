@@ -296,8 +296,8 @@ enum class WaveType(
             ByIdMap.continuous(WaveType::ordinal, WaveType.entries.toTypedArray(), ByIdMap.OutOfBoundsStrategy.ZERO);
         val STREAM_CODEC: StreamCodec<ByteBuf, WaveType> = ByteBufCodecs.idMapper<WaveType>(BY_ID, WaveType::ordinal)
 
-        fun omenScale(omen: Float): Float = omen * 0.1f // linear omen scaling
-        fun creditsBonus(credits: Boolean): Float = if (credits) 1.25f else 1f // credits bonus
+        fun omenScale(omen: Float): Float = omen * 0.115f
+        fun creditsBonus(credits: Boolean): Float = if (credits) 1.5f else 1f // credits bonus
 
         fun scaled(base: Float, omen: Float, credits: Boolean, min: Int = 0, max: Int = Int.MAX_VALUE): Int {
             val raw = base.coerceAtLeast(0f) * omenScale(omen) * creditsBonus(credits)

@@ -8,11 +8,12 @@ import com.mojang.serialization.codecs.RecordCodecBuilder
 import it.unimi.dsi.fastutil.ints.IntList
 import joshxviii.plantz.*
 import joshxviii.plantz.block.entity.FlagBlockEntity
+import joshxviii.plantz.entity.plant.Plant
 import joshxviii.plantz.entity.zombie.PazZombie
 import joshxviii.plantz.networking.ZombieRaidClientData
 import joshxviii.plantz.networking.ZombieRaidResponsePayload
-import net.minecraft.SharedConstants
 import net.minecraft.ChatFormatting
+import net.minecraft.SharedConstants
 import net.minecraft.core.BlockPos
 import net.minecraft.core.BlockPos.MutableBlockPos
 import net.minecraft.core.Holder
@@ -20,12 +21,14 @@ import net.minecraft.core.UUIDUtil
 import net.minecraft.core.component.DataComponents
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.network.chat.Component
-import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket
+import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket
+import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket
 import net.minecraft.network.protocol.game.ClientboundSoundPacket
 import net.minecraft.server.level.ServerBossEvent
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
+import net.minecraft.sounds.SoundEvent
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
 import net.minecraft.tags.FluidTags
@@ -34,8 +37,6 @@ import net.minecraft.util.RandomSource
 import net.minecraft.util.StringRepresentable
 import net.minecraft.world.BossEvent
 import net.minecraft.world.Difficulty
-import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket
-import net.minecraft.sounds.SoundEvent
 import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.entity.EntitySpawnReason
 import net.minecraft.world.entity.EquipmentSlot
@@ -49,9 +50,9 @@ import net.minecraft.world.item.component.FireworkExplosion
 import net.minecraft.world.item.component.Fireworks
 import net.minecraft.world.level.ChunkPos
 import net.minecraft.world.level.levelgen.Heightmap
+import net.minecraft.world.phys.AABB
+import java.util.*
 import java.util.function.Predicate
-import java.util.Optional
-import java.util.UUID
 
 class ZombieRaid(
     val center: BlockPos,
@@ -101,7 +102,7 @@ class ZombieRaid(
         fun getWaveSpawnCount(difficulty: Difficulty, raid: ZombieRaid): Int {
             //if (creditsUnlocked && omenLevel >= 5) return 20 // Force Zomboss wave with lvl 5 omen and after credits are unlocked
             val baseWaves = 2 + difficulty.id
-            val omenBonus = Mth.floor(raid.zombieRaidOmenLevel * 2)
+            val omenBonus = Mth.ceil(raid.zombieRaidOmenLevel * 2)
             val creditsBonus = if (raid.starterHasSeenCredits) 2 else 0
             return (baseWaves + omenBonus + creditsBonus).coerceAtMost(MAXIMUM_WAVE_COUNT)
         }
@@ -136,10 +137,13 @@ class ZombieRaid(
         val ZOMBIE_RAID_DEFEAT_TITLE: Component = Component.translatable("event.plantz.zombie_raid.defeat_title").withStyle(ChatFormatting.DARK_RED).withStyle(ChatFormatting.BOLD)
         const val WAVE_DURATION: Int = 3000 // 2.5 minutes
         const val FINAL_WAVE_DURATION: Int = WAVE_DURATION * 2 // 5 minutes
+
+        const val FLAG_MAX_HEALTH: Int = 400
+
         const val PRE_RAID_TICKS: Int = 100
         const val POST_RAID_TICKS: Int = 80
         const val SPAWN_DISTANCE: Int = 88
-        const val RAID_DISTANCE: Int = 144
+        const val RAID_DISTANCE: Int = 160
         const val GARDEN_HERO_EFFECT_DURATION: Int = 72000
         const val COUNTDOWN_BEFORE_LOSS: Int = 200 //10 seconds
         const val MAXIMUM_WAVE_COUNT: Int = 20
@@ -183,17 +187,19 @@ class ZombieRaid(
     }
 
     fun updateRaid(level: ServerLevel) {
+
+        if (status == ZombieRaidStatus.INIT) {
+            (level.getBlockEntity(center) as? FlagBlockEntity)?.let {
+                it.maxHealth = FLAG_MAX_HEALTH.toFloat()
+                it.health = it.maxHealth
+            }
+            vanishAllWildPlants(level)
+        }
+
         if (isStopped()) return
         if (level.tickRateManager().isFrozen) return
         ticksActive++
         refreshRaidProfile(level)
-        if (ticksActive == 1L) {
-            if (numWaves>=MAXIMUM_WAVE_COUNT && starterHasSeenCredits) {
-                zombieRaidEvent.players.forEach { player ->
-                    PazCriteria.START_HARDEST_RAID.trigger(player, true)
-                }
-            }
-        }
 
         if (SharedConstants.DEBUG_RAIDS) {// DEBUG INFO
             level.playSound(null, center, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS, 0.05f, 1.5f)
@@ -246,6 +252,7 @@ class ZombieRaid(
             postRaidTicks = POST_RAID_TICKS
             zombieRaidEvent.players.forEach { player ->// advancement
                 PazCriteria.WIN_ZOMBIE_RAID.trigger(player, true)
+                PazCriteria.WIN_HARDEST_RAID.trigger(player, numWaves>=MAXIMUM_WAVE_COUNT && starterHasSeenCredits)
                 val effect = MobEffectInstance(PazEffects.GARDEN_HERO, GARDEN_HERO_EFFECT_DURATION, (waveTypes.size-1).coerceAtLeast(0), false, true)
                 (player as GardenHeroRewards).`plantz$setWaveList`(waveTypes)
                 player.addEffect(effect)
@@ -274,20 +281,23 @@ class ZombieRaid(
             }
         }
         else if (waveTimer <= 0) {// destroy flag when timer runs out
-            (level.getBlockEntity(center) as? FlagBlockEntity)?.hurt(999f)
+            (level.getBlockEntity(center) as? FlagBlockEntity)?.destroy()
         }
+    }
+
+    fun isNear(level: ServerLevel, pos: BlockPos): Boolean {
+        return level.getZombieRaids().getNearbyRaid(pos, RAID_DISTANCE) === this
     }
 
     private fun validPlayer(): Predicate<ServerPlayer> {
         return Predicate { player: ServerPlayer ->
-            val pos = player.blockPosition()
-            player.isAlive && player.level().getZombieRaids().getNearbyRaid(pos, RAID_DISTANCE) === this
+            player.isAlive && isNear(player.level(), player.blockPosition())
         }
     }
 
     private fun updatePlayers(level: ServerLevel) {
         val currentPlayersInRaid: MutableSet<ServerPlayer> = Sets.newHashSet<ServerPlayer>(zombieRaidEvent.players)
-        val newPlayersInRaid = level.getPlayers(validPlayer())
+        val newPlayersInRaid = level.getPlayers( validPlayer() )
         for (player in newPlayersInRaid) if (!currentPlayersInRaid.contains(player)) {
             zombieRaidEvent.addPlayer(player)
             sendClientUpdate(level)
@@ -296,6 +306,8 @@ class ZombieRaid(
             sendClientUpdate(level, true)
             zombieRaidEvent.removePlayer(player)
         }
+
+        zombieRaidEvent.players.filter { it.hasEffect(PazEffects.ZOMBIE_OMEN) }.forEach(::absorbRaidOmen)
     }
 
     private fun updateZombieRaiders(level: ServerLevel) {
@@ -329,7 +341,7 @@ class ZombieRaid(
                 val zombiePos = zombie.blockPosition()
                 if (zombie.isRemoved || zombie.level().dimension() !== level.dimension() || this.center.distSqr(
                         zombiePos
-                    ) >= 12544.0
+                    ) >= RAID_DISTANCE * RAID_DISTANCE * 2
                 ) {
                     toRemove.add(zombie)
                     continue
@@ -343,11 +355,11 @@ class ZombieRaid(
 
     fun absorbRaidOmen(player: ServerPlayer): Boolean {
         val effect = player.getEffect(PazEffects.ZOMBIE_OMEN)?: return false
-        if (isFinalWave()) return false
-        zombieRaidOmenLevel += if (status == ZombieRaidStatus.INIT)
-            effect.amplifier+1f
-        else
-            (.5f * effect.amplifier)
+        val amp = effect.amplifier+1f
+        val value = if (status == ZombieRaidStatus.INIT) amp
+        else if (isFinalWave()) 0f else .5f * amp
+        zombieRaidOmenLevel += value
+        player.removeEffect(PazEffects.ZOMBIE_OMEN)
         return true
     }
 
@@ -433,6 +445,13 @@ class ZombieRaid(
         pendingRaiders.clear()
         totalZombieHealth = 0f
         setDirty(level)
+    }
+
+    private fun vanishAllWildPlants(level: ServerLevel) {
+        val maxDistSqr = (RAID_DISTANCE * RAID_DISTANCE).toDouble()
+        level.getEntitiesOfClass(Plant::class.java, AABB(center).inflate(RAID_DISTANCE.toDouble())) {
+            !it.isTame && it.blockPosition().distSqr(center) < maxDistSqr
+        }.forEach { it.vanish(level) }
     }
 
     private fun setDirty(level: ServerLevel) { level.getZombieRaids().setDirty() }

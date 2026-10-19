@@ -37,8 +37,8 @@
   "advancements.plantz.taco_time.description": "Get to wave 10! You'll receive 2x bonus rewards if you win!",
   "advancements.plantz.win_zombie_raid": "Home Lawn Security",
   "advancements.plantz.win_zombie_raid.description": "Defeat the Zombie Raid!",
-  "advancements.plantz.start_hardest_raid": "Zomboss's Army",
-  "advancements.plantz.start_hardest_raid.description": "Start a raid with the highest difficulty!",
+  "advancements.plantz.win_hardest_raid": "Zomboss's Army",
+  "advancements.plantz.win_hardest_raid.description": "Start a raid with the highest difficulty!",
 
   "message.plantz.too_damaged": "%s is too damaged to be transplanted!",
   "message.plantz.empty_packet": "This seed packet is empty!",

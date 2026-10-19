@@ -5,6 +5,7 @@ import joshxviii.plantz.block.entity.MailboxBlockEntity
 import joshxviii.plantz.block.entity.MailboxManager
 import joshxviii.plantz.block.entity.getMailboxMailQueue
 import joshxviii.plantz.networking.ServerConfigResponsePayload
+import joshxviii.plantz.raid.ZombieRaids
 import joshxviii.plantz.raid.getZombieRaids
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents
@@ -30,6 +31,7 @@ object PazMain : ModInitializer {
 		// clear client raid cache + load config
 		ServerLifecycleEvents.SERVER_STARTING.register {
 			PazNetwork.ZombieRaidClientCache.clear()
+			ZombieRaids.clearActiveRaidCenters()
 			PazConfig.load()
 		}
 		// config sync
