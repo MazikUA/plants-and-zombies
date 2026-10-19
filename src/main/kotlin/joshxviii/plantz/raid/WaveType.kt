@@ -15,6 +15,7 @@ import net.minecraft.network.codec.StreamCodec
 import net.minecraft.resources.ResourceKey
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.util.ByIdMap
+import net.minecraft.util.Mth
 import net.minecraft.util.StringRepresentable
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.EquipmentSlot
@@ -136,7 +137,7 @@ enum class WaveType(
             listOf(
                 WaveSpawnEntry(
                     PazEntities.ALL_STAR,
-                    scaled(3f + wave * 0.9f, omen, credits, min = 2)
+                    scaled(3f + wave * 0.9f, omen, credits, min = 2, max = 12)
                 ),
                 WaveSpawnEntry(
                     PazEntities.IMP,
@@ -296,13 +297,14 @@ enum class WaveType(
             ByIdMap.continuous(WaveType::ordinal, WaveType.entries.toTypedArray(), ByIdMap.OutOfBoundsStrategy.ZERO);
         val STREAM_CODEC: StreamCodec<ByteBuf, WaveType> = ByteBufCodecs.idMapper<WaveType>(BY_ID, WaveType::ordinal)
 
-        fun omenScale(omen: Float): Float = omen * 0.115f
-        fun creditsBonus(credits: Boolean): Float = if (credits) 1.5f else 1f // credits bonus
+        fun omenScale(omen: Float): Float = 1f+(omen-1f) * 0.08f
+        fun creditsBonus(credits: Boolean): Float = if (credits) 1.2f else 1f // credits bonus
 
         fun scaled(base: Float, omen: Float, credits: Boolean, min: Int = 0, max: Int = Int.MAX_VALUE): Int {
             val raw = base.coerceAtLeast(0f) * omenScale(omen) * creditsBonus(credits)
             val jitter = 0.85f + Math.random().toFloat() * 0.3f // +-15 %
-            return (raw * jitter).toInt().coerceIn(min, max)
+            val value = Mth.ceil(raw * jitter)
+            return value.coerceIn(min, max)
         }
 
         // configurations

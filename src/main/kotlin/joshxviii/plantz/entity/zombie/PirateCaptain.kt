@@ -4,10 +4,12 @@ import it.unimi.dsi.fastutil.ints.IntList
 import joshxviii.plantz.PazEntities
 import joshxviii.plantz.ai.goal.NavigateToTargetGoal
 import joshxviii.plantz.ai.goal.ProjectileAttackGoal
+import net.fabricmc.fabric.api.networking.v1.PlayerLookup.level
 import net.minecraft.core.component.DataComponents
 import net.minecraft.network.syncher.EntityDataAccessor
 import net.minecraft.network.syncher.EntityDataSerializers
 import net.minecraft.network.syncher.SynchedEntityData
+import net.minecraft.server.jsonrpc.methods.ServerSettingsService.difficulty
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.DifficultyInstance
@@ -131,8 +133,9 @@ class PirateCaptain(type: EntityType<out PirateCaptain>, level: Level) : PazZomb
         if (reason == RemovalReason.KILLED) {
             convertTo(PazEntities.PIRATE_CAPTAIN_GHOST, ConversionParams.single(this, true, true)) {
                 it.playSound(SoundEvents.ZOMBIE_VILLAGER_CONVERTED)
-                it.setItemSlot(EquipmentSlot.MAINHAND, Items.IRON_SWORD.defaultInstance)
-                it.setDropChance(EquipmentSlot.MAINHAND, 0.0f)
+                (level() as? ServerLevel)?.let { level ->
+                    it.finalizeSpawn(level, level.getCurrentDifficultyAt(blockPosition()), EntitySpawnReason.CONVERSION, PazZombieGroupData(isRaider = isRaider()))
+                }
             }
         }
         super.remove(reason)
