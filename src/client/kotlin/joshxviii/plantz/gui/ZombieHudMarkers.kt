@@ -15,6 +15,7 @@ import joshxviii.plantz.pazResource
 import joshxviii.plantz.renderer.entity.zombie.PazZombieRenderState
 import joshxviii.plantz.renderer.entity.zombie.PazZombieRenderer
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener
+import net.minecraft.client.DeltaTracker
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.navigation.ScreenRectangle
@@ -51,11 +52,10 @@ object ZombieHudMarkers {
     private const val MIN_DISTANCE = 10.0
     private const val MAX_DISTANCE = 96.0
 
-    fun renderIcons(graphics: GuiGraphicsExtractor, delta: Float) {
+    fun renderIcons(graphics: GuiGraphicsExtractor, deltaTracker: DeltaTracker) {
         val mc = Minecraft.getInstance()
         if (mc.level == null || mc.player == null) return
         if (!PazConfig.ALWAYS_SHOW_HEAD_MARKERS) PazNetwork.ZombieRaidClientCache.get()
-            //?.let { if (it.waveTimer > 1200) return }
             ?: return
 
         for ((worldPos, zombie) in collect(mc)) {

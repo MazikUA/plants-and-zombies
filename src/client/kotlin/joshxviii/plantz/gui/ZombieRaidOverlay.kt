@@ -1,8 +1,7 @@
 package joshxviii.plantz.gui
 
-import joshxviii.plantz.PazNetwork.ZombieRaidClientCache
 import joshxviii.plantz.PazConfig
-import joshxviii.plantz.block.entity.FlagBlockEntity
+import joshxviii.plantz.PazNetwork.ZombieRaidClientCache
 import joshxviii.plantz.pazResource
 import joshxviii.plantz.raid.ZombieRaid
 import joshxviii.plantz.renderer.outlineText
@@ -35,6 +34,12 @@ object ZombieRaidOverlay {
         graphics: GuiGraphicsExtractor,
         deltaTracker: DeltaTracker
     ) {
+        if (PazConfig.HIDE_RAID_UI) return
+        renderEventBar(graphics, deltaTracker)
+        ZombieHudMarkers.renderIcons(graphics, deltaTracker)
+    }
+
+    fun renderEventBar(graphics: GuiGraphicsExtractor, deltaTracker: DeltaTracker) {
         val bgWidth = 256
         val bgHeight = 32
         val font = Minecraft.getInstance().font
@@ -97,7 +102,6 @@ object ZombieRaidOverlay {
             val textX = screenWidth / 2 - font.width(raidEvent.status.name) / 2
             graphics.text(font, raidEvent.status.name, textX, textY+30, -1)
         }
-
     }
 
 }
