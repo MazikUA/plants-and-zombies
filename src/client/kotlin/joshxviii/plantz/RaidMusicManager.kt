@@ -23,6 +23,7 @@ import net.minecraft.client.sounds.SoundEngine
 import net.minecraft.core.Holder
 import net.minecraft.sounds.SoundEvent
 import net.minecraft.sounds.SoundSource
+import net.minecraft.util.Mth
 import net.minecraft.util.RandomSource
 
 enum class RaidMusicLayer(
@@ -52,6 +53,9 @@ object RaidMusicManager {
     var activeLayers: MutableMap<RaidMusicLayer, RaidMusicSoundInstance> = mutableMapOf()
     var targetMusicLayer: RaidMusicLayer? = null
     var raidEvent: ZombieRaidClientData? = null
+    var pitch = 1.0f
+    var targetPitch = 1.0f
+    var tick = 0
 
     fun tick() {
         raidEvent = ZombieRaidClientCache.get().also { event ->
@@ -88,6 +92,13 @@ object RaidMusicManager {
                     layer.volume -= fadeOutStep
             }
         }
+
+        if (shouldChangePitch()) {
+            val step = (targetPitch - pitch) / TRANSITION_TIME.coerceAtLeast(1)
+            pitch += step
+        }
+
+        if (tick >0) tick++
     }
 
     fun restart() {
@@ -109,9 +120,11 @@ object RaidMusicManager {
                 SoundEngine.PlayResult.NOT_STARTED -> {}
             }
         }
+        tick = 1
     }
 
     private fun stop() {
+        tick = -1
         activeLayers.forEach { (_, layer) ->
             layer.stopLayer()
         }
@@ -157,6 +170,19 @@ object RaidMusicManager {
         }
         return false
     }
+
+    private fun shouldChangePitch(): Boolean {
+        raidEvent?.let {
+            if (it.isFinalWave()) {
+                targetPitch = when (it.waveTimer) {
+                    in -1..600 -> 1.26f
+                    in 601..1200 -> 1.12f
+                    else -> 1.0f
+                }
+            }
+        }
+        return targetPitch != pitch
+    }
 }
 
 class RaidMusicSoundInstance(
@@ -169,6 +195,10 @@ class RaidMusicSoundInstance(
         delay = 0
         attenuation = Attenuation.NONE
         relative = true
+    }
+
+    override fun getPitch(): Float {
+        return RaidMusicManager.pitch
     }
 
     fun setVolume(volume: Float) {

@@ -62,4 +62,5 @@ data class ZombieRaidClientData(
 ) {
     fun currentWaveNumber(): Int = waveTypes.size
     fun currentWaveType(): WaveType? = waveTypes.lastOrNull()
+    fun isFinalWave(): Boolean = waveTypes.size == numWaves
 }
