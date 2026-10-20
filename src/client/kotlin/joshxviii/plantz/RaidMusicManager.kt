@@ -131,6 +131,7 @@ object RaidMusicManager {
         minecraft.toastManager.hideNowPlayingToast()
         activeLayers.clear()
         targetMusicLayer = null
+        targetPitch = 1.0f
     }
 
     fun isPlaying(): Boolean = targetMusicLayer != null

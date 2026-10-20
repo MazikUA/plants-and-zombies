@@ -1,0 +1,49 @@
+name: Check Language Files
+
+on:
+  pull_request:
+    paths:
+      - 'src/main/resources/assets/plantz/lang/**'
+  push:
+    paths:
+      - 'src/main/resources/assets/plantz/lang/**'
+  workflow_dispatch:
+
+jobs:
+  check-translations:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Get changed translation files
+        id: changed
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch origin ${{ github.base_ref }} --depth=1
+            FILES=$(git diff --name-only --diff-filter=AM origin/${{ github.base_ref }}...HEAD -- 'src/main/resources/assets/plantz/lang/*.json' | grep -v en_us.json || true)
+          else
+            FILES=$(git diff --name-only --diff-filter=AM HEAD~1 HEAD -- 'src/main/resources/assets/plantz/lang/*.json' | grep -v en_us.json || true)
+          fi
+
+          echo "files<<EOF" >> $GITHUB_OUTPUT
+          echo "$FILES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+          echo "Files to check:"
+          echo "$FILES"
+
+      - name: Check language files
+        run: |
+          if [ -z "${{ steps.changed.outputs.files }}" ]; then
+            echo "No translation files changed – skipping."
+            exit 0
+          fi
+          python .github/scripts/check_lang.py ${{ steps.changed.outputs.files }}
