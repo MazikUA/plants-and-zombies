@@ -146,7 +146,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
             val knockbackResistance: Double = 0.0,
             val attackRange: Double = 2.5,
             val movementSpeed: Double = 0.0,
-            val stepHeight: Double = 0.6,
+            val stepHeight: Double = 0.0,
             val followRange: Double = 14.0,
             val armor: Double = 0.0,
             val scale: Double = 1.0,
@@ -653,7 +653,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
     open fun canSurviveOn(block: BlockState) : Boolean = block.`is`(PLANTABLE)
     open fun canPlaceOn(block: BlockState) : Boolean = canSurviveOn(block)
     open fun canProduceSeeds(): Boolean = true
-    open fun clampToGrid() = true
+    open fun clampToGrid() = canSurviveOn(getBlockBelow())
     open fun cooldownFinished() {}
 
     fun hurtOnCollide(other: Entity?) {

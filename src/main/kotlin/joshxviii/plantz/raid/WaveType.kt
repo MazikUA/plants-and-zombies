@@ -82,7 +82,7 @@ enum class WaveType(
                 WaveSpawnEntry(
                     PazEntities.GARGANTUAR,
                     if (wave == 10) 1 // always spawn at wave 10
-                    else if (wave > 10) scaled(1f + (wave - 13) * 0.3f, omen, credits, min = 0) else 0
+                    else if (wave > 11) scaled(1f + (wave - 13) * 0.3f, omen, credits, min = 0) else 0
                 ),
                 WaveSpawnEntry(
                     PazEntities.ENGINEER_ZOMBIE,
@@ -209,7 +209,7 @@ enum class WaveType(
                     }),
                 WaveSpawnEntry(
                     PazEntities.PIRATE_CAPTAIN,
-                    if (credits) scaled(2f + wave * 0.4f, omen, true, min = 1) else 0
+                    if (credits) scaled(1f + wave * 0.4f, omen, true, min = 1) else 0
                 ),
                 WaveSpawnEntry(
                     PazEntities.GARGANTUAR,

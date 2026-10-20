@@ -11,7 +11,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "plantz:mailbox",
+          "name": "plantz:mail_collection_box",
           "functions": [
             {
               "function": "minecraft:copy_components",
@@ -29,5 +29,5 @@
       "rolls": 1.0
     }
   ],
-  "random_sequence": "plantz:blocks/mailbox"
+  "random_sequence": "plantz:blocks/mail_collection_box"
 }

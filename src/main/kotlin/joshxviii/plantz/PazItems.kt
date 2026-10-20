@@ -379,8 +379,6 @@ object PazItems {
                         balloonEntity.snapTo(balloonPos.center)
                         balloonEntity.applyImpulse(facing.unitVec3, pow = 0.15f, uncertainty = 20.0f)
 
-                        //TODO make the balloon attach to any entity in front of the dispenser
-
                         if (level.addFreshEntity(balloonEntity)) {
                             balloonEntity.playSound(PazSounds.BALLOON_INFLATE)
                             dispensed.shrink(1)
@@ -392,7 +390,7 @@ object PazItems {
                                 EntitySelector.NO_SPECTATORS
                             )) {
                                 if (entity is PazZombie && !entity.canEquipBalloons()) continue
-                                balloonEntity.setLeashedTo(entity, true)
+                                if (entity != null) balloonEntity.setLeashedTo(entity, true)
                                 break
                             }
 

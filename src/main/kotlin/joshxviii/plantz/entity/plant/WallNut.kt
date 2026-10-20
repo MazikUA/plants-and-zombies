@@ -29,6 +29,7 @@ import net.minecraft.world.entity.monster.zombie.Zombie
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.Level
+import net.minecraft.world.level.block.Rotation
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.storage.ValueInput
 import net.minecraft.world.level.storage.ValueOutput
@@ -61,6 +62,9 @@ open class WallNut(type: EntityType<out Plant>, level: Level) : Plant(type, leve
         getAttribute(Attributes.KNOCKBACK_RESISTANCE)!!.let {
             if (!it.hasModifier(ROLLING_ID)) it.addTransientModifier(AttributeModifier(ROLLING_ID, 99.0, AttributeModifier.Operation.ADD_VALUE))
         }
+        getAttribute(Attributes.STEP_HEIGHT)!!.let {
+            if (!it.hasModifier(ROLLING_ID)) it.addTransientModifier(AttributeModifier(ROLLING_ID, 0.75, AttributeModifier.Operation.ADD_VALUE))
+        }
     }
 
     fun stopRoll() {
@@ -73,13 +77,16 @@ open class WallNut(type: EntityType<out Plant>, level: Level) : Plant(type, leve
         getAttribute(Attributes.KNOCKBACK_RESISTANCE)!!.let {
             if (it.hasModifier(ROLLING_ID)) it.removeModifier(ROLLING_ID)
         }
+        getAttribute(Attributes.STEP_HEIGHT)!!.let {
+            if (it.hasModifier(ROLLING_ID)) it.removeModifier(ROLLING_ID)
+        }
     }
 
     fun resetRolledOverEntities() {
         rolledOverEntities.clear()
     }
 
-    override fun clampToGrid(): Boolean = !isRolling
+    override fun clampToGrid(): Boolean = !isRolling && super.clampToGrid()
 
     override fun limitPistonMovement(vec: Vec3): Vec3 {
         val result = super.limitPistonMovement(vec)
@@ -106,7 +113,7 @@ open class WallNut(type: EntityType<out Plant>, level: Level) : Plant(type, leve
             )
         }
 
-        if (deltaMovement.horizontalDistance() < 0.085) stopRoll()
+        if (deltaMovement.horizontalDistance() < 0.085 && !isLeashed) stopRoll()
     }
 
     override fun getLookControl(): LookControl = noLookControl

@@ -106,6 +106,7 @@ fun Plant.processGloveItem(player: Player, item: ItemStack, hand: InteractionHan
         !verifyOwner(player) -> return false
         // roll wallnut
         (this is WallNut && this.isRolling) -> {
+            dropAllLeashConnections(player)
             deltaMovement = Vec3.ZERO
         }
         // hold plant
@@ -135,14 +136,15 @@ fun Plant.processGloveItem(player: Player, item: ItemStack, hand: InteractionHan
 }
 
 fun Entity.saveAsCompoundTag(): CompoundTag {
+    if (level().isClientSide) return CompoundTag()
     ScopedCollector(problemPath(), LogUtils.getLogger()).use { reporter ->
         val output = TagValueOutput.createWithContext(reporter, registryAccess())
         saveWithoutId(output)
         if (this is Plant) plantSaveData(output)
-        return output.buildResult().apply {
-            remove("UUID")
-            remove("Pos")
-        }
+        output.discard("UUID")
+        output.discard("Pos")
+        output.discard("leash")
+        return output.buildResult()
     }
 }
 

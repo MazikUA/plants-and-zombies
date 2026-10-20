@@ -19,6 +19,7 @@ import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.entity.*
 import net.minecraft.world.entity.Leashable.LeashData
 import net.minecraft.world.entity.ai.attributes.Attributes
+import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation
 import net.minecraft.world.entity.item.ItemEntity
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.DyeColor
@@ -59,9 +60,9 @@ class Balloon(
         private const val MIN_ROTATION_SPEED = 0.001f
         private const val HOLDER_GRAVITY_LIFT_MULTIPLIER = 0.25
         private const val HOLDER_PULL_STIFFNESS = 0.004
-        private const val MAX_HOLDER_PULL_FORCE = 0.04
+        private const val MAX_HOLDER_PULL_FORCE = 0.08
         private const val MAX_HOLDER_UPWARD_VELOCITY = 0.08
-        private const val POPPING_HEIGHT = 80
+        private const val POPPING_HEIGHT = 96
     }
 
     var clientTiltZ: Float = 0f
@@ -154,24 +155,30 @@ class Balloon(
         val holder = leashHolder as? LivingEntity ?: return
         if ((holder as? Player)?.abilities?.flying == true) return
         if (y < holder.y) return
+        val isFlyingMob = (holder is Mob && holder.navigation is FlyingPathNavigation)
         val verticalStretch = y - holder.y - 2.0
         if (verticalStretch <= 0.0) return
 
         val holderFloorHeight = (holder.y - level().getHeight(Heightmap.Types.WORLD_SURFACE, holder.blockPosition()).toDouble()).coerceAtLeast(0.0)
-        val maxLiftHeight = if (holder is PazZombie) 2.5 else 5.0
+        val maxLiftHeight = if (isFlyingMob) 1.0 else 32.0
         val heightLimitForce = (holderFloorHeight / maxLiftHeight).coerceIn(0.0, 1.0)
 
-        val crouchMultiplier = if (holder.isCrouching) 0.55 else 1.0
         val gravityLift = holder.getAttributeValue(Attributes.GRAVITY) * HOLDER_GRAVITY_LIFT_MULTIPLIER
         val springLift = verticalStretch * HOLDER_PULL_STIFFNESS
-        val totalLift = ((gravityLift + springLift) * (crouchMultiplier - heightLimitForce))
+        val totalLift = ((gravityLift + springLift) * (1.0 - heightLimitForce))
             .coerceAtMost(MAX_HOLDER_PULL_FORCE)
 
         val currentYVelocity = holder.deltaMovement.y
         val availableLift = (MAX_HOLDER_UPWARD_VELOCITY - currentYVelocity).coerceAtLeast(0.0)
-        val appliedLift = totalLift.coerceAtMost(availableLift)
+        val appliedLift = totalLift.coerceAtMost(availableLift) * if (isFlyingMob) 0.15 else 1.0
 
-        if (appliedLift > 0.0) {
+        if (holder.isCrouching) {
+            holder.deltaMovement = Vec3(holder.deltaMovement.x, holder.deltaMovement.y * 0.9, holder.deltaMovement.z)
+            holder.needsSync = true
+            holder.checkFallDistanceAccumulation()
+            holder.checkFallDistanceAccumulation()
+        }
+        else if (appliedLift > 0.0) {
             holder.addDeltaMovement(Vec3(0.0, appliedLift, 0.0))
             holder.needsSync = true
             holder.checkFallDistanceAccumulation()
@@ -226,25 +233,6 @@ class Balloon(
     override fun isPickable(): Boolean = true
     override fun getDefaultGravity(): Double = -0.005
     override fun leashElasticDistance(): Double = 3.0
-    override fun leashTooFarBehaviour() {
-        super.leashTooFarBehaviour()
-    }
-    override fun closeRangeLeashBehaviour(leashHolder: Entity) {
-        super.closeRangeLeashBehaviour(leashHolder)
-    }
-
-    override fun onElasticLeashPull() {
-        super.onElasticLeashPull()
-    }
-
-    override fun setLeashedTo(holder: Entity, synch: Boolean) {
-        super.setLeashedTo(holder, synch)
-    }
-
-    override fun onLeashRemoved() {
-        val holder = this.leashHolder
-        super.onLeashRemoved()
-    }
 
     override fun hurtServer(
         level: ServerLevel,
