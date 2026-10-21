@@ -81,7 +81,7 @@
   "event.plantz.zombie_raid.start": "ゾンビがやってくる...",
   "event.plantz.zombie_raid.start.after_credits": "ゾンビたちがさらに強くなって戻ってくる……",
   "event.plantz.zombie_raid.huge_wave": "ゾンビの大群が接近中！",
-  "event.plantz.zombie_raid.special_wave.title": "特殊ウェーブ：",
+  "event.plantz.zombie_raid.special_wave": "特殊ウェーブ：",
   "event.plantz.zombie_raid.boss_wave": "ボスウェーブ：",
   "event.plantz.zombie_raid.boss_title": "%s",
   "event.plantz.zombie_raid.special_wave.bucket_brigade": "バケツ部隊！",
@@ -346,18 +346,19 @@
   "container.plantz.time_machine.wip": "???",
 
   "plantz.subtitles.projectile.deflected": "投射物が弾かれた",
-  "plantz.subtitles.projectile.fire": "投射物が発射された",
+  "plantz.subtitles.projectile.shoot": "投射物が発射された",
+
   "plantz.subtitles.entity.chomper.attack": "チャンパーが攻撃",
   "plantz.subtitles.entity.zombie.eat": "ゾンビが攻撃",
+
   "plantz.subtitles.entity.gnome.ambient": "ノームが囁く",
   "plantz.subtitles.entity.gnome.death": "ノームが死ぬ",
   "plantz.subtitles.entity.gnome.hurt": "ノームがダメージを受ける",
+
   "plantz.subtitles.entity.zombie_yeti.ambient": "イエティゾンビがうめく",
   "plantz.subtitles.entity.zombie_yeti.death": "イエティゾンビが死ぬ",
   "plantz.subtitles.entity.zombie_yeti.hurt": "イエティゾンビがダメージを受ける",
-  "plantz.subtitles.entity.browncoat.ambient": "ゾンビがうめく",
-  "plantz.subtitles.entity.browncoat.death": "ゾンビが死ぬ",
-  "plantz.subtitles.entity.browncoat.hurt": "ゾンビがダメージを受ける",
+
   "plantz.subtitles.entity.newspaper_zombie.ambient": "新聞ゾンビがうめく",
   "plantz.subtitles.entity.newspaper_zombie.death": "新聞ゾンビが死ぬ",
   "plantz.subtitles.entity.newspaper_zombie.hurt": "新聞ゾンビがダメージを受ける",
