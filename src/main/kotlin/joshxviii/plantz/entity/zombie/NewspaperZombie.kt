@@ -26,15 +26,15 @@ class NewspaperZombie(type: EntityType<out NewspaperZombie>, level: Level) : Paz
         val ANGRY_BONUS_ID: Identifier = pazResource("angry_zombie_bonus")
     }
 
-    override fun getAmbientSound(): SoundEvent {// TODO: custom sounds
-        return if (isAngry()) PazSounds.NEWSPAPER_ZOMBIE_AMBIENT else PazSounds.NEWSPAPER_ZOMBIE_AMBIENT
-    }
-    override fun getHurtSound(source: DamageSource): SoundEvent {
-        return if (isAngry()) PazSounds.NEWSPAPER_ZOMBIE_HURT else PazSounds.NEWSPAPER_ZOMBIE_HURT
-    }
-    override fun getDeathSound(): SoundEvent {
-        return if (isAngry()) PazSounds.NEWSPAPER_ZOMBIE_DEATH else PazSounds.NEWSPAPER_ZOMBIE_DEATH
-    }
+//    override fun getAmbientSound(): SoundEvent {// TODO: custom sounds
+//        return if (isAngry()) PazSounds.NEWSPAPER_ZOMBIE_AMBIENT else PazSounds.NEWSPAPER_ZOMBIE_AMBIENT
+//    }
+//    override fun getHurtSound(source: DamageSource): SoundEvent {
+//        return if (isAngry()) PazSounds.NEWSPAPER_ZOMBIE_HURT else PazSounds.NEWSPAPER_ZOMBIE_HURT
+//    }
+//    override fun getDeathSound(): SoundEvent {
+//        return if (isAngry()) PazSounds.NEWSPAPER_ZOMBIE_DEATH else PazSounds.NEWSPAPER_ZOMBIE_DEATH
+//    }
     override fun getStepSound(): SoundEvent {
         return SoundEvents.ZOMBIE_STEP
     }

@@ -181,10 +181,10 @@ class SuperBrainz(type: EntityType<out SuperBrainz>, level: Level) : PazZombie(t
             this,
             beamRange = 12.0,
             beamWidth = 1.0,
-            actionDelay = 10,
+            actionDelay = 25,
             doNotExtendPastTarget = true,
             damageType = PazDamageTypes.ZOMBIE_ENERGY,
-            damageMultiplier = 0.2f,
+            damageMultiplier = 0.5f,
             actionPredicate = {
                 !isFlying && beamCooldown<=0 && punchTime<=0
             },
@@ -194,15 +194,16 @@ class SuperBrainz(type: EntityType<out SuperBrainz>, level: Level) : PazZombie(t
                     playSound(PazSounds.ELECTRIC_ZAP)
                     (level() as ServerLevel).sendParticles(
                         ElectricArcParticleOptions(endPos.offsetRandom(random, .25f),
-                            color = variant.beamColor, width = 0.14f),
+                            color = variant.beamColor, width = 0.17f),
                         laserStart.x, laserStart.y, laserStart.z,
                         1, 0.0, 0.0, 0.0, 0.0
                     )
                 }
                 else {
+                    playSound(PazSounds.SUPER_BRAINZ_LAZER)
                     (level() as ServerLevel).sendParticles(
                         BeamParticleOptions(endPos.offsetRandom(random, .25f),
-                            color = variant.beamColor, width = 0.28f, lifeTime = 10),
+                            color = variant.beamColor, width = 0.3f, lifeTime = 10),
                         laserStart.x, laserStart.y, laserStart.z,
                         1, 0.0, 0.0, 0.0, 0.0
                     )
