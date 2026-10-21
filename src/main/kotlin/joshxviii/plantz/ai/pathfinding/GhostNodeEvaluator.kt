@@ -10,12 +10,13 @@ import net.minecraft.world.level.pathfinder.PathfindingContext
 import net.minecraft.world.level.pathfinder.WalkNodeEvaluator
 
 class GhostNodeEvaluator : FlyNodeEvaluator() {
+    var passThroughBlocks: Boolean = false
 
     override fun getPathType(context: PathfindingContext, x: Int, y: Int, z: Int): PathType {
         val pos = BlockPos(x, y, z)
         var type = super.getPathType(context, x, y, z)
 
-        if(isSolid(context, pos)) type = PathType.OPEN
+        if (passThroughBlocks && isSolid(context, pos)) type = PathType.OPEN
 
         return type
     }

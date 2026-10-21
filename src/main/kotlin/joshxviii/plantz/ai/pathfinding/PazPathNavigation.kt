@@ -36,12 +36,14 @@ open class PazGroundPathNavigation(mob: Mob, level: Level) : GroundPathNavigatio
 
 open class PazFlyingPathNavigation(mob: Mob, level: Level) : FlyingPathNavigation(mob, level) {
     var passThroughBlocks: Boolean = false
-    override fun createPathFinder(maxVisitedNodes: Int): PathFinder {
-        if (passThroughBlocks) {
-            this.nodeEvaluator = GhostNodeEvaluator()
-            return PathFinder(this.nodeEvaluator, maxVisitedNodes)
+        set(value) {
+            field = value
+            (nodeEvaluator as? GhostNodeEvaluator)?.passThroughBlocks = value
         }
-        return super.createPathFinder(maxVisitedNodes)
+
+    override fun createPathFinder(maxVisitedNodes: Int): PathFinder {
+        this.nodeEvaluator = GhostNodeEvaluator().also { it.passThroughBlocks = passThroughBlocks }
+        return PathFinder(this.nodeEvaluator, maxVisitedNodes)
     }
     override fun canMoveDirectly(startPos: Vec3, stopPos: Vec3): Boolean {
         if (passThroughBlocks) return true

@@ -34,7 +34,6 @@ class PirateCaptainGhost(type: EntityType<out PirateCaptainGhost>, level: Level)
 
     override fun registerGoals() {
         super.registerGoals()
-        goalSelector.addGoal(0, FloatGoal(this))
     }
 
     override fun getAmbientSound(): SoundEvent {
