@@ -27,6 +27,7 @@ import net.minecraft.world.level.ServerLevelAccessor
 import net.minecraft.world.level.levelgen.Heightmap
 import net.minecraft.world.level.storage.ValueInput
 import net.minecraft.world.level.storage.ValueOutput
+import net.minecraft.world.phys.Vec3
 import kotlin.jvm.optionals.getOrDefault
 
 class SuperBrainz(type: EntityType<out SuperBrainz>, level: Level) : PazZombie(type, level) {
@@ -83,30 +84,26 @@ class SuperBrainz(type: EntityType<out SuperBrainz>, level: Level) : PazZombie(t
         set(value) = this.entityData.set(BEAM_COOLDOWN_ID, value)
 
     fun removeBeamModifiers() {
-        getAttribute(Attributes.MOVEMENT_SPEED)!!.removeModifier(BEAM_MODE_SPEED_ID)
+        getAttribute(Attributes.MOVEMENT_SPEED)!!.let { if (it.hasModifier(BEAM_MODE_SPEED_ID)) it.removeModifier(BEAM_MODE_SPEED_ID) }
     }
     fun applyBeamModifiers() {
-        getAttribute(Attributes.MOVEMENT_SPEED)!!.addTransientModifier(BEAM_MODE_SPEED)
+        getAttribute(Attributes.MOVEMENT_SPEED)!!.let { if (!it.hasModifier(BEAM_MODE_SPEED_ID)) it.addTransientModifier(BEAM_MODE_SPEED) }
     }
 
     override fun tick() {
         super.tick()
+
         if (beamCooldown>0) beamCooldown--
-        if(beamAttackTime>0 && !isFlying) {
+        if(beamAttackTime>0) {
             if (beamAttackTime==1) applyBeamModifiers()
             laserAttackAnimation.startIfStopped(tickCount)
-            val laserStart = calculateUpVector(this.xRot + 95, this.yHeadRot + 25).scale(0.9).add(eyePosition)
-            (level() as? ServerLevel)?.sendParticles(
-                ParticleTypes.ELECTRIC_SPARK, laserStart.x, laserStart.y, laserStart.z,
-                4, 0.0, 0.0, 0.0, 0.5
-            )
             if (beamAttackTime++>BEAM_MODE_TIME) {
                 laserAttackAnimation.stop()
                 beamAttackTime=0
                 beamCooldown = BEAM_COOLDOWN + random.nextInt(20)
                 removeBeamModifiers()
             }
-        }
+        } else laserAttackAnimation.stop()
         if(punchTime>0) {
             if (useLeft) leftPunchAnimation.startIfStopped(tickCount)
             else rightPunchAnimation.startIfStopped(tickCount)
@@ -175,6 +172,13 @@ class SuperBrainz(type: EntityType<out SuperBrainz>, level: Level) : PazZombie(t
             },
             actionStartEffect = {
                 punchTime=1
+            },
+            afterHitEntityEffect = {
+                (level() as? ServerLevel)?.sendParticles(
+                    PazServerParticles.POP,
+                    it.getRandomX(0.2), it.randomY, it.getRandomZ(0.2),
+                    1, 0.0, 0.0, 0.0, 0.0
+                )
             }
         ))
         goalSelector.addGoal(4, BeamAttackGoal(
@@ -190,6 +194,16 @@ class SuperBrainz(type: EntityType<out SuperBrainz>, level: Level) : PazZombie(t
             },
             particleFactory = { startPos, endPos ->
                 val laserStart = calculateUpVector(this.xRot + 95, this.yHeadRot + 25).scale(0.9).add(startPos)
+
+                (level() as? ServerLevel)?.sendParticles(
+                    PlasmaBurstOptions(color = variant.beamColor, scale = 1.25f), laserStart.x, laserStart.y, laserStart.z,
+                    1, 0.0, 0.0, 0.0, 0.0
+                )
+                (level() as? ServerLevel)?.sendParticles(
+                    ParticleTypes.ELECTRIC_SPARK, laserStart.x, laserStart.y, laserStart.z,
+                    20, 0.0, 0.0, 0.0, 0.525
+                )
+
                 if (variant == SuperBrainzVariant.ELECTRO) {
                     playSound(PazSounds.ELECTRIC_ZAP)
                     (level() as ServerLevel).sendParticles(
@@ -217,6 +231,10 @@ class SuperBrainz(type: EntityType<out SuperBrainz>, level: Level) : PazZombie(t
                     PazServerParticles.POP,
                     endPos.x, endPos.y, endPos.z,
                     2, 0.0, 0.0, 0.0, 0.0
+                )
+                (level() as? ServerLevel)?.sendParticles(
+                    PlasmaBurstOptions(color = variant.beamColor, scale = 1.5f), endPos.x, endPos.y, endPos.z,
+                    1, 0.0, 0.0, 0.0, 0.0
                 )
             },
             afterHitEntityEffect = {

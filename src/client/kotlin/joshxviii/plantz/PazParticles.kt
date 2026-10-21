@@ -126,6 +126,10 @@ object PazParticles {
             NukeSmokeParticle.Provider(spriteSet)
         }
 
+        it.register(PazServerParticles.PLASMA_BURST) { spriteSet ->
+            PlasmaBurstParticle.Provider(spriteSet)
+        }
+
         it.register(PazServerParticles.PAINT_BALL) { spriteSet ->
             PaintBallParticle.Provider(spriteSet)
         }

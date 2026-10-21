@@ -46,6 +46,8 @@ open class WallNut(type: EntityType<out Plant>, level: Level) : Plant(type, leve
         val ROLLING: EntityDataAccessor<Boolean> = SynchedEntityData.defineId<Boolean>(WallNut::class.java, EntityDataSerializers.BOOLEAN)
         val ROLLING_ID: Identifier = pazResource("rolling")
         private const val ROLL_FRICTION = 0.99
+        private val KNOCK_BACK_MODIFIER = AttributeModifier(ROLLING_ID, 99.0, AttributeModifier.Operation.ADD_VALUE)
+        private val STEP_HEIGHT_MODIFIER = AttributeModifier(ROLLING_ID, 0.75, AttributeModifier.Operation.ADD_VALUE)
     }
 
     private var rolledOverEntities: MutableSet<Int> = mutableSetOf()
@@ -59,12 +61,8 @@ open class WallNut(type: EntityType<out Plant>, level: Level) : Plant(type, leve
     fun roll(direction: Vec3 = Direction.fromYRot(yRot.toDouble()).unitVec3, power: Float = 0.51f) {
         isRolling = true
         applyImpulse(direction, pow = power, uncertainty = 0.1f, ignoreResistance = true)
-        getAttribute(Attributes.KNOCKBACK_RESISTANCE)!!.let {
-            if (!it.hasModifier(ROLLING_ID)) it.addTransientModifier(AttributeModifier(ROLLING_ID, 99.0, AttributeModifier.Operation.ADD_VALUE))
-        }
-        getAttribute(Attributes.STEP_HEIGHT)!!.let {
-            if (!it.hasModifier(ROLLING_ID)) it.addTransientModifier(AttributeModifier(ROLLING_ID, 0.75, AttributeModifier.Operation.ADD_VALUE))
-        }
+        getAttribute(Attributes.KNOCKBACK_RESISTANCE)!!.let { if (!it.hasModifier(ROLLING_ID)) it.addTransientModifier(KNOCK_BACK_MODIFIER) }
+        getAttribute(Attributes.STEP_HEIGHT)!!.let { if (!it.hasModifier(ROLLING_ID)) it.addTransientModifier(STEP_HEIGHT_MODIFIER) }
     }
 
     fun stopRoll() {
