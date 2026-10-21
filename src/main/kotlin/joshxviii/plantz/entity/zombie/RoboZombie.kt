@@ -1,5 +1,6 @@
 package joshxviii.plantz.entity.zombie
 
+import joshxviii.plantz.PazSounds
 import joshxviii.plantz.ai.goal.MeleeAttackActionGoal
 import joshxviii.plantz.ai.goal.NavigateToTargetGoal
 import joshxviii.plantz.ai.goal.ProjectileAttackGoal
@@ -33,6 +34,19 @@ class RoboZombie(type: EntityType<out RoboZombie>, level: Level) : PazZombie(typ
 
     init {
         xpReward = 30
+    }
+
+    override fun getAmbientSound(): SoundEvent {
+        return PazSounds.ROBO_ZOMBIE_AMBIENT
+    }
+    override fun getHurtSound(source: DamageSource): SoundEvent {
+        return PazSounds.ROBO_ZOMBIE_HURT
+    }
+    override fun getDeathSound(): SoundEvent {
+        return PazSounds.ROBO_ZOMBIE_DEATH
+    }
+    override fun getStepSound(): SoundEvent {
+        return SoundEvents.COPPER_GOLEM_STEP
     }
 
     val walkNavigation = NavigateToTargetGoal(this)
@@ -117,6 +131,7 @@ class RoboZombie(type: EntityType<out RoboZombie>, level: Level) : PazZombie(typ
                 missileTime=1
             },
             actionSuccessEffect = {
+                playSound(PazSounds.ROBO_ZOMBIE_MISSILE)
                 missileCooldown = MISSILE_COOLDOWN_TIME + random.nextIntBetweenInclusive(-10, 20)
             }
         ))
@@ -156,20 +171,6 @@ class RoboZombie(type: EntityType<out RoboZombie>, level: Level) : PazZombie(typ
                 bashTime=0
             }
         }
-    }
-
-    //TODO custom sounds
-    override fun getAmbientSound(): SoundEvent {
-        return SoundEvents.EMPTY
-    }
-    override fun getHurtSound(source: DamageSource): SoundEvent {
-        return SoundEvents.EMPTY
-    }
-    override fun getDeathSound(): SoundEvent {
-        return SoundEvents.EMPTY
-    }
-    override fun getStepSound(): SoundEvent {
-        return SoundEvents.EMPTY
     }
 
     override fun doHurtTarget(level: ServerLevel, target: Entity): Boolean {
