@@ -347,7 +347,7 @@
   "container.plantz.time_machine.wip": "???",
 
   "plantz.subtitles.projectile.deflected": "投射物：被弹开",
-  "plantz.subtitles.projectile.fire": "投射物：发射",
+  "plantz.subtitles.projectile.shoot": "投射物：发射",
 
   "plantz.subtitles.entity.chomper.attack": "大嘴花：咬击",
   "plantz.subtitles.entity.zombie.eat": "僵尸：啃食",

@@ -346,12 +346,15 @@
   "container.plantz.time_machine.wip": "???",
 
   "plantz.subtitles.projectile.deflected": "投射物が弾かれた",
-  "plantz.subtitles.projectile.fire": "投射物が発射された",
+  "plantz.subtitles.projectile.shoot": "投射物が発射された",
+
   "plantz.subtitles.entity.chomper.attack": "チャンパーが攻撃",
   "plantz.subtitles.entity.zombie.eat": "ゾンビが攻撃",
+
   "plantz.subtitles.entity.gnome.ambient": "ノームが囁く",
   "plantz.subtitles.entity.gnome.death": "ノームが死ぬ",
   "plantz.subtitles.entity.gnome.hurt": "ノームがダメージを受ける",
+
   "plantz.subtitles.entity.zombie_yeti.ambient": "イエティゾンビがうめく",
   "plantz.subtitles.entity.zombie_yeti.death": "イエティゾンビが死ぬ",
   "plantz.subtitles.entity.zombie_yeti.hurt": "イエティゾンビがダメージを受ける",
