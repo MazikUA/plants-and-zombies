@@ -1,5 +1,6 @@
 package joshxviii.plantz.entity.zombie
 
+import joshxviii.plantz.PazSounds
 import joshxviii.plantz.ai.pathfinding.PazFlyingPathNavigation
 import net.minecraft.core.BlockPos
 import net.minecraft.network.syncher.EntityDataAccessor
@@ -32,21 +33,21 @@ class PirateCaptainGhost(type: EntityType<out PirateCaptainGhost>, level: Level)
         xpReward = 30
     }
 
-    override fun registerGoals() {
-        super.registerGoals()
-    }
-
     override fun getAmbientSound(): SoundEvent {
-        return SoundEvents.EMPTY
+        return PazSounds.PIRATE_CAPTAIN_GHOST_AMBIENT
     }
     override fun getHurtSound(source: DamageSource): SoundEvent {
-        return SoundEvents.EMPTY
+        return PazSounds.PIRATE_CAPTAIN_GHOST_HURT
     }
     override fun getDeathSound(): SoundEvent {
         return SoundEvents.EMPTY
     }
     override fun getStepSound(): SoundEvent {
         return SoundEvents.EMPTY
+    }
+
+    override fun registerGoals() {
+        super.registerGoals()
     }
 
     var isCharging: Boolean

@@ -2,6 +2,7 @@ package joshxviii.plantz.entity.zombie
 
 import it.unimi.dsi.fastutil.ints.IntList
 import joshxviii.plantz.PazEntities
+import joshxviii.plantz.PazSounds
 import joshxviii.plantz.ai.goal.NavigateToTargetGoal
 import joshxviii.plantz.ai.goal.ProjectileAttackGoal
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup.level
@@ -11,9 +12,11 @@ import net.minecraft.network.syncher.EntityDataSerializers
 import net.minecraft.network.syncher.SynchedEntityData
 import net.minecraft.server.jsonrpc.methods.ServerSettingsService.difficulty
 import net.minecraft.server.level.ServerLevel
+import net.minecraft.sounds.SoundEvent
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.DifficultyInstance
 import net.minecraft.world.InteractionHand
+import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.entity.*
 import net.minecraft.world.entity.projectile.FireworkRocketEntity
 import net.minecraft.world.entity.projectile.ProjectileUtil
@@ -65,6 +68,16 @@ class PirateCaptain(type: EntityType<out PirateCaptain>, level: Level) : PazZomb
 
     init {
         xpReward = 80
+    }
+
+    override fun getAmbientSound(): SoundEvent {
+        return PazSounds.PIRATE_CAPTAIN_AMBIENT
+    }
+    override fun getHurtSound(source: DamageSource): SoundEvent {
+        return PazSounds.PIRATE_CAPTAIN_HURT
+    }
+    override fun getDeathSound(): SoundEvent {
+        return PazSounds.PIRATE_CAPTAIN_DEATH
     }
 
     var shootTime: Int
