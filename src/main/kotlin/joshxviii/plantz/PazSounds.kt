@@ -73,7 +73,6 @@ object PazSounds {
     @JvmField val POTATOMINE_EXPLODE = registerForHolder("entity.potatomine.explode")
     @JvmField val SNOWCHUNK_HIT = registerForHolder("entity.snowchunk")
 
-    @JvmField val SPECIAL_WAVE = registerForHolder("event.raid.special_wave")
     @JvmField var TACO_REWARD = register("event.raid.taco_reward")
 
     @JvmField val MUSIC_DISC_GRASSY_GROOVE = registerForHolder("music_disc.grassy_groove")
@@ -88,6 +87,10 @@ object PazSounds {
     @JvmField val RAID_MUSIC_ARMY = registerForHolder("music.raid.army")
     @JvmField val RAID_MUSIC_LEAGUE = registerForHolder("music.raid.league")
     @JvmField val RAID_MUSIC_ZOMBOSS = registerForHolder("music.raid.zomboss")
+
+    @JvmField val SPECIAL_WAVE = registerForHolder("event.raid.special_wave")
+    @JvmField val RAID_VICTORY = registerForHolder("event.raid.victory")
+    @JvmField val RAID_DEFEAT = registerForHolder("event.raid.defeat")
 
     private fun registerGnomeSoundVariants(): Map<GnomeSoundVariant, GnomeSoundVariant.GnomeSoundSet> {
         return GnomeSoundVariant.entries.associateWith { soundVariant ->

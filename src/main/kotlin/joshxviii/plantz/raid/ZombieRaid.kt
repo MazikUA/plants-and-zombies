@@ -254,7 +254,7 @@ class ZombieRaid(
                 (player as GardenHeroRewards).`plantz$setWaveList`(waveTypes)
                 player.addEffect(effect)
                 player.sendSystemMessage(ZOMBIE_RAID_VICTORY)
-                showTitleMessage(ZOMBIE_RAID_VICTORY_TITLE)
+                showTitleMessage(ZOMBIE_RAID_VICTORY_TITLE, sound = PazSounds.RAID_VICTORY, soundSource = SoundSource.MUSIC)
             }
             return
         }
@@ -264,7 +264,7 @@ class ZombieRaid(
             postRaidTicks = POST_RAID_TICKS
             zombieRaidEvent.players.forEach { player ->
                 player.sendSystemMessage(ZOMBIE_RAID_DEFEAT)
-                showTitleMessage(ZOMBIE_RAID_DEFEAT_TITLE)
+                showTitleMessage(ZOMBIE_RAID_DEFEAT_TITLE, sound = PazSounds.RAID_DEFEAT, soundSource = SoundSource.MUSIC)
             }
             vanishAllZombies(level)
             return
@@ -543,9 +543,9 @@ class ZombieRaid(
         showTitleMessage(title, subtitle)
     }
 
-    private fun showTitleMessage(title: Component, subtitle: Component = Component.empty(), sound: Holder.Reference<SoundEvent> = PazSounds.SPECIAL_WAVE) {
+    private fun showTitleMessage(title: Component, subtitle: Component = Component.empty(), sound: Holder.Reference<SoundEvent> = PazSounds.SPECIAL_WAVE, soundSource: SoundSource = SoundSource.UI) {
         zombieRaidEvent.players.forEach {
-            it.connection.send(ClientboundSoundPacket(sound, SoundSource.UI, it.x, it.y, it.z, 1.0f, 1.0f, random.nextLong()))
+            it.connection.send(ClientboundSoundPacket(sound, soundSource, it.x, it.y, it.z, 1.0f, 1.0f, random.nextLong()))
             it.connection.send(ClientboundSetTitleTextPacket(title))
             it.connection.send(ClientboundSetSubtitleTextPacket(subtitle))
         }
