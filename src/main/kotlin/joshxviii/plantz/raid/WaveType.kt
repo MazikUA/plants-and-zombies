@@ -235,19 +235,19 @@ enum class WaveType(
             listOf(
                 WaveSpawnEntry(
                     PazEntities.ROBO_ZOMBIE,
-                    scaled(2.5f + wave * 0.35f, omen, credits, min = 1)
+                    scaled(1.0f + wave * 0.35f, omen, credits, min = 1)
                 ),
                 WaveSpawnEntry(
                     PazEntities.ENGINEER_ZOMBIE,
-                    scaled(2.5f + wave * 0.45f, omen, credits, min = 2)
+                    scaled(2.0f + wave * 0.45f, omen, credits, min = 2)
                 ),
                 WaveSpawnEntry(
                     PazEntities.SOLDIER_ZOMBIE,
-                    scaled(5f + wave * 0.7f, omen, credits, min = 2)
+                    scaled(4f + wave * 0.7f, omen, credits, min = 2)
                 ),
                 WaveSpawnEntry(
                     PazEntities.ZOMBIE_DRONE,
-                    scaled(7f + wave * 0.9f, omen, credits, min = 3)
+                    scaled(5f + wave * 0.9f, omen, credits, min = 3)
                 )
             )
         },

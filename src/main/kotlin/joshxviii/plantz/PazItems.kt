@@ -183,7 +183,7 @@ object PazItems {
     val DYE_BLASTER: Item = registerItem(
         "dye_blaster", ::DyeBlasterItem,
         properties = Item.Properties()
-            .durability(435)
+            .durability(685)
             .repairable(BRAINZ_ALLOY)
             .stacksTo(1)
     )
