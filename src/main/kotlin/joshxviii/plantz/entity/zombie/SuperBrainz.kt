@@ -148,13 +148,13 @@ class SuperBrainz(type: EntityType<out SuperBrainz>, level: Level) : PazZombie(t
     override fun addAdditionalSaveData(output: ValueOutput) {
         super.addAdditionalSaveData(output)
         output.store("variant", SuperBrainzVariant.CODEC, variant)
-        output.putInt("beamCooldown", beamCooldown)
+        output.putInt("beam_cooldown", beamCooldown)
     }
 
     override fun readAdditionalSaveData(input: ValueInput) {
         super.readAdditionalSaveData(input)
         variant = input.read("variant", SuperBrainzVariant.CODEC).getOrDefault(SuperBrainzVariant.pickRandomVariant())
-        beamCooldown = input.getIntOr("beamCooldown", BEAM_COOLDOWN)
+        beamCooldown = input.getIntOr("beam_cooldown", BEAM_COOLDOWN)
     }
 
     override fun registerGoals() {

@@ -20,6 +20,7 @@ object PazSounds {
     @JvmField val PROJECTILE_HIT_PAPER = register("entity.projectile.hit_paper")
 
     @JvmField val ELECTRIC_ZAP = register("entity.projectile.electric_zap")
+    @JvmField val MISSILE_EXPLODE = registerForHolder("entity.projectile.missile.explode")
 
     @JvmField val CHOMPER_ATTACK = register("entity.chomper.attack")
     @JvmField val SCAREDYSHROOM_HIDE = register("entity.scaredyshroom.hide")
@@ -59,7 +60,7 @@ object PazSounds {
     @JvmField val ROBO_ZOMBIE_AMBIENT = register("entity.robo_zombie.ambient")
     @JvmField val ROBO_ZOMBIE_HURT = register("entity.robo_zombie.hurt")
     @JvmField val ROBO_ZOMBIE_DEATH = register("entity.robo_zombie.death")
-    @JvmField val ROBO_ZOMBIE_MISSILE = register("entity.robo_zombie.missile")
+    @JvmField val ROBO_ZOMBIE_SHOOT = register("entity.robo_zombie.shoot")
     @JvmField val SUPER_BRAINZ_AMBIENT = register("entity.super_brainz.ambient")
     @JvmField val SUPER_BRAINZ_HURT = register("entity.super_brainz.hurt")
     @JvmField val SUPER_BRAINZ_DEATH = register("entity.super_brainz.death")

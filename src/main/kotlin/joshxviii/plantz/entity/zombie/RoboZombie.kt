@@ -5,6 +5,7 @@ import joshxviii.plantz.ai.goal.MeleeAttackActionGoal
 import joshxviii.plantz.ai.goal.NavigateToTargetGoal
 import joshxviii.plantz.ai.goal.ProjectileAttackGoal
 import joshxviii.plantz.entity.projectile.Missile
+import joshxviii.plantz.entity.zombie.SuperBrainz.Companion.BEAM_COOLDOWN_ID
 import net.minecraft.network.syncher.EntityDataAccessor
 import net.minecraft.network.syncher.EntityDataSerializers
 import net.minecraft.network.syncher.SynchedEntityData
@@ -12,7 +13,6 @@ import net.minecraft.server.level.ServerLevel
 import net.minecraft.sounds.SoundEvent
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.DifficultyInstance
-import net.minecraft.world.InteractionHand
 import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.damagesource.DamageTypes
 import net.minecraft.world.entity.*
@@ -29,6 +29,7 @@ class RoboZombie(type: EntityType<out RoboZombie>, level: Level) : PazZombie(typ
 
         val TANK_TRANSFORMATION: EntityDataAccessor<Boolean> = SynchedEntityData.defineId<Boolean>(RoboZombie::class.java, EntityDataSerializers.BOOLEAN)
         val MISSILE_TIME_ID: EntityDataAccessor<Int> = SynchedEntityData.defineId<Int>(RoboZombie::class.java, EntityDataSerializers.INT)
+        val MISSILE_COOLDOWN_ID: EntityDataAccessor<Int> = SynchedEntityData.defineId<Int>(RoboZombie::class.java, EntityDataSerializers.INT)
         val BASH_TIME_ID: EntityDataAccessor<Int> = SynchedEntityData.defineId<Int>(RoboZombie::class.java, EntityDataSerializers.INT)
     }
 
@@ -57,7 +58,9 @@ class RoboZombie(type: EntityType<out RoboZombie>, level: Level) : PazZombie(typ
         alwaysFaceTarget = true
     )
 
-    var missileCooldown = 0
+    var missileCooldown: Int
+        get() = this.entityData.get(BEAM_COOLDOWN_ID)
+        set(value) = this.entityData.set(BEAM_COOLDOWN_ID, value)
 
     var isTransformed: Boolean
         get() = this.entityData.get(TANK_TRANSFORMATION)
@@ -78,18 +81,21 @@ class RoboZombie(type: EntityType<out RoboZombie>, level: Level) : PazZombie(typ
     override fun defineSynchedData(entityData: SynchedEntityData.Builder) {
         super.defineSynchedData(entityData)
         entityData.define(TANK_TRANSFORMATION, false)
+        entityData.define(MISSILE_COOLDOWN_ID, MISSILE_COOLDOWN_TIME)
         entityData.define(MISSILE_TIME_ID, 0)
         entityData.define(BASH_TIME_ID, 0)
     }
 
     override fun addAdditionalSaveData(output: ValueOutput) {
         super.addAdditionalSaveData(output)
-        output.putBoolean("isTransformed", isTransformed)
+        output.putBoolean("is_transformed", isTransformed)
+        output.putInt("missile_cooldown", missileCooldown)
     }
 
     override fun readAdditionalSaveData(input: ValueInput) {
         super.readAdditionalSaveData(input)
-        isTransformed = input.getBooleanOr("isTransformed", false)
+        isTransformed = input.getBooleanOr("is_transformed", false)
+        missileCooldown = input.getIntOr("missile_cooldown", MISSILE_COOLDOWN_TIME)
         reassessNavigation()
     }
 
@@ -128,11 +134,11 @@ class RoboZombie(type: EntityType<out RoboZombie>, level: Level) : PazZombie(typ
                 missileTime<=0 && missileCooldown<=0
             },
             actionStartEffect = {
+                playSound(PazSounds.ROBO_ZOMBIE_SHOOT)
                 missileTime=1
             },
             actionSuccessEffect = {
-                playSound(PazSounds.ROBO_ZOMBIE_MISSILE)// TODO: custom sounds
-                missileCooldown = MISSILE_COOLDOWN_TIME + random.nextIntBetweenInclusive(-10, 20)
+                missileCooldown = MISSILE_COOLDOWN_TIME + random.nextIntBetweenInclusive(10, 50)
             }
         ))
     }
@@ -186,6 +192,8 @@ class RoboZombie(type: EntityType<out RoboZombie>, level: Level) : PazZombie(typ
     ): SpawnGroupData? {
         reassessNavigation()
         val data = super.finalizeSpawn(level, difficulty, spawnReason, groupData)
+
+        missileCooldown = MISSILE_COOLDOWN_TIME
 
         if (spawnReason != EntitySpawnReason.CONVERSION) {
             setCanBreakDoors(true)

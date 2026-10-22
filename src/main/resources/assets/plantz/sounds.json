@@ -54,6 +54,14 @@
     ], "subtitle": "plantz.subtitles.projectile.electric_zap"
   },
 
+  "entity.projectile.missile.explode": {
+    "sounds": [
+      { "name": "plantz:projectile/missile/explode1", "volume": 1.0, "pitch": 0.8 },
+      { "name": "plantz:projectile/missile/explode2", "volume": 1.0, "pitch": 0.8 },
+      { "name": "plantz:projectile/missile/explode3", "volume": 1.0, "pitch": 0.8 }
+    ], "subtitle": "plantz.subtitles.projectile.missile.explode"
+  },
+
   "entity.chomper.attack": {
     "sounds": [{ "name": "mob/evocation_illager/fangs", "volume": 1.0, "pitch": 0.8 }], "subtitle": "plantz.subtitles.entity.chomper.attack"
   },
@@ -291,12 +299,8 @@
       { "name": "plantz:entity/zombie/robo_zombie/hurt3", "volume": 1.0, "pitch": 0.8 }
     ], "subtitle": "plantz.subtitles.entity.robo_zombie.hurt"
   },
-  "entity.robo_zombie.missile": {
-    "sounds": [
-      { "name": "plantz:entity/zombie/robo_zombie/missile1", "volume": 1.0 },
-      { "name": "plantz:entity/zombie/robo_zombie/missile2", "volume": 1.0 },
-      { "name": "plantz:entity/zombie/robo_zombie/missile3", "volume": 1.0 }
-    ], "subtitle": "plantz.subtitles.entity.robo_zombie.missile"
+  "entity.robo_zombie.shoot": {
+    "sounds": [{ "name": "plantz:entity/zombie/robo_zombie/shoot", "volume": 1.0 }], "subtitle": "plantz.subtitles.entity.robo_zombie.shoot"
   },
   "entity.robo_zombie.death": {
     "sounds": [

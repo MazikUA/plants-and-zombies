@@ -3,6 +3,7 @@ package joshxviii.plantz.entity.projectile
 import joshxviii.plantz.*
 import joshxviii.plantz.entity.plant.Plant
 import net.minecraft.core.BlockPos
+import net.minecraft.core.Holder
 import net.minecraft.core.particles.ParticleOptions
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket
@@ -305,7 +306,7 @@ abstract class PazProjectile(
         }
     }
 
-    protected fun explode(radius: Float = 2.0f) {
+    protected fun explode(radius: Float = 2.0f, sound: Holder<SoundEvent> = PazSounds.PLANT_EXPLODE) {
         val level = this.level()
         level.explode(
             getOwner(),
@@ -317,7 +318,7 @@ abstract class PazProjectile(
             ParticleTypes.LARGE_SMOKE,
             ParticleTypes.EXPLOSION,
             WeightedList.of(),
-            PazSounds.PLANT_EXPLODE
+            sound
         )
         if (level is ServerLevel) {
             level.sendParticles(NukeWaveParticleOptions(color = 0xD0370D, scale = radius * 1f),
