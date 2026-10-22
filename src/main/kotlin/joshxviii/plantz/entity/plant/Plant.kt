@@ -13,6 +13,7 @@ import net.minecraft.ChatFormatting
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.core.Registry
+import net.minecraft.core.SectionPos
 import net.minecraft.core.component.DataComponents
 import net.minecraft.core.particles.BlockParticleOption
 import net.minecraft.core.particles.ParticleOptions
@@ -57,6 +58,7 @@ import net.minecraft.world.entity.monster.zombie.Zombie
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.*
+import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.levelgen.Heightmap
 import net.minecraft.world.level.portal.TeleportTransition
@@ -619,7 +621,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
 
     fun timeRequiredForSeeds() : Int {
         val sunCost = PazConfig.getSunCost(type)
-        val zenBuff = level().hasChunkAt(blockPosition()) && getBlockBelow().`is`(PazBlocks.ZEN_PLANT_POT)
+        val zenBuff = getBlockBelow().`is`(PazBlocks.ZEN_PLANT_POT)
         return PazConfig.getGrowTime(sunCost, zenBuff)
     }
 
@@ -690,8 +692,12 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
     fun getBlockBelow(): BlockState {
         val feetY = y - 0.001
         val blockBelowPos = BlockPos.containing(x, feetY, z)
-        val blockBelow = level().getBlockState(blockBelowPos)
-        return blockBelow
+
+        val chunkX = SectionPos.blockToSectionCoord(blockBelowPos.x)
+        val chunkZ = SectionPos.blockToSectionCoord(blockBelowPos.z)
+        val chunk = level().chunkSource.getChunkNow(chunkX, chunkZ)
+
+        return chunk?.getBlockState(blockBelowPos) ?: Blocks.AIR.defaultBlockState()
     }
 
     fun isOverEntityLimit(): Boolean {
