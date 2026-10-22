@@ -46,7 +46,7 @@ class RoboZombie(type: EntityType<out RoboZombie>, level: Level) : PazZombie(typ
         return PazSounds.ROBO_ZOMBIE_DEATH
     }
     override fun getStepSound(): SoundEvent {
-        return SoundEvents.COPPER_GOLEM_STEP
+        return SoundEvents.COPPER_GOLEM_STEP // TODO: custom sounds
     }
 
     val walkNavigation = NavigateToTargetGoal(this)
@@ -131,7 +131,7 @@ class RoboZombie(type: EntityType<out RoboZombie>, level: Level) : PazZombie(typ
                 missileTime=1
             },
             actionSuccessEffect = {
-                playSound(PazSounds.ROBO_ZOMBIE_MISSILE)
+                playSound(PazSounds.ROBO_ZOMBIE_MISSILE)// TODO: custom sounds
                 missileCooldown = MISSILE_COOLDOWN_TIME + random.nextIntBetweenInclusive(-10, 20)
             }
         ))

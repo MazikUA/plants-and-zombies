@@ -256,7 +256,11 @@
     ], "subtitle": "plantz.subtitles.entity.pirate_captain.hurt"
   },
   "entity.pirate_captain.death": {
-    "sounds": [{ "name": "plantz:entity/zombie/pirate_captain/death", "volume": 1.0 }], "subtitle": "subtitles"
+    "sounds": [
+      { "name": "plantz:entity/zombie/pirate_captain/death1", "volume": 1.0 },
+      { "name": "plantz:entity/zombie/pirate_captain/death2", "volume": 1.0 },
+      { "name": "plantz:entity/zombie/pirate_captain/death3", "volume": 1.0 }
+    ], "subtitle": "subtitles"
   },
   "entity.pirate_captain_ghost.ambient": {
     "sounds": [
@@ -275,16 +279,16 @@
 
   "entity.robo_zombie.ambient": {
     "sounds": [
-      { "name": "plantz:entity/zombie/robo_zombie/ambient1", "volume": 1.0 },
-      { "name": "plantz:entity/zombie/robo_zombie/ambient2", "volume": 1.0 },
-      { "name": "plantz:entity/zombie/robo_zombie/ambient3", "volume": 1.0 }
+      { "name": "plantz:entity/zombie/robo_zombie/ambient1", "volume": 1.0, "pitch": 0.8 },
+      { "name": "plantz:entity/zombie/robo_zombie/ambient2", "volume": 1.0, "pitch": 0.8 },
+      { "name": "plantz:entity/zombie/robo_zombie/ambient3", "volume": 1.0, "pitch": 0.8 }
     ], "subtitle": "plantz.subtitles.entity.robo_zombie.ambient"
   },
   "entity.robo_zombie.hurt": {
     "sounds": [
-      { "name": "plantz:entity/zombie/robo_zombie/hurt1", "volume": 1.0 },
-      { "name": "plantz:entity/zombie/robo_zombie/hurt2", "volume": 1.0 },
-      { "name": "plantz:entity/zombie/robo_zombie/hurt3", "volume": 1.0 }
+      { "name": "plantz:entity/zombie/robo_zombie/hurt1", "volume": 1.0, "pitch": 0.8 },
+      { "name": "plantz:entity/zombie/robo_zombie/hurt2", "volume": 1.0, "pitch": 0.8 },
+      { "name": "plantz:entity/zombie/robo_zombie/hurt3", "volume": 1.0, "pitch": 0.8 }
     ], "subtitle": "plantz.subtitles.entity.robo_zombie.hurt"
   },
   "entity.robo_zombie.missile": {
@@ -295,7 +299,10 @@
     ], "subtitle": "plantz.subtitles.entity.robo_zombie.missile"
   },
   "entity.robo_zombie.death": {
-    "sounds": [{ "name": "plantz:entity/zombie/robo_zombie/death", "volume": 1.0 }], "subtitle": "subtitles"
+    "sounds": [
+      { "name": "plantz:entity/zombie/robo_zombie/death1", "volume": 1.0, "pitch": 0.8 },
+      { "name": "plantz:entity/zombie/robo_zombie/death2", "volume": 1.0, "pitch": 0.8 }
+    ], "subtitle": "subtitles"
   },
 
   "entity.super_brainz.ambient": {
