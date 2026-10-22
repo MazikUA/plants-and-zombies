@@ -56,6 +56,9 @@ public class PazZombieModel<S extends PazZombieRenderState> extends ZombieModel<
         PartDefinition head = root.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, new CubeDeformation(0.0F))
                 .texOffs(32, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, new CubeDeformation(0.5F)), PartPose.offset(0.0F, 0.0F, 0.0F));
 
+        PartDefinition propeller = head.addOrReplaceChild("propeller", CubeListBuilder.create().texOffs(17, 1).addBox(-3.5F, 0.0177F, -3.5073F, 7.0F, 0.0F, 7.0F, new CubeDeformation(0.0F))
+                .texOffs(0, -1).addBox(0.0F, 0.1677F, -0.4323F, 0.0F, 2.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -9.4177F, 5.4323F, -0.7854F, 0.0F, 0.0F));
+
         PartDefinition hat = head.addOrReplaceChild("hat", CubeListBuilder.create(), PartPose.offset(0.0F, -8.0F, 0.0F));
 
         PartDefinition body = root.addOrReplaceChild("body", CubeListBuilder.create().texOffs(16, 16).addBox(-4.0F, 0.0F, -2.0F, 8.0F, 12.0F, 4.0F, new CubeDeformation(0.0F))

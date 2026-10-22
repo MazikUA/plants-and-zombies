@@ -174,6 +174,11 @@ class SuperBrainz(type: EntityType<out SuperBrainz>, level: Level) : PazZombie(t
                 punchTime=1
             },
             afterHitEntityEffect = {
+                when (variant) {
+                    SuperBrainzVariant.SUPER -> {}
+                    SuperBrainzVariant.TOXIC -> it.addEffect(MobEffectInstance(MobEffects.POISON, 45, 0))
+                    SuperBrainzVariant.ELECTRO -> it.addEffect(MobEffectInstance(PazEffects.ELECTRIFIED, 30, 0))
+                }
                 (level() as? ServerLevel)?.sendParticles(
                     PazServerParticles.POP,
                     it.getRandomX(0.2), it.randomY, it.getRandomZ(0.2),

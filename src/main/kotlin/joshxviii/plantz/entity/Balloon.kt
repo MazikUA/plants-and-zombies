@@ -40,13 +40,6 @@ class Balloon(
     companion object {
         val DYE_COLOR: EntityDataAccessor<DyeColor> = SynchedEntityData.defineId(Balloon::class.java, DATA_DYE_COLOR)
 
-        val browncoatBallons = mapOf(
-            BrownCoatVariant.BROWN to listOf(DyeColor.RED, DyeColor.YELLOW, DyeColor.BLUE),
-            BrownCoatVariant.DESERT to listOf(DyeColor.ORANGE, DyeColor.BROWN),
-            BrownCoatVariant.SNOW to listOf(DyeColor.LIGHT_BLUE, DyeColor.WHITE),
-            BrownCoatVariant.BUCCANEER to listOf(DyeColor.BLACK, DyeColor.RED)
-        )
-
         val impBallons = mapOf(
             ImpVariant.IMP to listOf(DyeColor.RED, DyeColor.YELLOW, DyeColor.BLUE),
             ImpVariant.YETI to listOf(DyeColor.LIGHT_BLUE, DyeColor.WHITE),

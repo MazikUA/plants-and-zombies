@@ -11,9 +11,10 @@ import java.util.function.IntFunction
 
 enum class BrownCoatVariant(val suffix: String, val id: Int) : StringRepresentable {
     BROWN("", 0),
-    SNOW("snow", 1),
-    DESERT("desert", 2),
-    BUCCANEER("buccaneer", 3);
+    BALLOON("balloon", 1),
+    SNOW("snow", 2),
+    DESERT("desert", 3),
+    BUCCANEER("buccaneer", 4);
 
     override fun getSerializedName(): String = suffix
 

@@ -153,9 +153,9 @@ open class PazZombieRenderState : ZombieRenderState() {
     fun getSuffixes(): MutableList<String> {
         val magicName = this.isMagicName(customName)
         val suffixes = mutableListOf<String>().apply {
-            textureExtra.forEach                { add(it) }
-            if (isBaby)                         add("baby")
-            else if (magicName.isNotEmpty())    add(magicName)
+            if (magicName.isEmpty()) textureExtra.forEach  { add(it) }
+            if (isBaby)                                    add("baby")
+            else if (magicName.isNotEmpty())               add(magicName)
         }.filter { it.isNotEmpty() }.toMutableList()
         return suffixes
     }

@@ -4,6 +4,7 @@ import joshxviii.plantz.*
 import joshxviii.plantz.PazDataSerializers.IMP_VARIANT
 import joshxviii.plantz.entity.Balloon
 import joshxviii.plantz.entity.plant.ExplosivePlant.Companion.scaledExplosion
+import net.fabricmc.fabric.api.networking.v1.PlayerLookup.level
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.network.syncher.EntityDataAccessor
 import net.minecraft.network.syncher.EntityDataSerializers
@@ -17,6 +18,7 @@ import net.minecraft.world.DifficultyInstance
 import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.entity.*
+import net.minecraft.world.item.DyeColor
 import net.minecraft.world.item.Items
 import net.minecraft.world.level.ExplosionDamageCalculator
 import net.minecraft.world.level.Level
@@ -157,6 +159,15 @@ class Imp(type: EntityType<out Imp> = PazEntities.IMP, level: Level) : PazZombie
         return wasHurt
     }
 
+    fun spawnWithBalloons() {
+        val balloonColors = when (variant) {
+            ImpVariant.YETI -> listOf(DyeColor.LIGHT_BLUE, DyeColor.WHITE)
+            ImpVariant.PIRATE -> listOf(DyeColor.BLACK, DyeColor.RED)
+            else -> listOf(DyeColor.RED, DyeColor.YELLOW, DyeColor.BLUE)
+        }
+        spawnBalloons(1, balloonColors)
+    }
+
     override fun finalizeSpawn(
         level: ServerLevelAccessor,
         difficulty: DifficultyInstance,
@@ -184,9 +195,7 @@ class Imp(type: EntityType<out Imp> = PazEntities.IMP, level: Level) : PazZombie
             }
 
             val spawnBalloons = (spawnReason != EntitySpawnReason.EVENT && spawnReason != EntitySpawnReason.REINFORCEMENT && y > level.seaLevel && random.nextFloat() < 0.08)
-            if (spawnBalloons) Balloon.impBallons[variant]?.let{
-                spawnBalloons(1, it)
-            }
+            if (spawnBalloons) spawnWithBalloons()
         }
 
         return data

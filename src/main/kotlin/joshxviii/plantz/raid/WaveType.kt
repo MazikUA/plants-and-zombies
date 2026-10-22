@@ -314,12 +314,8 @@ enum class WaveType(
             val balloonChance = 0.3 * ((wave.toDouble() / ZombieRaid.MAXIMUM_WAVE_COUNT).pow(.5)).coerceIn(0.0, 1.0).toFloat()
             val random = raid.random
             if (random.nextFloat() < balloonChance) {
-                if (zombie is BrownCoat) Balloon.browncoatBallons[zombie.variant]?.let {
-                    zombie.spawnBalloons(raid.random.nextIntBetweenInclusive(2, 3), it)
-                }
-                if (zombie is Imp) Balloon.impBallons[zombie.variant]?.let {
-                    zombie.spawnBalloons(1, it)
-                }
+                if (zombie is BrownCoat) zombie.spawnWithBalloons()
+                if (zombie is Imp) zombie.spawnWithBalloons()
             }
         }
 
