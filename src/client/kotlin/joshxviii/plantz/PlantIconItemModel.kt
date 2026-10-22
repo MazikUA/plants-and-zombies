@@ -26,15 +26,15 @@ class PlantIconItemModel(
             val reg = BuiltInRegistries.ENTITY_TYPE
             val resourceManager = Minecraft.getInstance().resourceManager
             return reg.mapNotNull { type ->
-                val overlayId = overlayIdFor(type)
-                val modelLocation = Identifier.fromNamespaceAndPath(overlayId.namespace, "models/${overlayId.path}.json")
+                val id = overlayIdFor(type)
+                val modelLocation = Identifier.fromNamespaceAndPath(id.namespace, "models/${id.path}.json")
                 if (resourceManager.getResource(modelLocation).isPresent) type else null
             }
         }
 
         fun overlayIdFor(type: EntityType<*>): Identifier {
             val id = BuiltInRegistries.ENTITY_TYPE.getKey(type)
-            return pazResource("item/plant_icon/${id.path}")
+            return Identifier.fromNamespaceAndPath(id.namespace, "item/plant_icon/${id.path}")
         }
     }
 
@@ -66,17 +66,14 @@ class PlantIconItemModel(
         override fun bake(context: ItemModel.BakingContext, transformation: Matrix4fc): ItemModel {
             val entityIcons = mutableMapOf<EntityType<*>, ItemModel>()
             for (type in plantEntityTypes()) {
-                val id = overlayIdFor(type)
-                entityIcons[type] = ItemModelUtils.plainModel(id).bake(context, transformation)
+                entityIcons[type] = ItemModelUtils.plainModel(overlayIdFor(type)).bake(context, transformation)
             }
 
             return PlantIconItemModel(entityIcons)
         }
 
         override fun resolveDependencies(resolver: ResolvableModel.Resolver) {
-            for (type in plantEntityTypes()) {
-                overlayIdFor(type).let { resolver.markDependency(it) }
-            }
+            for (type in plantEntityTypes()) overlayIdFor(type).let { resolver.markDependency(it) }
         }
     }
 }
