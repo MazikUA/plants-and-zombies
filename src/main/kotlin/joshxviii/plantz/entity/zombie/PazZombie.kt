@@ -42,6 +42,7 @@ import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation
 import net.minecraft.world.entity.ai.navigation.PathNavigation
+import net.minecraft.world.entity.ai.navigation.WallClimberNavigation
 import net.minecraft.world.entity.animal.golem.IronGolem
 import net.minecraft.world.entity.animal.turtle.Turtle
 import net.minecraft.world.entity.item.ItemEntity
@@ -59,6 +60,7 @@ import net.minecraft.world.level.storage.ValueInput
 import net.minecraft.world.level.storage.ValueOutput
 import net.minecraft.world.phys.Vec3
 import java.util.*
+import kotlin.collections.getValue
 import kotlin.jvm.optionals.getOrElse
 import kotlin.math.max
 
@@ -261,6 +263,9 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
         }
 
     protected val groundNavigation: PathNavigation = navigation
+    protected val climbingNavigation: WallClimberNavigation by lazy {
+        WallClimberNavigation(this, level())
+    }
     protected val flyingNavigation: FlyingPathNavigation by lazy {
         val nav = PazFlyingPathNavigation(this, level())
         nav.setCanOpenDoors(false)
@@ -282,9 +287,9 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
             this.moveControl = flyingMoveControl
             this.isNoGravity = true
         } else {
-            if (this.navigation !== groundNavigation) {
+            if (this.navigation !== if (canClimbWalls()) climbingNavigation else groundNavigation) {
                 this.navigation.stop()
-                this.navigation = groundNavigation
+                this.navigation = if (canClimbWalls()) climbingNavigation else groundNavigation
             }
             this.moveControl = if (isImmobile) noMoveControl else groundMoveControl
             if (this !is ZombieRobot && this !is PirateCaptainGhost) {
@@ -490,6 +495,7 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
     open fun emergingTime(): Int = 40
     open fun canEquipDuckyInWater() = true
     open fun canEquipBalloons() = true
+    open fun canClimbWalls(): Boolean = false
 
     override fun maxUpStep(): Float = if (isInWater) 0.5f else super.maxUpStep()
     override fun isSunSensitive(): Boolean = false
@@ -500,6 +506,7 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
         else super.checkSpawnObstruction(level)
     }
     override fun isBaby(): Boolean = false
+    override fun onClimbable(): Boolean { return if (canClimbWalls() && !level().isClientSide) this.horizontalCollision else super.onClimbable() }
     override fun populateDefaultEquipmentSlots(random: RandomSource, difficulty: DifficultyInstance) {}
     fun isBabyZombie() = super.isBaby()
     fun randomEquip(random: RandomSource, difficulty: DifficultyInstance) {

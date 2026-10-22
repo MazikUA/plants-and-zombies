@@ -507,8 +507,8 @@ object PazEntities {
             attackDamage = 12.0,
             maxHealth = 128.0,
             stepHeight = 1.0,
-            movementSpeed = 0.23,
-            knockbackResistance = 1.0,
+            movementSpeed = 0.215,
+            knockbackResistance = 0.75,
             spawnReinforcementsChance = 0.0,
         )
     )

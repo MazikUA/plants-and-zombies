@@ -25,6 +25,7 @@ class RoboZombieRenderer(
         collector: SubmitNodeCollector,
         camera: CameraRenderState
     ) {
+
         super.submit(state, poseStack, collector, camera)
     }
 
@@ -38,39 +39,46 @@ class RoboZombieRenderer(
         super.extractRenderState(entity, state, partialTicks)
         updateTreadRotation(entity, state, partialTicks)
         state.isTankTransformation = entity.isTransformed
+        state.transformAnimationState.copyFrom(entity.transformAnimation)
         state.idleAnimationState.copyFrom(entity.idleAnimation)
         state.shootAnimationState.copyFrom(entity.shootAnimation)
         state.bashAnimationState.copyFrom(entity.bashAnimation)
 
-        state.treadRotation = entity.treadRotation
+        state.treadYaw = entity.treadYaw
+        state.treadPitch = entity.treadPitch
     }
 
     private fun updateTreadRotation(entity: RoboZombie, state: RoboZombieRenderState, partialTicks: Float) {
         if (!entity.isTransformed) {
-            entity.treadRotation = 0.0f
+            entity.treadYaw = 0.0f
+            entity.treadPitch = 0.0f
             return
         }
 
         val yBodyRot = Mth.rotLerp(partialTicks, entity.yBodyRotO, entity.yBodyRot)
+        val rotDelta = yBodyRot - entity.yBodyRotO
 
         val dx = entity.x - entity.xo
+        val dy = entity.y - entity.yo
         val dz = entity.z - entity.zo
-        val distance = sqrt(dx * dx + dz * dz)
 
-        val moveDir =
-            if (distance < 0.05)
-                entity.treadRotation
-            else
-                Mth.wrapDegrees(-yBodyRot + Vec3(dx, 0.0, dz).toAngle() + 90)
+        val distance = sqrt(dx * dx + dy * dy + dz * dz)
+        val isMoving = distance > 0.0
 
-        entity.treadRotation = Mth.rotLerpRad(partialTicks * 0.025f, entity.treadRotation, moveDir * Mth.DEG_TO_RAD)
+        val horizontalDir = (if (isMoving) Mth.wrapDegrees(-yBodyRot + Vec3(dx, 0.0, dz).toAngle() - 90) else rotDelta*2) * Mth.DEG_TO_RAD
+        val verticalDir = if (isMoving) -Mth.sin(dy / distance) else 0f
+
+        entity.treadYaw = Mth.rotLerpRad(partialTicks * if (isMoving) 0.095f else 0.05f, entity.treadYaw, horizontalDir)
+        entity.treadPitch = Mth.rotLerpRad(partialTicks * 0.085f, entity.treadPitch, verticalDir)
     }
 
 }
 
 class RoboZombieRenderState: PazZombieRenderState() {
     var isTankTransformation = false
-    var treadRotation: Float = 0.0f
+    var treadYaw: Float = 0.0f
+    var treadPitch: Float = 0.0f
+    val transformAnimationState: AnimationState = AnimationState()
     val idleAnimationState: AnimationState = AnimationState()
     val shootAnimationState: AnimationState = AnimationState()
     val bashAnimationState: AnimationState = AnimationState()

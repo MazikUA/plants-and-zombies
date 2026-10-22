@@ -8,7 +8,6 @@ import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
-import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 
 import static joshxviii.plantz.UtilsKt.pazResource;
@@ -20,6 +19,8 @@ public class RoboZombieModel<S extends PazZombieRenderState> extends PazZombieMo
     private final KeyframeAnimation walkAnimation;
     private final KeyframeAnimation idleAnimation;
     private final KeyframeAnimation tankIdleAnimation;
+    private final KeyframeAnimation transformTankAnimation;
+    private final KeyframeAnimation transformIdleAnimation;
     ModelPart treads;
 
     public RoboZombieModel(final ModelPart root) {
@@ -29,7 +30,9 @@ public class RoboZombieModel<S extends PazZombieRenderState> extends PazZombieMo
         this.shootAnimation = RoboZombieAnimation.missile.bake(root.getChild("root"));
         this.walkAnimation = RoboZombieAnimation.walk.bake(root.getChild("root"));
         this.idleAnimation = RoboZombieAnimation.idle.bake(root.getChild("root"));
-        this.tankIdleAnimation = RoboZombieAnimation.tank_idle.bake(root.getChild("root"));
+        this.tankIdleAnimation = RoboZombieAnimation.idle_tank.bake(root.getChild("root"));
+        this.transformTankAnimation = RoboZombieAnimation.transform_tank.bake(root.getChild("root"));
+        this.transformIdleAnimation = RoboZombieAnimation.transform_idle.bake(root.getChild("root"));
     }
 
     public static LayerDefinition createBodyLayer() {
@@ -90,11 +93,12 @@ public class RoboZombieModel<S extends PazZombieRenderState> extends PazZombieMo
         if (!(state instanceof RoboZombieRenderState roboState)) return;
         walkAnimation.applyWalk(state.walkAnimationPos, state.walkAnimationSpeed, 2f, 2f);
 
-        if (roboState.isTankTransformation()) {
-            tankIdleAnimation.apply(roboState.getIdleAnimationState(), roboState.ageInTicks);
-            treads.yRot = roboState.getTreadRotation();
-        }
-        else idleAnimation.apply(roboState.getIdleAnimationState(), roboState.ageInTicks);
+        treads.yRot = roboState.getTreadYaw();
+        treads.xRot = roboState.getTreadPitch();
+        var isTransformed = roboState.isTankTransformation();
+        var transformTransition = roboState.getTransformAnimationState();
+        (isTransformed ? tankIdleAnimation : idleAnimation).apply(roboState.getIdleAnimationState(), roboState.ageInTicks);
+        (isTransformed ? transformTankAnimation : transformIdleAnimation).apply(transformTransition, roboState.ageInTicks);
         shootAnimation.apply(roboState.getShootAnimationState(), roboState.ageInTicks);
         bashAnimation.apply(roboState.getBashAnimationState(), roboState.ageInTicks);
     }
