@@ -331,7 +331,7 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
     override fun tick() {
         super.tick()
         moveDirO = moveDir
-        moveDir = deltaMovement
+        val delta = deltaMovement
 
         val serverLevel = level() as? ServerLevel
 
@@ -398,6 +398,7 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
                 )
             }
         }
+        moveDir = moveDir.add(delta)
     }
 
     fun spawnBalloons(count: Int = 2, color: DyeColor = DyeColor.RED) {

@@ -300,7 +300,7 @@
     ], "subtitle": "plantz.subtitles.entity.robo_zombie.hurt"
   },
   "entity.robo_zombie.shoot": {
-    "sounds": [{ "name": "plantz:entity/zombie/robo_zombie/shoot", "volume": 1.0 }], "subtitle": "plantz.subtitles.entity.robo_zombie.shoot"
+    "sounds": [{ "name": "plantz:entity/zombie/robo_zombie/shoot", "volume": 1.5 }], "subtitle": "plantz.subtitles.entity.robo_zombie.shoot"
   },
   "entity.robo_zombie.death": {
     "sounds": [

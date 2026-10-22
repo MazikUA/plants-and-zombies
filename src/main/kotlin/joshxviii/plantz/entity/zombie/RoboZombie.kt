@@ -25,7 +25,7 @@ import net.minecraft.world.level.storage.ValueOutput
 class RoboZombie(type: EntityType<out RoboZombie>, level: Level) : PazZombie(type, level) {
 
     companion object {
-        const val MISSILE_COOLDOWN_TIME = 210
+        const val MISSILE_COOLDOWN_TIME = 320
 
         val TANK_TRANSFORMATION: EntityDataAccessor<Boolean> = SynchedEntityData.defineId<Boolean>(RoboZombie::class.java, EntityDataSerializers.BOOLEAN)
         val MISSILE_TIME_ID: EntityDataAccessor<Int> = SynchedEntityData.defineId<Int>(RoboZombie::class.java, EntityDataSerializers.INT)
@@ -53,10 +53,12 @@ class RoboZombie(type: EntityType<out RoboZombie>, level: Level) : PazZombie(typ
     val walkNavigation = NavigateToTargetGoal(this)
     val tankNavigation = NavigateToTargetGoal(
         this,
-        speedModifier = 1.25,
-        keepAwayDistance = 5.0,
+        speedModifier = 1.3,
+        keepAwayDistance = 3.0,
         alwaysFaceTarget = true
     )
+
+    var treadRotation: Float = 0.0f
 
     var missileCooldown: Int
         get() = this.entityData.get(BEAM_COOLDOWN_ID)
@@ -64,7 +66,10 @@ class RoboZombie(type: EntityType<out RoboZombie>, level: Level) : PazZombie(typ
 
     var isTransformed: Boolean
         get() = this.entityData.get(TANK_TRANSFORMATION)
-        set(value) = this.entityData.set(TANK_TRANSFORMATION, value)
+        set(value) {
+            this.entityData.set(TANK_TRANSFORMATION, value)
+            reassessNavigation()
+        }
 
     var missileTime: Int
         get() = this.entityData.get(MISSILE_TIME_ID)
@@ -111,6 +116,11 @@ class RoboZombie(type: EntityType<out RoboZombie>, level: Level) : PazZombie(typ
         else goalSelector.addGoal(3, walkNavigation)
     }
 
+    override fun onSyncedDataUpdated(accessor: EntityDataAccessor<*>) {
+        super.onSyncedDataUpdated(accessor)
+        if (accessor == TANK_TRANSFORMATION) reassessNavigation()
+    }
+
     override fun registerGoals() {
         super.registerGoals()
         goalSelector.addGoal(4, MeleeAttackActionGoal(
@@ -128,6 +138,7 @@ class RoboZombie(type: EntityType<out RoboZombie>, level: Level) : PazZombie(typ
             usingEntity = this,
             projectileFactory =  { Missile(level(), this) },
             velocity = 1.0,
+            leadShots = false,
             actionDelay = 19,
             soundEvent = null,
             usePredicate = {

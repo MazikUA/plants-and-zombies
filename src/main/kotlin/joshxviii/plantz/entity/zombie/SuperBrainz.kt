@@ -56,9 +56,6 @@ class SuperBrainz(type: EntityType<out SuperBrainz>, level: Level) : PazZombie(t
     var yCapeO = 0.0f
     var zCapeO = 0.0f
 
-    var walkDist = 0f
-    var walkDistO = 0f
-
     val laserAttackAnimation : AnimationState = AnimationState()
     val rightPunchAnimation : AnimationState = AnimationState()
     val leftPunchAnimation : AnimationState = AnimationState()
@@ -277,9 +274,6 @@ class SuperBrainz(type: EntityType<out SuperBrainz>, level: Level) : PazZombie(t
     }
 
     fun updateCapeState() {
-        walkDistO = walkDist
-        val delta = deltaMovement
-
         xCapeO = xCape
         yCapeO = yCape
         zCapeO = zCape
@@ -300,9 +294,6 @@ class SuperBrainz(type: EntityType<out SuperBrainz>, level: Level) : PazZombie(t
             yCape += dy * 0.25f
             zCape += dz * 0.25f
         }
-
-        val horizontalSpeed = delta.horizontalDistance()
-        walkDist += horizontalSpeed.toFloat()
     }
 
     override fun finalizeSpawn(
