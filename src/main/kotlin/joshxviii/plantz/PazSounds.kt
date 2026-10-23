@@ -10,6 +10,7 @@ import net.minecraft.sounds.SoundEvents
 object PazSounds {
 
     @JvmField val WATERING_CAN = register("item.watering_can")
+    @JvmField val DYE_BLASTER = register("item.dye_blaster")
 
     @JvmField val BALLOON_INFLATE = register("item.balloon.inflate")
     @JvmField val BALLOON_POP = register("item.balloon.pop")
@@ -57,6 +58,7 @@ object PazSounds {
     @JvmField val PIRATE_CAPTAIN_DEATH = register("entity.pirate_captain.death")
     @JvmField val PIRATE_CAPTAIN_GHOST_AMBIENT = register("entity.pirate_captain_ghost.ambient")
     @JvmField val PIRATE_CAPTAIN_GHOST_HURT = register("entity.pirate_captain_ghost.hurt")
+    @JvmField val ZOMBIE_TURRET_SHOOT = register("entity.zombie_turret.shoot")
     @JvmField val ROBO_ZOMBIE_AMBIENT = register("entity.robo_zombie.ambient")
     @JvmField val ROBO_ZOMBIE_HURT = register("entity.robo_zombie.hurt")
     @JvmField val ROBO_ZOMBIE_DEATH = register("entity.robo_zombie.death")

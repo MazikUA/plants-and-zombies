@@ -37,7 +37,7 @@ class ZombieTurret(type: EntityType<out ZombieTurret>, level: Level) : ZombieRob
             actionDelay = 9,
             inaccuracy = 5.2f,
             leadShots = false,
-            soundEvent = SoundEvents.EMPTY,
+            soundEvent = PazSounds.ZOMBIE_TURRET_SHOOT,
             projectileFactory = {
                 LaserBullet(
                     level(),
@@ -48,9 +48,6 @@ class ZombieTurret(type: EntityType<out ZombieTurret>, level: Level) : ZombieRob
             },
             usePredicate = { actionTime<=0 },
             actionStartEffect = { actionTime=1 },
-            actionSuccessEffect = {
-                playSound(PazSounds.SUPER_BRAINZ_LAZER, 0.6f, 2.5f) // TODO custom sounds
-            },
         ))
     }
 

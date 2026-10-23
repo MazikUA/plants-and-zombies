@@ -6,6 +6,15 @@
     ], "subtitle": "plantz.subtitles.item.watering_can"
   },
 
+  "item.dye_blaster": {
+    "sounds": [
+      { "name": "plantz:item/dye_blaster/shoot1", "volume": 1.0, "pitch": 1.0},
+      { "name": "plantz:item/dye_blaster/shoot2", "volume": 1.0, "pitch": 1.0},
+      { "name": "plantz:item/dye_blaster/shoot3", "volume": 1.0, "pitch": 1.0},
+      { "name": "plantz:item/dye_blaster/shoot4", "volume": 1.0, "pitch": 1.0}
+    ], "subtitle": "plantz.subtitles.item.dye_blaster"
+  },
+
   "item.balloon.inflate": {
     "sounds": [
       { "name": "plantz:item/balloon/inflate1", "volume": 0.4, "pitch": 1.1},
@@ -119,17 +128,17 @@
       { "name": "plantz:entity/zombie/browncoat/ambient1", "volume": 0.7 },
       { "name": "plantz:entity/zombie/browncoat/ambient2", "volume": 0.7 },
       { "name": "plantz:entity/zombie/browncoat/ambient3", "volume": 0.7 }
-    ], "subtitle": "plantz.subtitles.entity.browncoat.ambient"
+    ], "subtitle": "subtitles.entity.zombie.ambient"
   },
   "entity.browncoat.hurt": {
     "sounds": [
       { "name": "plantz:entity/zombie/browncoat/hurt1", "volume": 0.7 },
       { "name": "plantz:entity/zombie/browncoat/hurt2", "volume": 0.7 },
       { "name": "plantz:entity/zombie/browncoat/hurt3", "volume": 0.7 }
-    ], "subtitle": "plantz.subtitles.entity.browncoat.hurt"
+    ], "subtitle": "subtitles.entity.zombie.hurt"
   },
   "entity.browncoat.death": {
-    "sounds": [{ "name": "plantz:entity/zombie/browncoat/death", "volume": 0.7 }], "subtitle": "plantz.subtitles.entity.browncoat.death"
+    "sounds": [{ "name": "plantz:entity/zombie/browncoat/death", "volume": 0.7 }], "subtitle": "subtitles.entity.zombie.death"
   },
 
   "entity.digger_zombie.ambient": {
@@ -283,6 +292,14 @@
       { "name": "plantz:entity/zombie/pirate_captain_ghost/hurt2", "volume": 1.0 },
       { "name": "plantz:entity/zombie/pirate_captain_ghost/hurt3", "volume": 1.0 }
     ], "subtitle": "plantz.subtitles.entity.pirate_captain_ghost.hurt"
+  },
+
+  "entity.zombie_turret.shoot": {
+    "sounds": [
+      { "name": "plantz:entity/zombie/zombie_turret/shoot1", "volume": 1.0 },
+      { "name": "plantz:entity/zombie/zombie_turret/shoot2", "volume": 1.0 },
+      { "name": "plantz:entity/zombie/zombie_turret/shoot3", "volume": 1.0 }
+    ], "subtitle": "plantz.subtitles.entity.zombie_turret.shoot"
   },
 
   "entity.robo_zombie.ambient": {
