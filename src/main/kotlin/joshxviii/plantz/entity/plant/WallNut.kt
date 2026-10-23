@@ -111,7 +111,7 @@ open class WallNut(type: EntityType<out Plant>, level: Level) : Plant(type, leve
             )
         }
 
-        if (deltaMovement.horizontalDistance() < 0.085 && !isLeashed) stopRoll()
+        if (deltaMovement.horizontalDistance() < 0.085 && leashHolder==null) stopRoll()
     }
 
     override fun getLookControl(): LookControl = noLookControl

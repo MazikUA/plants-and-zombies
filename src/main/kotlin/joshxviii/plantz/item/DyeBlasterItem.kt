@@ -45,7 +45,7 @@ class DyeBlasterItem(properties: Properties) : ProjectileWeaponItem(properties) 
         val ammo = livingEntity.getProjectile(itemStack)
         if (ammo.isEmpty) return
         if (ticksRemaining%4 != 0) return
-        level.playSound(null, livingEntity.blockPosition(), PazSounds.DYE_BLASTER, SoundSource.NEUTRAL, 1f, 1f)
+        level.playSound(null, livingEntity.blockPosition(), PazSounds.DYE_BLASTER, SoundSource.NEUTRAL, 0.3f, 1f)
         itemStack.hurtAndBreak(1, livingEntity, livingEntity.usedItemHand)
         if (level.random.nextFloat() < AMMO_CHANCE) draw(itemStack, ammo, livingEntity)
         if (level is ServerLevel) shoot(level, livingEntity, livingEntity.usedItemHand, itemStack, listOf(ammo), 1.2f, 8.0f, false, null)

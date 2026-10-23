@@ -352,7 +352,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
 
     override fun canRide(vehicle: Entity): Boolean = false
     override fun isFood(itemStack: ItemStack): Boolean = false
-    override fun getLeashOffset(): Vec3 = Vec3.ZERO
+    override fun getLeashOffset(): Vec3 = super.getLeashOffset()
     override fun getPickResult(): ItemStack = SeedPacketItem.stackFor(this.type)
     override fun wantsToAttack(target: LivingEntity, owner: LivingEntity): Boolean {
         return if (this.hasSameOwner(target)) false
