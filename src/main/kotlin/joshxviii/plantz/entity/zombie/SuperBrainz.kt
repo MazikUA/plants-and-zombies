@@ -191,6 +191,9 @@ class SuperBrainz(type: EntityType<out SuperBrainz>, level: Level) : PazZombie(t
             doNotExtendPastTarget = true,
             damageType = PazDamageTypes.ZOMBIE_ENERGY,
             damageMultiplier = 0.5f,
+            actionSuccessEffect = {
+                if (beamAttackTime<=0) beamAttackTime = 1
+            },
             actionPredicate = {
                 !isFlying && beamCooldown<=0 && punchTime<=0
             },
@@ -240,7 +243,6 @@ class SuperBrainz(type: EntityType<out SuperBrainz>, level: Level) : PazZombie(t
                 )
             },
             afterHitEntityEffect = {
-                if (beamAttackTime<=0) beamAttackTime = 1
                 when (variant) {
                     SuperBrainzVariant.SUPER -> {}
                     SuperBrainzVariant.TOXIC -> it.addEffect(MobEffectInstance(MobEffects.POISON, 100, 0))

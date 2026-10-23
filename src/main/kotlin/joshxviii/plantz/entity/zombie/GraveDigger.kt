@@ -144,6 +144,7 @@ class GraveDigger(type: EntityType<out GraveDigger>, level: Level) : PazZombie(t
 
         override fun canUse(): Boolean {
             val level = gravedigger.level() as ServerLevel
+            level.getNearestPlayer(gravedigger, 14.0) ?: return false
             if (!level.gameRules.get(GameRules.MOB_GRIEFING)) return false
             if (!gravedigger.mainHandItem.`is`(ItemTags.SHOVELS)) return false
             if (gravedigger.dugGraves >= gravedigger.maxGraves) return false

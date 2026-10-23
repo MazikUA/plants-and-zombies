@@ -76,10 +76,6 @@ enum class WaveType(
                     if (wave > 5) scaled(0.8f + (wave - 5) * 0.35f, omen, credits) else 0
                 ),
                 WaveSpawnEntry(
-                    PazEntities.GRAVE_DIGGER,
-                    if (wave > 4 && Math.random() > 0.2) 1 else 0
-                ),
-                WaveSpawnEntry(
                     PazEntities.GARGANTUAR,
                     if (wave == 10) 1 // always spawn at wave 10
                     else if (wave > 11) scaled(1f + (wave - 13) * 0.3f, omen, credits, min = 0) else 0
@@ -91,7 +87,8 @@ enum class WaveType(
                 WaveSpawnEntry(
                     PazEntities.SOLDIER_ZOMBIE,
                     if (credits && wave > 8) scaled(1f + (wave - 8) * 0.5f, omen, true) else 0
-                )
+                ),
+                graveDiggerEntry(wave),
             )
         },
         lootTableFn = { waveNum, _ -> if (waveNum > 7) PazLootTables.MAIL_REWARD_DEFAULT_HARD else PazLootTables.MAIL_REWARD_DEFAULT_EASY }
@@ -145,7 +142,8 @@ enum class WaveType(
                         configureHalftimeShowdown(it)
                         configureDefaultBalloonChance(it, raid)
                     }
-                )
+                ),
+                graveDiggerEntry(wave),
             )
         },
         lootTableFn = { _, _ -> PazLootTables.MAIL_REWARD_HALFTIME }
@@ -178,7 +176,8 @@ enum class WaveType(
                 WaveSpawnEntry(
                     PazEntities.ZOMBIE_YETI,
                     scaled(1.2f + wave * 0.35f, omen, credits, min = 1)
-                )
+                ),
+                graveDiggerEntry(wave),
             )
         },
         lootTableFn = { _, _ -> PazLootTables.MAIL_REWARD_WINTER }
@@ -216,7 +215,8 @@ enum class WaveType(
                     if (wave == 10) 1 else
                     if (wave > 10) scaled(0.6f + wave * 0.1f, omen, credits, min = 0) else 0,
                     ::configurePirateInvasion
-                )
+                ),
+                graveDiggerEntry(wave),
             )
         },
         lootTableFn = { _, _ -> PazLootTables.MAIL_REWARD_PIRATE }
@@ -415,6 +415,11 @@ enum class WaveType(
                 }
             }
         }
+
+        fun graveDiggerEntry(wave: Int): WaveSpawnEntry = WaveSpawnEntry(
+            PazEntities.GRAVE_DIGGER,
+            if (wave > 4 && Math.random() > 0.15) 1 else 0
+        )
     }
 
 

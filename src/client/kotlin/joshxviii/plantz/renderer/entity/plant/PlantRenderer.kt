@@ -14,7 +14,7 @@ import joshxviii.plantz.entity.plant.WallNut
 import joshxviii.plantz.renderer.entity.plant.PlantRenderState.Companion.TEXTURE_PATH
 import joshxviii.plantz.renderer.getEmissiveTextureLocation
 import joshxviii.plantz.renderer.getTextureLocation
-import joshxviii.plantz.renderer.isMagicName
+import joshxviii.plantz.renderer.validMagicName
 import net.minecraft.client.model.EntityModel
 import net.minecraft.client.renderer.SubmitNodeCollector
 import net.minecraft.client.renderer.entity.EntityRendererProvider
@@ -213,10 +213,10 @@ open class PlantRenderState : LivingEntityRenderState() {
     val bounceAnimationState: AnimationState = AnimationState()
 
     fun getSuffixes(): MutableList<String> {
-        val magicName = this.isMagicName(customName)
+        val magicName = this.validMagicName(customName)
         val suffixes = mutableListOf<String>().apply {
             textureExtra.forEach                { add(it) }
-            if (magicName.isNotEmpty())         add(magicName)
+            if (magicName!=null)                add(magicName)
             else {
                 if (isBaby)                     add("baby")
                 if (isAsleep || deathTime > 0)  add("sleep")

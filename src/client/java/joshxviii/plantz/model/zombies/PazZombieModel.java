@@ -2,6 +2,7 @@ package joshxviii.plantz.model.zombies;
 
 import joshxviii.plantz.ai.ZombieState;
 import joshxviii.plantz.animation.zombies.PazZombieAnimations;
+import joshxviii.plantz.renderer.RenderingUtilsKt;
 import joshxviii.plantz.renderer.entity.zombie.PazZombieRenderState;
 import net.minecraft.client.animation.AnimationDefinition;
 import net.minecraft.client.animation.KeyframeAnimation;
@@ -23,6 +24,7 @@ public class PazZombieModel<S extends PazZombieRenderState> extends ZombieModel<
     final KeyframeAnimation emergeAnimation;
     final KeyframeAnimation retreatAnimation;
     final KeyframeAnimation floatAnimation;
+    ModelPart propeller;
 
     public PazZombieModel(
             @Nullable AnimationDefinition initAnimationOverride,
@@ -30,6 +32,8 @@ public class PazZombieModel<S extends PazZombieRenderState> extends ZombieModel<
     ) {
         var mainRoot = root.hasChild("root") ? root.getChild("root") : root;
         super(mainRoot);
+
+        this.propeller = RenderingUtilsKt.getChildOrNull(this.getHead(), "big_hat");
 
         this.emergeAnimation = Objects.requireNonNullElse(initAnimationOverride, PazZombieAnimations.emerge).bake(mainRoot);
         this.retreatAnimation = PazZombieAnimations.retreat.bake(mainRoot);
@@ -56,8 +60,8 @@ public class PazZombieModel<S extends PazZombieRenderState> extends ZombieModel<
         PartDefinition head = root.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, new CubeDeformation(0.0F))
                 .texOffs(32, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, new CubeDeformation(0.5F)), PartPose.offset(0.0F, 0.0F, 0.0F));
 
-        PartDefinition propeller = head.addOrReplaceChild("propeller", CubeListBuilder.create().texOffs(17, 1).addBox(-3.5F, 0.0177F, -3.5073F, 7.0F, 0.0F, 7.0F, new CubeDeformation(0.0F))
-                .texOffs(0, -1).addBox(0.0F, 0.1677F, -0.4323F, 0.0F, 2.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -9.4177F, 5.4323F, -0.7854F, 0.0F, 0.0F));
+        PartDefinition propeller = head.addOrReplaceChild("propeller", CubeListBuilder.create().texOffs(17, 1).addBox(-3.5F, -1.925F, -3.5375F, 7.0F, 0.0F, 7.0F, new CubeDeformation(0.0F))
+                .texOffs(0, -1).addBox(0.0F, -1.925F, -0.4625F, 0.0F, 2.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -8.075F, 3.9625F));
 
         PartDefinition hat = head.addOrReplaceChild("hat", CubeListBuilder.create(), PartPose.offset(0.0F, -8.0F, 0.0F));
 
@@ -104,6 +108,7 @@ public class PazZombieModel<S extends PazZombieRenderState> extends ZombieModel<
             var animationPos = state.walkAnimationPos;
             var animationSpeed = state.walkAnimationSpeed + 0.2f;
             floatAnimation.applyWalk(animationPos, animationSpeed, 1f, 2f);
+            if (this.propeller != null) propeller.yRot = (float) Math.toRadians(animationPos);
         }
         emergeAnimation.apply(state.getEmergeAnimationState(), state.ageInTicks);
         retreatAnimation.apply(state.getRetreatAnimationState(), state.ageInTicks);

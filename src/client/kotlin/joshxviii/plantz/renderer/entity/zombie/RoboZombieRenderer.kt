@@ -25,7 +25,6 @@ class RoboZombieRenderer(
         collector: SubmitNodeCollector,
         camera: CameraRenderState
     ) {
-
         super.submit(state, poseStack, collector, camera)
     }
 

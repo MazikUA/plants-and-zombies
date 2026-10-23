@@ -93,6 +93,7 @@ class PirateCaptain(type: EntityType<out PirateCaptain>, level: Level) : PazZomb
         super.registerGoals()
         goalSelector.addGoal(2, ProjectileAttackGoal(
             usingEntity = this,
+            leadShots = false,
             projectileFactory =  {
                 FireworkRocketEntity(level(), getFirework(), this, x, y+eyeHeight, z, true)
             },

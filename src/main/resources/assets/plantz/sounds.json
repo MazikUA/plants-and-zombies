@@ -39,7 +39,7 @@
     ], "subtitle": "plantz.subtitles.projectile.deflected"
   },
   "entity.projectile.shoot": {
-    "sounds": [{ "name": "random/pop", "volume": 1.0, "pitch": 1.0 }], "subtitle": "plantz.subtitles.projectile.shoot"
+    "sounds": [{ "name": "random/pop", "volume": 1.0, "pitch": 0.8 }], "subtitle": "plantz.subtitles.projectile.shoot"
   },
 
   "entity.projectile.electric_zap": {
@@ -379,13 +379,13 @@
 
   "event.raid.victory": {
     "sounds": [
-      { "name": "plantz:music/raid/loon_griefers_win", "volume": 0.7, "pitch": 1.0 }
+      { "name": "plantz:music/raid/loon_griefers_win", "volume": 0.8, "pitch": 1.0 }
     ], "subtitle": "plantz.subtitles.event.raid.victory"
   },
 
   "event.raid.defeat": {
     "sounds": [
-      { "name": "plantz:music/raid/loon_griefers_lose", "volume": 0.7, "pitch": 1.0 }
+      { "name": "plantz:music/raid/loon_griefers_lose", "volume": 0.8, "pitch": 1.0 }
     ], "subtitle": "plantz.subtitles.event.raid.defeat"
   },
 

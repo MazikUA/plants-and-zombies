@@ -10,9 +10,12 @@ import joshxviii.plantz.item.GardeningGloveItem
 import joshxviii.plantz.item.PlantPotHelmetItem
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
+import net.fabricmc.fabric.api.resource.v1.ResourceLoader
 import net.minecraft.client.KeyMapping
 import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
+import net.minecraft.server.packs.PackType
+import net.minecraft.server.packs.resources.ResourceManagerReloadListener
 
 object PazClient : ClientModInitializer {
 	override fun onInitializeClient() {
@@ -22,6 +25,15 @@ object PazClient : ClientModInitializer {
 		PazScreens.registerAll()
 		PazClientNetwork.initialize()
 		PazRenderPipelines.initialize()
+
+		ResourceLoader.get(PackType.CLIENT_RESOURCES).registerReloadListener(
+			pazResource("client_reload"),
+			ResourceManagerReloadListener({
+				if (PazNetwork.ZombieRaidClientCache.isActive()) {
+					RaidMusicManager.restart()
+				}
+			})
+		)
 
 		// custom tooltips
 		ItemTooltipCallback.EVENT.register { stack, context, type, lines ->

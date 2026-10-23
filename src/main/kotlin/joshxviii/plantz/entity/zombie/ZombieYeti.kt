@@ -1,12 +1,16 @@
 package joshxviii.plantz.entity.zombie
 
 import joshxviii.plantz.PazDamageTypes
+import joshxviii.plantz.PazEffects
 import joshxviii.plantz.PazSounds
 import joshxviii.plantz.PazTags
 import joshxviii.plantz.ai.goal.ProjectileAttackGoal
 import joshxviii.plantz.canReachTarget
 import joshxviii.plantz.entity.projectile.PowderSnowChunk
 import net.minecraft.core.BlockPos
+import net.minecraft.network.syncher.EntityDataAccessor
+import net.minecraft.network.syncher.EntityDataSerializers
+import net.minecraft.network.syncher.SynchedEntityData
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.sounds.SoundEvent
 import net.minecraft.sounds.SoundEvents
@@ -14,6 +18,7 @@ import net.minecraft.util.RandomSource
 import net.minecraft.world.Difficulty
 import net.minecraft.world.DifficultyInstance
 import net.minecraft.world.damagesource.DamageSource
+import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.entity.*
 import net.minecraft.world.entity.ai.goal.FloatGoal
 import net.minecraft.world.entity.monster.zombie.Zombie
@@ -37,7 +42,14 @@ class ZombieYeti(type: EntityType<out ZombieYeti>, level: Level) : PazZombie(typ
                     && checkMobSpawnRules(type, level, spawnReason, pos, random) || level.getBlockState(below).`is`(PazTags.BlockTags.YETI_SPAWNABLE_ON)
                     && pos.y > level.seaLevel
         }
+        val BASH_TIME_ID: EntityDataAccessor<Int> = SynchedEntityData.defineId<Int>(ZombieYeti::class.java, EntityDataSerializers.INT)
     }
+
+    val bashAnimation : AnimationState = AnimationState()
+
+    var bashTime: Int
+        get() = this.entityData.get(BASH_TIME_ID)
+        set(value) = this.entityData.set(BASH_TIME_ID, value)
 
     init {
         xpReward = 25
@@ -80,6 +92,22 @@ class ZombieYeti(type: EntityType<out ZombieYeti>, level: Level) : PazZombie(typ
         return SoundEvents.ZOMBIE_STEP
     }
 
+    override fun defineSynchedData(entityData: SynchedEntityData.Builder) {
+        super.defineSynchedData(entityData)
+        entityData.define(BASH_TIME_ID, 0)
+    }
+
+    override fun tick() {
+        super.tick()
+        if (bashTime>0 || swinging) {
+            bashAnimation.startIfStopped(tickCount)
+            if (bashTime++>20) {
+                bashAnimation.stop()
+                bashTime=0
+            }
+        }
+    }
+
     override fun doPush(entity: Entity) {
         super.doPush(entity)
         if (isPathFinding && this.target!=null) {
@@ -98,8 +126,11 @@ class ZombieYeti(type: EntityType<out ZombieYeti>, level: Level) : PazZombie(typ
     override fun randomizeReinforcementsChance() {}
 
     override fun doHurtTarget(level: ServerLevel, target: Entity): Boolean {
-        val result = super.doHurtTarget(level, target)
-        return result
+        val wasHurt = super.doHurtTarget(level, target)
+        if (wasHurt && target is LivingEntity) {
+            if (random.nextFloat() < 0.5f) target.addEffect(MobEffectInstance(PazEffects.CHILLED, 80, 0), this)
+        }
+        return wasHurt
     }
 
     override fun finalizeSpawn(
@@ -116,7 +147,7 @@ class ZombieYeti(type: EntityType<out ZombieYeti>, level: Level) : PazZombie(typ
                 setItemSlot(EquipmentSlot.HEAD, Items.BUCKET.defaultInstance)
             }
 
-            if (random.nextFloat() < 0.001) {
+            if (random.nextFloat() < 0.005) {
                 val polarBear = EntityType.POLAR_BEAR.create(level(), EntitySpawnReason.JOCKEY)
                 if (polarBear != null) {
                     polarBear.snapTo(x, y, z, yRot, 0.0f)

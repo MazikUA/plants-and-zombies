@@ -404,7 +404,7 @@ object PazEntities {
     @JvmField val DISCO_ZOMBIE: EntityType<DiscoZombie> =  registerZombie(
         "disco_zombie",
         EntityType.Builder.of(::DiscoZombie, MobCategory.MONSTER)
-            .sized(0.64f, 2.2f)
+            .sized(0.64f, 1.96f)
             .eyeHeight(1.74f)
             .clientTrackingRange(8),
         attributes = PazZombie.Companion.PazZombieAttributes(
@@ -571,7 +571,7 @@ object PazEntities {
             maxHealth = 8.0,
             armor = 7.0,
             followRange = 20.0,
-            attackDamage = 1.5,
+            attackDamage = 2.0,
             spawnReinforcementsChance = 0.0,
         )
     )
@@ -729,9 +729,9 @@ object PazEntities {
         return Registry.register(BuiltInRegistries.ENTITY_TYPE, id, builder.build(id))
     }
 
-    val MAGIC_NAMES = mapOf<EntityType<*>, String>(
-        CHOMPER      to "chester",
-        DISCO_ZOMBIE to "mj",
-        BROWN_COAT   to "tugboat"
+    val MAGIC_NAMES = mapOf<EntityType<*>, List<String>>(
+        CHOMPER      to listOf("chester"),
+        DISCO_ZOMBIE to listOf("mj"),
+        BROWN_COAT   to listOf("tugboat", "mustache")
     )
 }

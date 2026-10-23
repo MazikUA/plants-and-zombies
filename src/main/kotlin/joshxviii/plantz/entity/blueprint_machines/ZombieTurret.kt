@@ -1,12 +1,15 @@
 package joshxviii.plantz.entity.blueprint_machines
 
 import joshxviii.plantz.PazDamageTypes
+import joshxviii.plantz.PazSounds
 import joshxviii.plantz.ai.goal.ProjectileAttackGoal
 import joshxviii.plantz.entity.projectile.LaserBullet
 import joshxviii.plantz.entity.zombie.ZombieRobot
 import net.minecraft.network.syncher.EntityDataAccessor
 import net.minecraft.network.syncher.EntityDataSerializers
 import net.minecraft.network.syncher.SynchedEntityData
+import net.minecraft.sounds.SoundEvent
+import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.level.Level
@@ -31,9 +34,10 @@ class ZombieTurret(type: EntityType<out ZombieTurret>, level: Level) : ZombieRob
         goalSelector.addGoal(1, ProjectileAttackGoal(
             usingEntity = this,
             velocity = 1.1,
-            actionDelay = 5,
+            actionDelay = 9,
             inaccuracy = 5.2f,
             leadShots = false,
+            soundEvent = SoundEvents.EMPTY,
             projectileFactory = {
                 LaserBullet(
                     level(),
@@ -43,7 +47,10 @@ class ZombieTurret(type: EntityType<out ZombieTurret>, level: Level) : ZombieRob
                 )
             },
             usePredicate = { actionTime<=0 },
-            actionStartEffect = { actionTime=1 }
+            actionStartEffect = { actionTime=1 },
+            actionSuccessEffect = {
+                playSound(PazSounds.SUPER_BRAINZ_LAZER, 0.6f, 2.5f) // TODO custom sounds
+            },
         ))
     }
 
