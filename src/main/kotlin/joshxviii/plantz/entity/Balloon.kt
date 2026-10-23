@@ -91,16 +91,10 @@ class Balloon(
     override fun load(input: ValueInput) {
         super.load(input)
         val holder = leashHolder
-        if (holder is PazZombie && !holder.balloons.contains(this)) {
-            holder.balloons.add(this)
-        }
     }
 
     override fun getLeashHolder(): Entity? {
         val holder = super.getLeashHolder()
-        if (holder is PazZombie && !holder.balloons.contains(this)) {
-            holder.balloons.add(this)
-        }
         return holder
     }
 

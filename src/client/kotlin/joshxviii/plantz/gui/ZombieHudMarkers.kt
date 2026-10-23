@@ -5,6 +5,7 @@ import joshxviii.plantz.PazConfig
 import joshxviii.plantz.PazNetwork
 import joshxviii.plantz.ZombieRaider
 import joshxviii.plantz.entity.zombie.PazZombie
+import joshxviii.plantz.getHeldBalloons
 import joshxviii.plantz.renderer.entity.zombie.PazZombieRenderState
 import joshxviii.plantz.renderer.entity.zombie.PazZombieRenderer
 import net.minecraft.client.DeltaTracker
@@ -89,7 +90,7 @@ object ZombieHudMarkers {
         if (zombie.mainHandItem.`is`(PazBlocks.BRAINZ_FLAG.asItem()) || zombie.offhandItem.`is`(PazBlocks.BRAINZ_FLAG.asItem())) submitItem(graphics,
             PazBlocks.BRAINZ_FLAG.asItem().defaultInstance, cx, cy, baseScale)
 
-        val balloon = (zombie as? PazZombie)?.balloons?.firstOrNull()
+        val balloon = (zombie as? PazZombie)?.getHeldBalloons()?.firstOrNull()
         if (balloon != null) submitItem(graphics, balloon.pickResult, cx, cy-8, baseScale)
     }
 

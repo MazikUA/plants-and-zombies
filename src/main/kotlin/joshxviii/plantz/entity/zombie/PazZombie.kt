@@ -243,7 +243,7 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
         if (isBaby) return super.pickUpItem(level, entity)
         val balloonItem = entity.item.item as? BalloonItem ?: return super.pickUpItem(level, entity)
 
-        val balloonsMissing = (4 - balloons.size).coerceIn(0, MAX_EQUIPPABLE_BALLOONS)
+        val balloonsMissing = (MAX_EQUIPPABLE_BALLOONS - getHeldBalloons().size).coerceIn(0, MAX_EQUIPPABLE_BALLOONS)
         val count = entity.item.count.coerceAtMost(balloonsMissing)
         spawnBalloons(count, balloonItem.color)
         entity.item.shrink(count)
@@ -313,8 +313,6 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
         return super.getMoveControl()
     }
 
-    var balloons : MutableList<Balloon> = mutableListOf()
-
     override fun registerGoals() {
         super.registerGoals()
         this.goalSelector.addGoal(7, FlyingPathfindingGoal(this, hoverGroundHeight = 1.5))
@@ -341,9 +339,7 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
         val serverLevel = level() as? ServerLevel
 
         if (canEquipBalloons()) {
-            if (balloons.isNotEmpty()) isFlying = true
-            balloons.removeIf { !it.isAlive || it.leashHolder != this }
-            if (balloons.isEmpty()) isFlying = false
+            isFlying = getHeldBalloons().isNotEmpty()
         }
 
         if (isEyeInFluid(FluidTags.WATER)) {
@@ -420,7 +416,6 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
             balloon.snapTo(randomX, eyeY + 1.0, randomZ)
             level.addFreshEntity(balloon)
             balloon.setLeashedTo(this, true)
-            balloons.add(balloon)
         }
     }
 

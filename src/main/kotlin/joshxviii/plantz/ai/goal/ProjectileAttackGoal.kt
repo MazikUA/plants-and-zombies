@@ -3,6 +3,7 @@ package joshxviii.plantz.ai.goal
 import joshxviii.plantz.PazSounds
 import joshxviii.plantz.applyImpulse
 import joshxviii.plantz.entity.plant.Plant
+import joshxviii.plantz.getHeldBalloons
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.sounds.SoundEvent
 import net.minecraft.util.Mth
@@ -35,6 +36,7 @@ class ProjectileAttackGoal(
     val useHighArc: Boolean = false,
     val soundEvent: SoundEvent? = PazSounds.PROJECTILE_SHOOT,
     val leadShots: Boolean = true,
+    val aimAtBalloons: Boolean = false,
 ) : ActionGoal(usingEntity, cooldownTime, actionDelay, actionStartEffect, actionSuccessEffect, actionEndEffect, actionPredicate, delayedEffectDelay, delayedEffect) {
     var distanceSqr: Double = 0.0
 
@@ -78,7 +80,13 @@ class ProjectileAttackGoal(
     }
 
     override fun doAction() : Boolean {// fire projectile
-        val target = usingEntity.target?: return false
+        var target: Entity = usingEntity.target?: return false
+
+        if (aimAtBalloons) {
+            target.getHeldBalloons().firstOrNull()?.let{
+                target = it
+            }
+        }
 
         val level = usingEntity.level() as ServerLevel
         val projectile = projectileFactory()
@@ -120,7 +128,7 @@ class ProjectileAttackGoal(
         return true
     }
 
-    private fun calculateMovingTargetPosition(target: LivingEntity, projectile: Entity, v: Double): Vec3 {
+    private fun calculateMovingTargetPosition(target: Entity, projectile: Entity, v: Double): Vec3 {
         val basePos = Vec3(
             target.x - projectile.x,
             target.boundingBox.minY + (target.bbHeight * 0.5) - projectile.y,

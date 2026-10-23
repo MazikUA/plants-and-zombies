@@ -59,14 +59,18 @@ class BrownCoat(type: EntityType<out BrownCoat>, level: Level) : PazZombie(type,
     }
 
     fun spawnWithBalloons() {
+        var balloonCount = random.nextIntBetweenInclusive(2,3)
+        if (variant == BrownCoatVariant.BROWN && random.nextFloat() < 0.33) {
+            variant = BrownCoatVariant.BALLOON
+            balloonCount+=2
+        }
         val balloonColors = when (variant) {
             BrownCoatVariant.DESERT -> listOf(DyeColor.ORANGE, DyeColor.BROWN)
             BrownCoatVariant.SNOW -> listOf(DyeColor.LIGHT_BLUE, DyeColor.WHITE)
             BrownCoatVariant.BUCCANEER -> listOf(DyeColor.BLACK, DyeColor.RED)
             else -> listOf(DyeColor.RED, DyeColor.YELLOW, DyeColor.BLUE)
         }
-        if (variant == BrownCoatVariant.BROWN && random.nextFloat() < 0.33) variant = BrownCoatVariant.BALLOON
-        spawnBalloons(random.nextIntBetweenInclusive(2,3), balloonColors)
+        spawnBalloons(balloonCount, balloonColors)
     }
 
     override fun finalizeSpawn(
@@ -99,7 +103,7 @@ class BrownCoat(type: EntityType<out BrownCoat>, level: Level) : PazZombie(type,
             }
         }
 
-        val spawnBalloons = (spawnReason != EntitySpawnReason.EVENT && spawnReason != EntitySpawnReason.REINFORCEMENT && y > level.seaLevel && random.nextFloat() < 0.02)
+        val spawnBalloons = (spawnReason != EntitySpawnReason.EVENT && spawnReason != EntitySpawnReason.REINFORCEMENT && y > level.seaLevel && random.nextFloat() < 10.02)
         if (spawnBalloons) spawnWithBalloons()
 
         return data

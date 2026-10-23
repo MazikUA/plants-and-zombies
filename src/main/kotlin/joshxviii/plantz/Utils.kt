@@ -1,6 +1,7 @@
 package joshxviii.plantz
 
 import joshxviii.plantz.PazMain.MODID
+import joshxviii.plantz.entity.Balloon
 import joshxviii.plantz.entity.plant.Plant
 import joshxviii.plantz.entity.plant.saveAsCompoundTag
 import joshxviii.plantz.raid.WaveType
@@ -41,7 +42,6 @@ import net.minecraft.world.level.pathfinder.Path
 import net.minecraft.world.level.storage.loot.LootTable
 import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.Vec3
-import org.joml.Vector3f
 import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.pow
@@ -178,6 +178,10 @@ fun Vec3.toAngle(): Float {
 }
 
 fun Item.name(): Component = Component.translatable(this.descriptionId)
+
+fun Entity.getHeldBalloons(): List<Balloon> {
+    return Leashable.leashableLeashedTo(this).filterIsInstance<Balloon>()
+}
 
 fun Entity.canWearPlant(): Boolean {
     return this is LivingEntity && this.getItemBySlot(EquipmentSlot.HEAD).`is`(PazItems.PLANT_POT_HELMET)

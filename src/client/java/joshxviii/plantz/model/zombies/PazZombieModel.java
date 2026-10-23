@@ -33,7 +33,7 @@ public class PazZombieModel<S extends PazZombieRenderState> extends ZombieModel<
         var mainRoot = root.hasChild("root") ? root.getChild("root") : root;
         super(mainRoot);
 
-        this.propeller = RenderingUtilsKt.getChildOrNull(this.getHead(), "big_hat");
+        this.propeller = RenderingUtilsKt.getChildOrNull(this.getHead(), "propeller");
 
         this.emergeAnimation = Objects.requireNonNullElse(initAnimationOverride, PazZombieAnimations.emerge).bake(mainRoot);
         this.retreatAnimation = PazZombieAnimations.retreat.bake(mainRoot);
@@ -108,7 +108,7 @@ public class PazZombieModel<S extends PazZombieRenderState> extends ZombieModel<
             var animationPos = state.walkAnimationPos;
             var animationSpeed = state.walkAnimationSpeed + 0.2f;
             floatAnimation.applyWalk(animationPos, animationSpeed, 1f, 2f);
-            if (this.propeller != null) propeller.yRot = (float) Math.toRadians(animationPos);
+            if (this.propeller != null) propeller.yRot = animationPos;
         }
         emergeAnimation.apply(state.getEmergeAnimationState(), state.ageInTicks);
         retreatAnimation.apply(state.getRetreatAnimationState(), state.ageInTicks);
