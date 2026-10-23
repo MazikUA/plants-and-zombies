@@ -3,6 +3,7 @@ package joshxviii.plantz.block.entity
 import joshxviii.plantz.PazBlocks
 import joshxviii.plantz.PazEffects
 import joshxviii.plantz.raid.ZombieRaid
+import joshxviii.plantz.raid.ZombieRaid.Companion.FLAG_MAX_HEALTH
 import net.minecraft.core.BlockPos
 import net.minecraft.core.HolderLookup
 import net.minecraft.nbt.CompoundTag
@@ -111,7 +112,9 @@ class FlagBlockEntity(
         syncToClient()
     }
 
-    private fun healthToDestroyProgress(): Int = floor((1f - (health / maxHealth)) * 10f).toInt()
+    fun healthProgress(): Float = (health / maxHealth).coerceIn(0f, 1f)
+
+    private fun healthToDestroyProgress(): Int = floor((1f - healthProgress()) * 10f).toInt()
 
     override fun saveAdditional(output: ValueOutput) {
         super.saveAdditional(output)

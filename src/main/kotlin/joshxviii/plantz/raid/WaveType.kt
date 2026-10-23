@@ -5,7 +5,7 @@ import io.netty.buffer.ByteBuf
 import joshxviii.plantz.PazEntities
 import joshxviii.plantz.PazItems
 import joshxviii.plantz.PazLootTables
-import joshxviii.plantz.entity.Balloon
+import joshxviii.plantz.SeasonalEvents
 import joshxviii.plantz.entity.zombie.*
 import net.minecraft.core.component.DataComponents
 import net.minecraft.core.registries.Registries
@@ -78,7 +78,7 @@ enum class WaveType(
                 WaveSpawnEntry(
                     PazEntities.GARGANTUAR,
                     if (wave == 10) 1 // always spawn at wave 10
-                    else if (wave > 11) scaled(1f + (wave - 13) * 0.3f, omen, credits, min = 0) else 0
+                    else if (wave > 11) scaled(0.5f + (wave - 13) * 0.3f, omen, credits, max = 3) else 0
                 ),
                 WaveSpawnEntry(
                     PazEntities.ENGINEER_ZOMBIE,
@@ -186,6 +186,20 @@ enum class WaveType(
             )
         },
         lootTableFn = { _, _ -> PazLootTables.MAIL_REWARD_WINTER }
+    ),
+    ZOMBOWEEN(
+        minWave = 3,
+        maxWave = 11,
+        creditsRequired = false,
+        weightFn = { raid, credits ->
+            if (SeasonalEvents.isHalloween()) 1f else 0f
+        },
+        spawnFn = { raid, credits ->
+            listOf(
+
+            )
+        },
+        lootTableFn = { _, _ -> PazLootTables.MAIL_REWARD_ZOMBOWEEN }
     ),
     PIRATE_INVASION(
         minWave = 9,
@@ -369,6 +383,10 @@ enum class WaveType(
                     zombie.setDropChance(EquipmentSlot.MAINHAND, 0.0f)
                 }
             }
+        }
+
+        fun configureZomboween(zombie: Zombie) {
+
         }
 
         fun configurePirateInvasion(zombie: Zombie) {

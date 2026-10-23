@@ -54,6 +54,30 @@ import kotlin.math.sqrt
 
 fun pazResource(path: String): Identifier = Identifier.fromNamespaceAndPath(MODID, path)
 
+object SeasonalEvents {
+    fun dayNow(): LocalDate = LocalDate.now()
+
+    fun isNear(
+        monthDay: MonthDay,
+        daysBefore: Long = 14,
+        daysAfter: Long = 7,
+        today: LocalDate = dayNow(),
+    ): Boolean {
+        for (yearOffset in -1..1) {
+            val event = monthDay.atYear(today.year + yearOffset)
+            val daysUntil = ChronoUnit.DAYS.between(today, event)
+            if (daysUntil in -daysAfter..daysBefore) return true
+        }
+        return false
+    }
+
+    fun isHalloween(): Boolean =
+        isNear(MonthDay.of(Month.OCTOBER, 31))
+
+    fun isChristmas(): Boolean =
+        isNear(MonthDay.of(Month.DECEMBER, 25))
+}
+
 interface GardenHeroRewards {
     fun `plantz$getWaveList`(): MutableList<WaveType>
     fun `plantz$setWaveList`(value: MutableList<WaveType>)
@@ -66,22 +90,6 @@ interface GardenHeroRewards {
             return rewards
         }
     }
-}
-
-interface ZombieRaider {
-    fun `plantz$getIsFromRaid`(): Boolean
-    fun `plantz$setIsFromRaid`(value: Boolean)
-    fun `plantz$getAddsHealthToRaid`(): Boolean
-    fun `plantz$setAddsHealthToRaid`(value: Boolean)
-}
-
-fun Zombie.getEffectiveRaidHealth(): Float {
-    if (this !is ZombieRaider) return 0f
-    return if (this.`plantz$getAddsHealthToRaid`() && this.`plantz$getIsFromRaid`() && this.isAlive) this.health else 0f
-}
-
-fun Zombie.isActiveInRaid(): Boolean {
-    return this is ZombieRaider && this.`plantz$getIsFromRaid`() && this.isAlive
 }
 
 interface PlantHeadAttachment {
