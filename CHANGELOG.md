@@ -1,5 +1,8 @@
 # Changelog 1.6
 ### Additions
+#### General:
+- Added Time Machine.
+  - ***Currently not obtainable outside of Creative mode.***
 
 # Changelog 1.5
 ### Additions
@@ -8,16 +11,14 @@
 - When placing plants in plant pots, their initial rotation will be orientated the same as the pot.
 - While a plant is equipped using the Plant Pot Helmet, you can place them back in plant pots by shift clicking.
 - Added Brainz Alloy.
-  - Drops from the Grave Loot, Raid rewards, Rob Zombies, Super Brainz, Zombie Bots, and various other methods.
+  - Drops from Grave Loot, Raid rewards, Robot Zombies, Super Brainz, Gargantuar, and various other methods.
   - Used for crafting blocks and special zombie tech.
 - Added Brainz Alloy block set.
   - Blocks include: Brainz Alloy Block, Stairs, Slab, Treaded Brainz Alloy Block, Reinforced Brainz Alloy Block, and Brainz Alloy Fences.
-- Added Time Machine.
-  - ***Currently not obtainable outside of Creative mode.***
 - Added Gardening Gloves.
   - Can be obtained from a level 3 farmer or from raid rewards.
-  - Lets players pet plants with right-click or pick up and hold one plant by shift-clicking.
-  - Can harvest and auto replant crops when the player has the right seeds/crops in their inventory with right-click.
+  - Lets players pet plants with right-click or pick-up and hold one plant by shift-clicking.
+  - Can harvest crops with right click and can auto replant when the player has the right seeds/crops in their inventory.
   - Can also be used to roll Wall Nuts by punching them.
 - Farmer Villagers trades have been added or changed.
   - Level 1: An emerald for 32 Sun.
@@ -28,18 +29,21 @@
   - Players and mobs shot with the blaster will be given the "painted" mob effect.
 - Added Balloons
   - Balloons are attached to leads by default and can be tied to other mobs and fences.
-  - Balloons pull the holder upward slightly. By carrying enough balloons, you can negate fall damage or even begin to float.
+  - A single Balloon will pull the holder upward slightly. By carrying enough balloons, you can negate fall damage or even begin to float.
 - Added Gravestone Block
-  - Zombies will emerge from the ground near the gravestone during the night.
+  - Zombies will emerge from the ground near the gravestone during the night, during thunderstorms, or in certain spooky biomes.
 - Added The Graveyard biome.
 - Added Garden Gnome Blocks.
 - Added Tacos as a food item. It can be received as a raid reward or crafted with ingredients from [Farmer's Delight](https://modrinth.com/mod/farmers-delight-refabricated).
 - The Football Helmet now gives increased speed and step height while sprinting. Nearby Mobs will also be knocked back.
-- Added Freeze Mob Effect.
+- Added "Freeze" Mob Effect.
+  - Freezes players and mobs in place.
+- Added "Chilled" Mob Effect.
+  - Slows players and mobs down.
+- Added "Painted" Mob Effect.
+  - The effect will cover the player's screen with the dye color of the effect
 - Added "Hero of the Garden" Effect.
-  - Applies after defeating a raid.
   - While the effect is active, interacting with a mailbox will grant loot for each completed wave in the raid.
-  - Special Waves will grant loot unique to that wave.
 #### Plants:
 - Added Electric Peashooter
   - Acquired by striking a peashooter with lightning.
@@ -56,11 +60,11 @@
   - Acquired from Melon Pult zen-gardening while in cold biomes.
 - Added Ice Shroom
   - Found in icy biomes.
-- Snow Peas will now apply the Freeze effect rather than Slowness and Weakness.
+- Snow Peas will now apply the Chilled mob effect rather than Slowness and Weakness.
 - Added plant transformations
   - Some plants can be transformed into other plants under certain conditions.
 - Added Seed Packet Mutations
-  - When zen-gardening a plant, seeds for a different plant may be produced instead.
+  - When zen-gardening a plant, seeds for a different plant type may be produced instead.
     - Wall Nut has an 8% chance to produce Explode-O-Nut seeds.
     - Explode-O-Nut has an 40% chance to produce Wall Nut seeds.
     - Electric Peashooter has a 95% chance to produce Peashooter seeds.
@@ -71,44 +75,42 @@
 - Repeaters no longer spawn naturally.
 - Wall Nuts can now be rolled around by either using Gardening Gloves or by being pushed with a piston.
 #### Zombies:
-- Added the Hero of the Garden effect.
-  - While the effect is active, interacting with a mailbox will grant hero rewards based on the effect's level.
 - Updated the Zombie Raid event.
-  - Wild plants within the radius of the raid will vanish, and new plants will not spawn in the area until the raid has finished.
-  - The amount of waves a raid has is determined by: 2 + (zombie omen level * 2) + (the game's difficulty) + (2 if the end credits have been seen).
-  - Using another Bad Omen potion during a raid will extend the raid's wave. Unless the raid is already in its final wave.
-  - After the end credits have been seen, waves during a raid will be more difficult.
+  - Wild plants within the radius of the raid will vanish, and new plants will not spawn in the area until the raid has been complete.
   - After losing a raid, all the zombies in the raid will vanish and no rewards will be given.
+  - The amount of waves a raid is determined by: (A base of 2) + (bad omen level * 2) + (the game's difficulty: 0, 1, 2, or 3) + (2 if the end credits have been seen).
+  - Using another Bad Omen potion during a raid will extend the raid by the potion's amplification level. Unless the raid is already in its final wave.
+  - After the end credits have been seen, waves during a raid will be more challenging.
   - Added Special wave types:
-    - "Bucket Brigade" can occur during waves 1–3.
-    - "Half-time Showdown" can occur during waves 2–5.
-    - "Winter Wonderland" can occur during waves 4–9.
-    - "Pirate Invasion" can occur during waves 5–14.
-    - "Robo Army" can occur during waves 6–15. (Only after the end credits have been seen)
-    - "League of Awesome" can occur during waves 8–19. (Only after the end credits have been seen)
-  - When a raid is completed, all players participating in the raid will receive the Hero of the Garden effect.
-  - Special waves add unique loot to the item pool when claiming raid hero rewards.
+    - "Bucket Brigade" can occur during waves 1–4.
+    - "Half-time Showdown" can occur during waves 2–6.
+    - "Winter Wonderland" can occur during waves 5–9.
+    - "Pirate Invasion" can occur during waves 9–15.
+    - "Robo Army" can occur during waves 12–16. (Only after the end credits have been seen)
+    - "League of Awesome" can occur during waves 13–19. (Only after the end credits have been seen)
+  - When a raid has been completed, all players participating in the raid will receive the "Hero of the Garden" effect.
+  - Special waves add unique loot to the reward item pool when interacting with a mailbox.
   - Every 5 waves completed will add an item from the party loot table.
     - Party Loot Includes:
-    - Tacos
-    - Balloons
-    - Lawn Flamingos
-    - Gargen Gnomes
-- Added Desert, Snow, and Pirate Variants for the Browncoat Zombie.
+      - Tacos
+      - Balloons
+      - Lawn Flamingos
+      - Garden Gnomes
+- Added Desert, Snow, Pirate, and Balloon Variants for the Browncoat Zombie.
   - The pirate browncoat will spawn during the "Pirate Invasion" special wave.
   - The snow browncoat will spawn during the "Winter Wonderland" special wave.
-- Added a Yeti and Pirate Variant for the Imp,
-  - Yeti Imps apply the Freeze effect and spawn during the "Winter Wonderland" special wave.
-  - Pirate Imps spawn in an explosive barrel and spawn during the "Pirate Invasion" special wave.
+  - Browncoats that spawn with balloons have a 33% chance to be a balloon browncoat.
+  - Browncoats that spawn in the desert have a 75% chance to be a desert browncoat.
+- Added a Yeti and Pirate Variants for the Imp,
+  - Yeti Imps apply the Chilled mob effect and spawn during the "Winter Wonderland" special wave.
+  - Pirate Imps spawn in an explosive barrel and during the "Pirate Invasion" special wave.
 - Added a Pirate Variant for Gargantuar that spawns during the "Pirate Invasion" special wave.
 - Added Engineer Zombie
-  - Spawns during the "Robo Army" zombie wave and normal waves after the end credits have been seen.
   - Will avoid players and plants and will attempt to build zombie bots to attack.
 - Added Soldier Zombie
-  - Spawns during the "Robo Army" special wave.
   - Uses the dye blaster.
 - Added Grave Digger
-  - Has a chance to spawn at night.
+  - Each Zombie raid was a 15% chance to spawn exactly one Grave Digger during any wave.
   - Will dig up gravestones while targeting an entity.
   - After the grave digger has dug up 4–6 graves, it will retreat.
 - Added Robo Zombie
@@ -116,7 +118,7 @@
 - Added Pirate Captain Zombie
   - Spawns during the "Pirate Invasion" special wave. 
 - Added Super Brainz
-  - Spawns during the "League of Awesome" special zombie raid.
+  - Spawns during the "League of Awesome" special wave.
 - Zombies will now attack Wall Nuts when walking into them.
 ### Technical Changes
 - Items that have the Block Projectile item component will no longer deflect piercing projectiles.
@@ -127,6 +129,7 @@
     - `alloyCost` – A list of entity ids paired with an integer.
   - `paz-client.json`:
     - `showHiddenItemsInCreativeTab` – Enables some W.I.P items in the creative tab.
+    - `hideRaidUi` – Hides the zombie raid UI.
 - Added `seed_mutation` data directory.
   - The path for editing Seed Mutations is: `data/<namespace>/seed_mutation/<entity_name>.json`
   - Entry Format:
@@ -137,7 +140,7 @@
       - `chance` - value between 0-1. (defaults to 1.0)
       - `result` - An entity id. (Required)
   - Mutation objects are evaluated from top to bottom, the first mutation that matches the conditions will be accepted.
-  ### Example file: 
+  #### Example file: 
   ```
   {
     "mutations": [
@@ -154,6 +157,22 @@
   }
   ```
   - Datapacks or other mods can add or replace these files to change mutation rates and conditions.
+- Added `plant_icon` item model type.
+  - Used for displaying icons on seed packets and on the gardening glove.
+  - Using a resource pack or mod, you can add custom icons for any entity type in the game.
+  - Add an icon .png to `assets/<namespace>/models/plant_icon/<entity_name>.png`. And add a model .json to `assets/<namespace>/models/plant_icon/<entity_name>.json`.
+  #### Example setup:
+  - Model json: `assets/minecraft/models/plant_icon/pig.json`
+  ```
+  {
+    "parent": "minecraft:item/generated",
+    "textures": {
+      "layer0": "minecraft:item/plant_icon/pig"
+    }
+  }
+  ```
+  - Icon png: `assets/minecraft/models/plant_icon/pig.png`
+  
 
 # Changelog 1.4.2
 ### Hotfix

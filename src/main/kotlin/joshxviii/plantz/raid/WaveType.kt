@@ -133,12 +133,17 @@ enum class WaveType(
 
             listOf(
                 WaveSpawnEntry(
+                    PazEntities.BROWN_COAT,
+                    scaled(4f + wave * 0.9f, omen, credits, min = 3), {
+                        configureDefaultBalloonChance(it, raid)
+                    }),
+                WaveSpawnEntry(
                     PazEntities.ALL_STAR,
-                    scaled(3f + wave * 0.9f, omen, credits, min = 2, max = 12)
+                    scaled(2.5f + wave * 0.9f, omen, credits, min = 2, max = 12)
                 ),
                 WaveSpawnEntry(
                     PazEntities.IMP,
-                    scaled(4f + wave * 0.8f, omen, credits, min = 1), {
+                    scaled(3.5f + wave * 0.8f, omen, credits, min = 1), {
                         configureHalftimeShowdown(it)
                         configureDefaultBalloonChance(it, raid)
                     }
