@@ -10,12 +10,12 @@
 - Plantz Flag will now power-up nearby plants, reducing their cooldown by 20%. This effect does not stack.
 - When placing plants in plant pots, their initial rotation will be orientated the same as the pot.
 - While a plant is equipped using the Plant Pot Helmet, you can place them back in plant pots by shift clicking.
-- Added Brainz Alloy.
+- Added Brainz Alloy
   - Drops from Grave Loot, Raid rewards, Robot Zombies, Super Brainz, Gargantuar, and various other methods.
   - Used for crafting blocks and special zombie tech.
-- Added Brainz Alloy block set.
+- Added Brainz Alloy block set
   - Blocks include: Brainz Alloy Block, Stairs, Slab, Treaded Brainz Alloy Block, Reinforced Brainz Alloy Block, and Brainz Alloy Fences.
-- Added Gardening Gloves.
+- Added Gardening Gloves
   - Can be obtained from a level 3 farmer or from raid rewards.
   - Lets players pet plants with right-click or pick-up and hold one plant by shift-clicking.
   - Can harvest crops with right click and can auto replant when the player has the right seeds/crops in their inventory.
@@ -24,25 +24,30 @@
   - Level 1: An emerald for 32 Sun.
   - Level 2: Watering Can and Potatomine seeds.
   - Level 3: Gardening Gloves.
+- The Solar Battery can now be crafted with 4 x brainz alloy, 1 x reinforced brainz alloy block, 1 x daylight detector, and 2 x glass.
 - Added Dye Blaster
   - Has a 40% chance to consume dye as ammo.
   - Players and mobs shot with the blaster will be given the "painted" mob effect.
 - Added Balloons
   - Balloons are attached to leads by default and can be tied to other mobs and fences.
   - A single Balloon will pull the holder upward slightly. By carrying enough balloons, you can negate fall damage or even begin to float.
+  - Balloons can be crafted with phantom membrane, a wind charge, and string
 - Added Gravestone Block
   - Zombies will emerge from the ground near the gravestone during the night, during thunderstorms, or in certain spooky biomes.
-- Added The Graveyard biome.
-- Added Garden Gnome Blocks.
+- Added The Graveyard biome
+- Added Garden Gnome Blocks
+- Added the Lawn Flamingo Block
+- Added The Mail Collection Box
+  - Can be triggered with redstone to automatically send mail to a selected mailbox.
 - Added Tacos as a food item. It can be received as a raid reward or crafted with ingredients from [Farmer's Delight](https://modrinth.com/mod/farmers-delight-refabricated).
 - The Football Helmet now gives increased speed and step height while sprinting. Nearby Mobs will also be knocked back.
-- Added "Freeze" Mob Effect.
+- Added "Freeze" Mob Effect
   - Freezes players and mobs in place.
-- Added "Chilled" Mob Effect.
+- Added "Chilled" Mob Effect
   - Slows players and mobs down.
-- Added "Painted" Mob Effect.
+- Added "Painted" Mob Effect
   - The effect will cover the player's screen with the dye color of the effect
-- Added "Hero of the Garden" Effect.
+- Added "Hero of the Garden" Effect
   - While the effect is active, interacting with a mailbox will grant loot for each completed wave in the raid.
 #### Plants:
 - Added Electric Peashooter
