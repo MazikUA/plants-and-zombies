@@ -5,8 +5,7 @@
   - ***Currently not obtainable outside of Creative mode.***
 
 # Changelog 1.5
-### Additions
-#### General:   
+### General:   
 - Plantz Flag will now power-up nearby plants, reducing their cooldown by 20%. This effect does not stack.
 - When placing plants in plant pots, their initial rotation will be orientated the same as the pot.
 - While a plant is equipped using the Plant Pot Helmet, you can place them back in plant pots by shift clicking.
@@ -49,7 +48,7 @@
   - The effect will cover the player's screen with the dye color of the effect
 - Added "Hero of the Garden" Effect
   - While the effect is active, interacting with a mailbox will grant loot for each completed wave in the raid.
-#### Plants:
+### Plants:
 - Added Electric Peashooter
   - Acquired by striking a peashooter with lightning.
 - Added Lightning Reed
@@ -79,8 +78,9 @@
     - Winter Melon has a 75% chance to produce Melonpult seeds.
 - Repeaters no longer spawn naturally.
 - Wall Nuts can now be rolled around by either using Gardening Gloves or by being pushed with a piston.
-#### Zombies:
+### Zombies:
 - Updated the Zombie Raid event.
+  - Added new raid music by [@Patrika](https://www.youtube.com/@pattrika)
   - Wild plants within the radius of the raid will vanish, and new plants will not spawn in the area until the raid has been complete.
   - After losing a raid, all the zombies in the raid will vanish and no rewards will be given.
   - The amount of waves a raid is determined by: (A base of 2) + (bad omen level * 2) + (the game's difficulty: 0, 1, 2, or 3) + (2 if the end credits have been seen).
@@ -125,7 +125,7 @@
 - Added Super Brainz
   - Spawns during the "League of Awesome" special wave.
 - Zombies will now attack Wall Nuts when walking into them.
-### Technical Changes
+## Technical Changes
 - Items that have the Block Projectile item component will no longer deflect piercing projectiles.
 - Added BrainzAlloyCost item component.
 - Added configuration options.
@@ -150,13 +150,18 @@
   {
     "mutations": [
       {
-        "biomes": "#plantz:plant/has_winter_melon",
-        "chance": 0.75,
-        "result": "plantz:winter_melon"
+        "weather": "thunder",
+        "chance": 0.4,
+        "result": "plantz:electric_peashooter"
       },
       {
-        "chance": 0.6,
-        "result": "plantz:melonpult"
+        "biome": "#plantz:plant/has_fire_peashooter",
+        "chance": 0.33,
+        "result": "plantz:fire_peashooter"
+      },
+      {
+        "chance": 0.1,
+        "result": "plantz:repeater"
       }
     ]
   }
