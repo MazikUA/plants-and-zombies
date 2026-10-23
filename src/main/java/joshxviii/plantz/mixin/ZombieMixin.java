@@ -41,6 +41,8 @@ public class ZombieMixin implements ZombieRaider {
 
     @Unique
     static private final EntityDataAccessor<Boolean> IS_FROM_RAID  = SynchedEntityData.defineId(Zombie.class, EntityDataSerializers.BOOLEAN);
+    @Unique
+    static private final EntityDataAccessor<Boolean> ADDS_HEALTH_TO_RAID  = SynchedEntityData.defineId(Zombie.class, EntityDataSerializers.BOOLEAN);
 
     @Override
     public boolean plantz$getIsFromRaid() {
@@ -52,19 +54,32 @@ public class ZombieMixin implements ZombieRaider {
         ((Entity) (Object) this).getEntityData().set(IS_FROM_RAID, value);
     }
 
+    @Override
+    public boolean plantz$getAddsHealthToRaid() {
+        return ((Entity) (Object) this).getEntityData().get(ADDS_HEALTH_TO_RAID);
+    }
+
+    @Override
+    public void plantz$setAddsHealthToRaid(boolean value) {
+        ((Entity) (Object) this).getEntityData().set(ADDS_HEALTH_TO_RAID, value);
+    }
+
     @Inject(method = "defineSynchedData", at = @At("TAIL"))
     public void syncedData(SynchedEntityData.Builder entityData, CallbackInfo ci) {
         entityData.define(IS_FROM_RAID, false);
+        entityData.define(ADDS_HEALTH_TO_RAID, true);
     }
 
     @Inject(method = "addAdditionalSaveData", at = @At("TAIL"))
     private void saveCustomFlags(ValueOutput output, CallbackInfo ci) {
         output.putBoolean("plantz:IsFromRaid", this.plantz$getIsFromRaid());
+        output.putBoolean("plantz:AddsHealthToRaid", this.plantz$getAddsHealthToRaid());
     }
 
     @Inject(method = "readAdditionalSaveData", at = @At("TAIL"))
     private void loadCustomFlags(ValueInput input, CallbackInfo ci) {
         this.plantz$setIsFromRaid(input.getBooleanOr("plantz:IsFromRaid", false));
+        this.plantz$setAddsHealthToRaid(input.getBooleanOr("plantz:AddsHealthToRaid", true));
     }
 
     @ModifyArgs(method = "hurtServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/monster/Monster;hurtServer(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)Z"))

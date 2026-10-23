@@ -88,7 +88,7 @@ enum class WaveType(
                     PazEntities.SOLDIER_ZOMBIE,
                     if (credits && wave > 8) scaled(1f + (wave - 8) * 0.5f, omen, true) else 0
                 ),
-                graveDiggerEntry(wave),
+                graveDiggerEntry(raid),
             )
         },
         lootTableFn = { waveNum, _ -> if (waveNum > 7) PazLootTables.MAIL_REWARD_DEFAULT_HARD else PazLootTables.MAIL_REWARD_DEFAULT_EASY }
@@ -134,9 +134,9 @@ enum class WaveType(
             listOf(
                 WaveSpawnEntry(
                     PazEntities.BROWN_COAT,
-                    scaled(4f + wave * 0.9f, omen, credits, min = 3), {
-                        configureDefaultBalloonChance(it, raid)
-                    }),
+                    scaled(4f + wave * 0.9f, omen, credits, min = 3),
+                    ::configureHalftimeShowdown
+                ),
                 WaveSpawnEntry(
                     PazEntities.ALL_STAR,
                     scaled(2.5f + wave * 0.9f, omen, credits, min = 2, max = 12)
@@ -148,7 +148,7 @@ enum class WaveType(
                         configureDefaultBalloonChance(it, raid)
                     }
                 ),
-                graveDiggerEntry(wave),
+                graveDiggerEntry(raid),
             )
         },
         lootTableFn = { _, _ -> PazLootTables.MAIL_REWARD_HALFTIME }
@@ -182,7 +182,7 @@ enum class WaveType(
                     PazEntities.ZOMBIE_YETI,
                     scaled(1.2f + wave * 0.35f, omen, credits, min = 1)
                 ),
-                graveDiggerEntry(wave),
+                graveDiggerEntry(raid),
             )
         },
         lootTableFn = { _, _ -> PazLootTables.MAIL_REWARD_WINTER }
@@ -221,7 +221,7 @@ enum class WaveType(
                     if (wave > 10) scaled(0.6f + wave * 0.1f, omen, credits, min = 0) else 0,
                     ::configurePirateInvasion
                 ),
-                graveDiggerEntry(wave),
+                graveDiggerEntry(raid),
             )
         },
         lootTableFn = { _, _ -> PazLootTables.MAIL_REWARD_PIRATE }
@@ -345,8 +345,11 @@ enum class WaveType(
         }
 
         fun configureHalftimeShowdown(zombie: Zombie) {
-            zombie.setItemSlot(EquipmentSlot.HEAD, PazItems.FOOTBALL_HELMET.defaultInstance)
-            zombie.setDropChance(EquipmentSlot.HEAD, 0.0f)
+            if (zombie is Imp) {
+                zombie.setItemSlot(EquipmentSlot.HEAD, PazItems.FOOTBALL_HELMET.defaultInstance)
+                zombie.setDropChance(EquipmentSlot.HEAD, 0.0f)
+            }
+            if (zombie is BrownCoat) zombie.spawnWithBalloons()
         }
 
         fun configureWinterWonderland(zombie: Zombie) {
@@ -421,9 +424,8 @@ enum class WaveType(
             }
         }
 
-        fun graveDiggerEntry(wave: Int): WaveSpawnEntry = WaveSpawnEntry(
-            PazEntities.GRAVE_DIGGER,
-            if (wave > 4 && Math.random() > 0.15) 1 else 0
+        fun graveDiggerEntry(raid: ZombieRaid): WaveSpawnEntry = WaveSpawnEntry(
+            PazEntities.GRAVE_DIGGER, if (raid.currentWaveNumber() > 4 && raid.random.nextFloat() < 0.175f) 1 else 0
         )
     }
 

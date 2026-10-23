@@ -517,12 +517,13 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
     ): SpawnGroupData? {
         val newData = PazZombieGroupData(
             isRaider = (groupData as? PazZombieGroupData)?.isRaider?: false,
+            isCountedTowardRaidHealth = (groupData as? PazZombieGroupData)?.isCountedTowardRaidHealth?: false,
             isBaby = isBaby && (groupData as? ZombieGroupData)?.isBaby?: false
         )
         val level = level() as ServerLevel
         if (newData.isRaider) {
             val raid = level.getZombieRaids().getNearbyRaid(blockPosition(), RAID_DISTANCE)
-            raid?.joinRaid(level, this)
+            raid?.joinRaid(level, this, newData.isCountedTowardRaidHealth)
         }
 
         val data = super.finalizeSpawn(level, difficulty, spawnReason, newData)
@@ -541,6 +542,7 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
 
 class PazZombieGroupData(
     val isRaider: Boolean = false,
+    val isCountedTowardRaidHealth: Boolean = true,
     isBaby: Boolean = false
 ) : Zombie.ZombieGroupData(
     isBaby,

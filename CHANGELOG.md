@@ -4,6 +4,13 @@
 - Added Time Machine.
   - ***Currently not obtainable outside of Creative mode.***
 
+# Changelog 1.5.1
+### Fixes
+- Reduced Grave Digger spawn chance during raids.
+- Zombie Robots built by the Engineer will vanish at the end of the raid.
+- Balloon Zombies can drop balloons when killed.
+- 
+
 # Changelog 1.5
 ### General:   
 - Plantz Flag will now power-up nearby plants, reducing their cooldown by 20%. This effect does not stack.

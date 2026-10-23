@@ -29,6 +29,7 @@ import net.minecraft.world.entity.ai.control.LookControl
 import net.minecraft.world.entity.ai.navigation.PathNavigation
 import net.minecraft.world.entity.ai.targeting.TargetingConditions
 import net.minecraft.world.entity.item.FallingBlockEntity
+import net.minecraft.world.entity.monster.zombie.Zombie
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.entity.projectile.Projectile
 import net.minecraft.world.item.DyeColor
@@ -42,6 +43,10 @@ import net.minecraft.world.level.pathfinder.Path
 import net.minecraft.world.level.storage.loot.LootTable
 import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.Vec3
+import java.time.LocalDate
+import java.time.Month
+import java.time.MonthDay
+import java.time.temporal.ChronoUnit
 import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.pow
@@ -66,6 +71,17 @@ interface GardenHeroRewards {
 interface ZombieRaider {
     fun `plantz$getIsFromRaid`(): Boolean
     fun `plantz$setIsFromRaid`(value: Boolean)
+    fun `plantz$getAddsHealthToRaid`(): Boolean
+    fun `plantz$setAddsHealthToRaid`(value: Boolean)
+}
+
+fun Zombie.getEffectiveRaidHealth(): Float {
+    if (this !is ZombieRaider) return 0f
+    return if (this.`plantz$getAddsHealthToRaid`() && this.`plantz$getIsFromRaid`() && this.isAlive) this.health else 0f
+}
+
+fun Zombie.isActiveInRaid(): Boolean {
+    return this is ZombieRaider && this.`plantz$getIsFromRaid`() && this.isAlive
 }
 
 interface PlantHeadAttachment {

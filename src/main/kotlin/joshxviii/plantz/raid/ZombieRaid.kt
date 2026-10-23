@@ -81,7 +81,7 @@ class ZombieRaid(
                     Codec.BOOL.fieldOf("is_leader").forGetter(RaiderRecord::isLeader)
                 ).apply(i, ::RaiderRecord)
             }
-            fun of(zombie: Zombie, wave: Int) = RaiderRecord(zombie.uuid, wave, zombie.health, zombie.blockPosition(), false)
+            fun of(zombie: Zombie, wave: Int) = RaiderRecord(zombie.uuid, wave, zombie.getEffectiveRaidHealth(), zombie.blockPosition(), false)
         }
     }
 
@@ -222,7 +222,7 @@ class ZombieRaid(
         }
 
         if (
-            ((getTotalZombiesAlive() == 0 && raidCooldownTicks > 0) || waveTimer == 0) && !isFinalWave()
+            ((getAliveRaiders() == 0 && raidCooldownTicks > 0) || waveTimer == 0) && !isFinalWave()
         ) {
             raidCooldownTicks-- // pre-loading time
             waveTimer = 0
@@ -244,7 +244,7 @@ class ZombieRaid(
         }
 
         // victory condition (all zombies dead and all waves completed)
-        if (getTotalZombiesAlive() == 0 && isFinalWave()) {
+        if (getAliveRaiders() == 0 && isFinalWave()) {
             status = ZombieRaidStatus.VICTORY
             postRaidTicks = POST_RAID_TICKS
             zombieRaidEvent.players.forEach { player ->// advancement
@@ -256,6 +256,7 @@ class ZombieRaid(
                 player.sendSystemMessage(ZOMBIE_RAID_VICTORY)
                 showTitleMessage(ZOMBIE_RAID_VICTORY_TITLE, sound = PazSounds.RAID_VICTORY, soundSource = SoundSource.MUSIC)
             }
+            vanishAllZombies(level)
             return
         }
         // lose condition (flag destroyed)
@@ -313,7 +314,7 @@ class ZombieRaid(
         while (pending.hasNext()) {
             val record = pending.next()
             val entity = level.getEntity(record.uuid)
-            if (entity is Zombie && entity.isAlive) {
+            if (entity is Zombie && entity.isActiveInRaid()) {
                 pending.remove()
                 addWaveMob(entity, record.wave, level, false)
                 setDirty(level)
@@ -370,7 +371,7 @@ class ZombieRaid(
         if (waveType != WaveType.DEFAULT) announceSpecialWave(waveType)
         else if (wave % 10 == 0) announceBossWave()
         var leaderSet = false
-        totalZombieHealth = 0.0f
+        totalZombieHealth = 0f
 
         val waveEntries = waveType.spawnEntries(this, creditsUnlocked)
 
@@ -385,7 +386,7 @@ class ZombieRaid(
                 val randZ = pos.z + random.nextInt(11) - 5
                 val randY = level.getHeight(Heightmap.Types.OCEAN_FLOOR, randX, randZ)
                 val randomPos = MutableBlockPos(randX,randY,randZ)
-                joinRaid(level, zombie, wave, false, randomPos, configure)
+                joinRaid(level, zombie, true, wave, false, randomPos, configure)
             }
         }
     }
@@ -393,13 +394,14 @@ class ZombieRaid(
     fun joinRaid(
         level: ServerLevel,
         zombie: Zombie,
+        countHealth: Boolean = true,
         waveNumber: Int = currentWaveNumber(),
         exists: Boolean = true,
         pos: BlockPos? = null,
         configure: (Zombie) -> Unit = {},
     ) {
         if (status != ZombieRaidStatus.ONGOING) return
-        val added = addWaveMob(zombie, waveNumber, level)
+        val added = addWaveMob(zombie, waveNumber, level, countHealth)
         if (added) {
             if (!exists && pos != null) {
                 zombie.setPos(pos.x.toDouble() + 0.5, pos.y.toDouble() + 1.0, pos.z.toDouble() + 0.5)
@@ -420,7 +422,7 @@ class ZombieRaid(
     fun removeFromRaid(level: ServerLevel, zombie: Zombie, removeFromTotalHealth: Boolean = true) {
         for (zombies in waveZombieMap.values) {
             if (zombies.remove(zombie)) {
-                if (removeFromTotalHealth) totalZombieHealth -= zombie.health
+                if (removeFromTotalHealth) totalZombieHealth -= zombie.getEffectiveRaidHealth()
                 (zombie as? ZombieRaider)?.`plantz$setIsFromRaid`(false)
                 sendClientUpdate(level)
                 setDirty(level)
@@ -471,8 +473,9 @@ class ZombieRaid(
         if (existingCopy != null) zombies.remove(existingCopy)
 
         zombies.add(zombie)
-        if (countHealth) totalZombieHealth += zombie.maxHealth
         (zombie as? ZombieRaider)?.`plantz$setIsFromRaid`(true)
+        (zombie as? ZombieRaider)?.`plantz$setAddsHealthToRaid`(countHealth)
+        if (countHealth) totalZombieHealth += zombie.maxHealth
 
         sendClientUpdate(level)
         return true
@@ -488,7 +491,7 @@ class ZombieRaid(
             numWaves = numWaves,
             waveTimer = waveTimer,
             zombieHealthMax = if (status != ZombieRaidStatus.NEXT_WAVE) totalZombieHealth else 1f,
-            zombieHealth = getHealthOfZombies(),
+            zombieHealth = healthBarProgress(),
             flagHealth = flag?.health ?: 0f,
             seenCredits = starterHasSeenCredits
         )
@@ -501,21 +504,21 @@ class ZombieRaid(
 
     fun currentWaveNumber(): Int = waveTypes.size
     fun isFinalWave(): Boolean = currentWaveNumber() >= numWaves
-    fun getTotalZombiesAlive(): Int = waveZombieMap.values.stream().mapToInt { it.map { z -> if (z.isAlive) 1 else 0 }.sum() }.sum() + pendingRaiders.size
-    fun getHealthOfZombies(): Float =
+    fun getAliveRaiders(): Int = waveZombieMap.values.stream().mapToInt { it.map { z -> if (z.getEffectiveRaidHealth()>0f) 1 else 0 }.sum() }.sum() + pendingRaiders.size
+    fun healthBarProgress(): Float =
         if (status != ZombieRaidStatus.NEXT_WAVE)// zombie health bar
-            waveZombieMap.values.map { it.map { z -> if (z.isAlive) z.health else 0f }.sum() }.sum() + pendingRaiders.values.sumOf { it.health.toDouble() }.toFloat()
+            waveZombieMap.values.map { it.map { z -> z.getEffectiveRaidHealth() }.sum() }.sum() + pendingRaiders.values.sumOf { it.health.toDouble() }.toFloat()
         else// next wave loading bar
             1f - (raidCooldownTicks.toFloat() / PRE_RAID_TICKS.toFloat())
 
     private fun raiderRecords(): List<RaiderRecord> =
         waveZombieMap.flatMap { (wave, zombies) ->
-            zombies.filter { it.health > 0f && (!it.isRemoved || it.removalReason?.shouldSave() == true) }
+            zombies.filter { it.isActiveInRaid() && (!it.isRemoved || it.removalReason?.shouldSave() == true) }
                 .map { RaiderRecord.of(it, wave) }
         } + pendingRaiders.values
 
     private fun shouldSpawnNextWave(): Boolean {
-        return (getTotalZombiesAlive() == 0 || waveTimer == 0)
+        return (getAliveRaiders() == 0 || waveTimer == 0)
             && status == ZombieRaidStatus.ONGOING
             && !isFinalWave()
     }
