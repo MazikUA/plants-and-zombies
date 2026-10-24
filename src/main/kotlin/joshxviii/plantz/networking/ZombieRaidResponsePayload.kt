@@ -28,13 +28,13 @@ class ZombieRaidResponsePayload(
                 ByteBufCodecs.FLOAT,   { it.data.zombieProgressBar },
                 ByteBufCodecs.FLOAT,   { it.data.bossProgressBar },
                 ByteBufCodecs.BOOL,    { it.data.seenCredits },
-                { id, status, waveTypes, num, timer, activeTime, zombieH, zombieMax, flagH, credits ->
+                { id, status, waveTypes, num, timer, activeTime, plantProgress, zombieProgress, bossProgress, credits ->
                     ZombieRaidResponsePayload(
                         ZombieRaidClientData(
                             id,
                             ZombieRaid.ZombieRaidStatus.entries[status],
                             waveTypes,
-                            num, timer, activeTime, zombieH, zombieMax, flagH, credits
+                            num, timer, activeTime, plantProgress, zombieProgress, bossProgress, credits
                         )
                     )
                 }
@@ -52,9 +52,9 @@ data class ZombieRaidClientData(
     val numWaves: Int = 0,
     val waveTimer: Int = 0,
     val activeTime: Int = 0,
+    val plantProgressBar: Float = 0f,
     val zombieProgressBar: Float = 0f,
     val bossProgressBar: Float = 0f,
-    val plantProgressBar: Float = 0f,
     val seenCredits: Boolean = false
 ) {
     fun currentWaveNumber(): Int = waveTypes.size

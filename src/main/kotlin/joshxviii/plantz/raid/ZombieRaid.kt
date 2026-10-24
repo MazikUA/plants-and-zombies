@@ -44,6 +44,7 @@ import net.minecraft.world.BossEvent
 import net.minecraft.world.Difficulty
 import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.entity.EntitySpawnReason
+import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.EquipmentSlot
 import net.minecraft.world.entity.SpawnGroupData
 import net.minecraft.world.entity.monster.zombie.Zombie
@@ -356,7 +357,10 @@ class ZombieRaid(
         waveTypes.add(waveType)
         val wave = currentWaveNumber()
         waveTimer = if (isFinalWave()) FINAL_WAVE_DURATION else WAVE_DURATION
-        if (wave % 10 == 0) spawnBoss(level, waveType, pos)
+        val shouldSpawnBoss = wave % 10 == 0
+        if (waveType != WaveType.DEFAULT) announceSpecialWave(waveType)
+        else if (shouldSpawnBoss) announceBossWave()
+        if (shouldSpawnBoss) spawnBoss(level, waveType, pos)
         var leaderSet = false
         totalZombieHealth = 0f
 
@@ -379,13 +383,10 @@ class ZombieRaid(
     }
 
     fun spawnBoss(level: ServerLevel, waveType: WaveType, pos: BlockPos) {
-        if (waveType != WaveType.DEFAULT) announceSpecialWave(waveType)
-        else announceBossWave()
-
         // configure bosses
         // TODO: some bosses may consist of multiple entities,
         //  so using a list of a list of entity types makes sense here (like with baron von bats)
-        val bossType = listOf(
+        val bossType: List<EntityType<out Zombie>> = listOf(
             listOf(PazEntities.GARGANTUAR)
         ).random()
         for (type in bossType) {
@@ -395,7 +396,7 @@ class ZombieRaid(
         }
 
         zombieRaidEvent.players.forEach {
-            it.sendSystemMessage(Component.translatable("raid.zombie.boss.spawn", getBosses().firstOrNull()?.name ?: "Unknown").withColor(0xf64a40))
+            it.sendSystemMessage(Component.translatable("event.plantz.zombie_raid.boss.spawn", getBosses().firstOrNull()?.name ?: "Unknown").withColor(0xf64a40))
         }
     }
 
@@ -537,7 +538,7 @@ class ZombieRaid(
 
     private fun raiderRecords(): List<RaiderRecord> =
         waveZombieMap.flatMap { (wave, zombies) ->
-            zombies.filter { it.isActiveInRaid() && (!it.isRemoved || it.removalReason?.shouldSave() == true) }.map { RaiderRecord.save(it, wave) }
+            zombies.filter { it.isAlive && (!it.isRemoved || it.removalReason?.shouldSave() == true) }.map { RaiderRecord.save(it, wave) }
         } + pendingRaiders.values
 
     private fun shouldSpawnNextWave(): Boolean {

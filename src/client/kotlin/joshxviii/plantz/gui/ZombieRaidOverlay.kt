@@ -65,6 +65,9 @@ object ZombieRaidOverlay {
         // zombie health
         zombieBar(x, y, graphics, raidEvent)
 
+        // boss health
+        //bossBar(x, y, graphics, raidEvent)
+
         // timer
         val time = raidEvent.waveTimer
         val timer = Component.literal(time.tickTimeFormat())
@@ -119,9 +122,14 @@ object ZombieRaidOverlay {
         val bossHealthPercent = raidEvent.bossProgressBar
         if (bossHealthPercent <= 0f) return //TODO maybe use -1 to hide bar?
 
+        val font = Minecraft.getInstance().font
+
+        val text = "$bossHealthPercent"
         val bossBarWidth = Mth.floor(BAR_WIDTH * bossHealthPercent)
-        val bossHealthX = x + (BG_WIDTH-BAR_WIDTH) - 17
-        val bossHealthY = y + 15
+        val bossHealthX = (graphics.guiWidth()/2) - font.width(text) / 2
+        val bossHealthY = y + 45
+        graphics.text(font, text, bossHealthX, bossHealthY, -1)
+        return
         graphics.blit(RenderPipelines.GUI_TEXTURED, BOSS_BAR_BACKGROUND, bossHealthX, bossHealthY, 0f, 0f, BAR_WIDTH, BAR_HEIGHT, BAR_WIDTH, BAR_HEIGHT)
         graphics.blit(RenderPipelines.GUI_TEXTURED, BOSS_BAR, bossHealthX, bossHealthY, 0f, 0f, bossBarWidth, BAR_HEIGHT, BAR_WIDTH, BAR_HEIGHT)
     }

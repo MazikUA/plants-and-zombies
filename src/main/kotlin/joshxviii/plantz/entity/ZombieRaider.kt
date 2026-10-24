@@ -42,8 +42,7 @@ interface ZombieRaider {
 }
 
 fun Zombie.getEffectiveRaidHealth(): Float {
-    if (this !is ZombieRaider) return 0f
-    return if (this.`plantz$getAddsHealthToRaid`() && this.`plantz$getIsFromRaid`() && this.isAlive) this.health else 0f
+    return if (this is ZombieRaider && this.`plantz$getAddsHealthToRaid`()) this.health else 0f
 }
 
 fun Zombie.isActiveInRaid(): Boolean = this is ZombieRaider && this.`plantz$getIsFromRaid`() && this.isAlive

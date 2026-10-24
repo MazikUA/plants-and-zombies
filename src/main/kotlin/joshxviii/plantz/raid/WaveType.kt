@@ -195,8 +195,13 @@ enum class WaveType(
             if (SeasonalEvents.isHalloween()) 1f else 0f
         },
         spawnFn = { raid, credits ->
-            listOf(
+            val wave = raid.currentWaveNumber()
+            val omen = raid.zombieRaidOmenLevel
 
+            listOf(
+                WaveSpawnEntry(PazEntities.BROWN_COAT, 1,
+                    ::configureZomboween
+                )
             )
         },
         lootTableFn = { _, _ -> PazLootTables.MAIL_REWARD_ZOMBOWEEN }
@@ -231,8 +236,7 @@ enum class WaveType(
                 ),
                 WaveSpawnEntry(
                     PazEntities.GARGANTUAR,
-                    if (wave == 10) 1 else
-                    if (wave > 10) scaled(0.6f + wave * 0.1f, omen, credits, min = 0) else 0,
+                    if (wave > 10) scaled(0.4f + wave * 0.1f, omen, credits, min = 0) else 0,
                     ::configurePirateInvasion
                 ),
                 graveDiggerEntry(raid),
@@ -386,7 +390,11 @@ enum class WaveType(
         }
 
         fun configureZomboween(zombie: Zombie) {
-
+            val pumpkinChance = zombie.random.nextFloat() < 0.2f
+            if (pumpkinChance) {
+                zombie.setItemSlot(EquipmentSlot.HEAD, Items.JACK_O_LANTERN.defaultInstance)
+                zombie.setDropChance(EquipmentSlot.HEAD, 0.0f)
+            }
         }
 
         fun configurePirateInvasion(zombie: Zombie) {

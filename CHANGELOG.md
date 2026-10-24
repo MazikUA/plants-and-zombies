@@ -9,7 +9,7 @@
 - Reduced Grave Digger spawn chance during raids.
 - Zombie Robots built by the Engineer will vanish at the end of the raid.
 - Balloon Zombies can drop balloons when killed.
-- 
+- Puff Shrooms, Sun Shrooms, and Scaredy Shrooms now spawn again. :,)
 
 # Changelog 1.5
 ### General:   

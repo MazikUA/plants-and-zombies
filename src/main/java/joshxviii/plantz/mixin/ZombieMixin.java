@@ -1,6 +1,7 @@
 package joshxviii.plantz.mixin;
 
 import joshxviii.plantz.*;
+import joshxviii.plantz.entity.ZombieRaider;
 import joshxviii.plantz.entity.zombie.Gargantuar;
 import joshxviii.plantz.entity.zombie.PazZombie;
 import joshxviii.plantz.entity.zombie.ZombieYeti;
@@ -44,6 +45,8 @@ public class ZombieMixin implements ZombieRaider {
     @Unique
     static private final EntityDataAccessor<Boolean> ADDS_HEALTH_TO_RAID  = SynchedEntityData.defineId(Zombie.class, EntityDataSerializers.BOOLEAN);
     @Unique
+    static private final EntityDataAccessor<Boolean> IS_LEADER  = SynchedEntityData.defineId(Zombie.class, EntityDataSerializers.BOOLEAN);
+    @Unique
     static private final EntityDataAccessor<Boolean> IS_BOSS  = SynchedEntityData.defineId(Zombie.class, EntityDataSerializers.BOOLEAN);
 
     @Override
@@ -67,6 +70,16 @@ public class ZombieMixin implements ZombieRaider {
     }
 
     @Override
+    public void plantz$setIsLeader(boolean value) {
+        ((Entity) (Object) this).getEntityData().set(IS_LEADER, value);
+    }
+
+    @Override
+    public boolean plantz$getIsLeader() {
+        return ((Entity) (Object) this).getEntityData().get(IS_LEADER);
+    }
+
+    @Override
     public boolean plantz$getIsBoss() {
         return ((Entity) (Object) this).getEntityData().get(IS_BOSS);
     }
@@ -80,6 +93,7 @@ public class ZombieMixin implements ZombieRaider {
     public void syncedData(SynchedEntityData.Builder entityData, CallbackInfo ci) {
         entityData.define(IS_FROM_RAID, false);
         entityData.define(ADDS_HEALTH_TO_RAID, true);
+        entityData.define(IS_LEADER, false);
         entityData.define(IS_BOSS, false);
     }
 
@@ -87,6 +101,7 @@ public class ZombieMixin implements ZombieRaider {
     private void saveCustomFlags(ValueOutput output, CallbackInfo ci) {
         output.putBoolean("plantz:IsFromRaid", this.plantz$getIsFromRaid());
         output.putBoolean("plantz:AddsHealthToRaid", this.plantz$getAddsHealthToRaid());
+        output.putBoolean("plantz:IsLeader", this.plantz$getIsLeader());
         output.putBoolean("plantz:IsBoss", this.plantz$getIsBoss());
     }
 
@@ -94,6 +109,7 @@ public class ZombieMixin implements ZombieRaider {
     private void loadCustomFlags(ValueInput input, CallbackInfo ci) {
         this.plantz$setIsFromRaid(input.getBooleanOr("plantz:IsFromRaid", false));
         this.plantz$setAddsHealthToRaid(input.getBooleanOr("plantz:AddsHealthToRaid", true));
+        this.plantz$setIsLeader(input.getBooleanOr("plantz:IsLeader", false));
         this.plantz$setIsBoss(input.getBooleanOr("plantz:IsBoss", false));
     }
 
