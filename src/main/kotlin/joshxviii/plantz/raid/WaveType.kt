@@ -201,7 +201,7 @@ enum class WaveType(
             listOf(
                 WaveSpawnEntry(
                     PazEntities.BROWN_COAT,
-                    scaled(5f + wave * 0.9f, omen, credits, min = 5),
+                    scaled(6.25f + wave * 0.9f, omen, credits, min = 5),
                     { configureZomboween(it, raid) }
                 ),
                 WaveSpawnEntry(

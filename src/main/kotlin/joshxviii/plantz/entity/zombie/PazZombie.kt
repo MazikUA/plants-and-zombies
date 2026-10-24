@@ -10,6 +10,7 @@ import joshxviii.plantz.ai.pathfinding.PazFlyingPathNavigation
 import joshxviii.plantz.ai.pathfinding.PazGroundPathNavigation
 import joshxviii.plantz.entity.Balloon
 import joshxviii.plantz.entity.ZombieRaider
+import joshxviii.plantz.entity.setCountHealth
 import joshxviii.plantz.item.BalloonItem
 import joshxviii.plantz.raid.ZombieRaid.Companion.RAID_DISTANCE
 import joshxviii.plantz.raid.getZombieRaids
@@ -524,7 +525,8 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
         val level = level() as ServerLevel
         if (newData.isRaider) {
             val raid = level.getZombieRaids().getNearbyRaid(blockPosition(), RAID_DISTANCE)
-            raid?.joinRaid(level, this, newData.isCountedTowardRaidHealth)
+            this.setCountHealth(newData.isCountedTowardRaidHealth)
+            raid?.joinRaid(level, this)
         }
 
         val data = super.finalizeSpawn(level, difficulty, spawnReason, newData)

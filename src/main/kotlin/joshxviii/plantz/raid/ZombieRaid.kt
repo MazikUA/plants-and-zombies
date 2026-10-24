@@ -392,7 +392,7 @@ class ZombieRaid(
         for (type in bossType) {
             val zombie = type.create(level, EntitySpawnReason.EVENT) ?: return
             setBoss(zombie)
-            joinRaid(level, zombie, true, exists = false, pos = pos)
+            joinRaid(level, zombie, exists = false, pos = pos)
         }
 
         zombieRaidEvent.players.forEach {
@@ -403,14 +403,14 @@ class ZombieRaid(
     fun joinRaid(
         level: ServerLevel,
         zombie: Zombie,
-        countHealth: Boolean = true,
+        addMaxHealth: Boolean = true,
         waveNumber: Int = currentWaveNumber(),
         exists: Boolean = true,
         pos: BlockPos? = null,
         configure: (Zombie) -> Unit = {},
     ) {
         if (status != ZombieRaidStatus.ONGOING) return
-        val added = addWaveMob(zombie, waveNumber, level, countHealth)
+        val added = addWaveMob(zombie, waveNumber, level, addMaxHealth)
         if (added) {
             if (!exists && pos != null) {
                 zombie.setPos(pos.x.toDouble() + 0.5, pos.y.toDouble() + 1.0, pos.z.toDouble() + 0.5)
@@ -464,7 +464,7 @@ class ZombieRaid(
 
     private fun setDirty(level: ServerLevel) { level.getZombieRaids().setDirty() }
 
-    private fun addWaveMob(zombie: Zombie, wave: Int = currentWaveNumber(), level: ServerLevel, countHealth: Boolean = true): Boolean {
+    private fun addWaveMob(zombie: Zombie, wave: Int = currentWaveNumber(), level: ServerLevel, addMaxHealth: Boolean): Boolean {
         waveZombieMap.computeIfAbsent(wave) { Sets.newHashSet<Zombie>() }
         val zombies = waveZombieMap[wave] as MutableSet<Zombie>
         if (zombies.contains(zombie)) return false
@@ -476,8 +476,8 @@ class ZombieRaid(
 
         zombies.add(zombie)
         (zombie as? ZombieRaider)?.`plantz$setIsFromRaid`(true)
-        (zombie as? ZombieRaider)?.`plantz$setAddsHealthToRaid`(countHealth)
-        if (countHealth) totalZombieHealth += zombie.maxHealth
+        val countHealth = (zombie as? ZombieRaider)?.`plantz$getAddsHealthToRaid`() ?: true
+        if (countHealth && addMaxHealth) totalZombieHealth += zombie.maxHealth
 
         sendClientUpdate(level)
         return true
