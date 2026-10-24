@@ -60,7 +60,7 @@ object SeasonalEvents {
     fun isNear(
         monthDay: MonthDay,
         daysBefore: Long = 14,
-        daysAfter: Long = 7,
+        daysAfter: Long = 1,
         today: LocalDate = dayNow(),
     ): Boolean {
         for (yearOffset in -1..1) {

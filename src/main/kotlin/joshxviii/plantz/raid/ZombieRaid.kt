@@ -559,8 +559,10 @@ class ZombieRaid(
     }
 
     private fun announceSpecialWave(wave: WaveType) {
-        val title: Component = Component.translatable("event.plantz.zombie_raid.special_wave").apply { withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD) }
-        val subtitle: Component = wave.popupMessage().copy().apply { withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.BOLD) }
+        val titleColor = if (wave == WaveType.ZOMBOWEEN) ChatFormatting.DARK_PURPLE else ChatFormatting.GREEN
+        val subColor = if (wave == WaveType.ZOMBOWEEN) ChatFormatting.GOLD else ChatFormatting.DARK_PURPLE
+        val title: Component = Component.translatable("event.plantz.zombie_raid.special_wave").apply { withStyle(titleColor, ChatFormatting.BOLD) }
+        val subtitle: Component = wave.popupMessage().copy().apply { withStyle(subColor, ChatFormatting.BOLD) }
         showTitleMessage(title, subtitle)
     }
 

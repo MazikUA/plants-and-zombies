@@ -6,6 +6,9 @@
 
 # Changelog 1.5.1
 ### Changes / Additions
+- Added "Zomboween" special wave.
+  - Has a chance to occur 2 weeks before and 1 day after October 31st.
+  - Can happen within waves 4–11.
 - Plant and Brainz Flags can only be placed while holding shift.
 - Plant and Zombie projectiles are now ignored by:
   - Armor Stand
