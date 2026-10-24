@@ -6,6 +6,7 @@ import joshxviii.plantz.PazTags.BlockTags.PLANTABLE
 import joshxviii.plantz.ai.PlantState
 import joshxviii.plantz.ai.goal.SleepGoal
 import joshxviii.plantz.api.SeedMutationManager
+import joshxviii.plantz.block.entity.FlagBlockEntity
 import joshxviii.plantz.entity.Sun
 import joshxviii.plantz.item.SeedPacketItem
 import joshxviii.plantz.raid.isNearRaid
@@ -83,8 +84,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
     companion object {
         val LOGGER: Logger = LoggerFactory.getLogger(Plant::class.java)
         private const val NUTRIENT_SUPPLY_MAX = 160  // ticks before suffocating when on invalid ground
-        private const val FLAG_POWER_RANGE = 5
-        
+
         /**
          * Default plant spawn rules
          */
@@ -423,6 +423,12 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         super.setDeltaMovement(m)
     }
 
+    override fun travel(input: Vec3) {
+        if (clampToGrid()) {
+            if (tickCount%20 == 0) setPos(x,y,z)
+        } else super.travel(input)
+    }
+
     override fun setPos(x: Double, y: Double, z: Double) {
         if (clampToGrid() && !isPassenger && !isAttached() && onGround()) {
             super.setPos(Mth.floor(x) + 0.5, y, Mth.floor(z) + 0.5)
@@ -472,7 +478,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
                 }
             }
 
-            updatePlantPower(level)
+            if (tickCount % 20 == 0) updatePlantPower(level, hasNearbyPlantzFlag(level))
 
             if (cooldown > 0 && !isAsleep) cooldown--
             if (cooldown == 0) cooldownFinished()
@@ -672,8 +678,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         }
     }
 
-    private fun updatePlantPower(level: ServerLevel) {
-        val nearFlag = hasNearbyPlantzFlag(level)
+    fun updatePlantPower(level: ServerLevel, nearFlag: Boolean) {
         if (nearFlag != poweredUp) {
             poweredUp = nearFlag
             if (poweredUp) addParticlesAroundSelf(particle = PazServerParticles.POWERED_UP)
@@ -684,7 +689,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         val flagPos = level.poiManager.findClosest(
             { it.value() == PazBlocks.PLANTZ_FLAG_POI },
             blockPosition(),
-            FLAG_POWER_RANGE,
+            FlagBlockEntity.FLAG_POWER_RANGE.toInt(),
             PoiManager.Occupancy.ANY
         ).orElse(null) ?: return false
 
