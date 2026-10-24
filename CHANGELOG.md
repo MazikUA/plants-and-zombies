@@ -16,6 +16,8 @@
   - Minecarts
   - Item Frames
 - The Skillet item from [Farmer's Delight](https://modrinth.com/mod/farmers-delight-refabricated) can now be equipped.
+- Added a new server config option: `graveStoneActivationRange`.
+  - Sets the range at which Gravestone can spawn zombies.
 ### Fixes
 - Reduced Grave Digger spawn chance during raids.
 - Zombie Robots built by the Engineer will vanish at the end of the raid.

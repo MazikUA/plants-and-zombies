@@ -73,6 +73,7 @@ data class ServerConfig(
         "plantz:coffeebean"             to 2,
         "plantz:grave_buster"           to 3,
     ),
+    var graveStoneActivationRange: Double = 24.0
 )
 data class ClientConfig(
     var showDebugInfo: Boolean = false,
@@ -162,6 +163,9 @@ object PazConfig {
 
     val PLANT_COOLDOWN_ENABLED: Boolean
         get() = server.plantCooldownEnabled
+
+    val GRAVESTONE_ACTIVATION_RANGE: Double
+        get() = server.graveStoneActivationRange
 
     fun getGrowTime(sunCost: Int, zenBuff: Boolean): Int {
         val time = server.seedGrowTime.coerceAtLeast(0) + (sunCost * server.extraGrowTimePerSun.coerceAtLeast(0))
