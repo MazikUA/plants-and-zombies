@@ -30,6 +30,7 @@ import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundEvent
 import net.minecraft.sounds.SoundEvents
+import net.minecraft.sounds.SoundSource
 import net.minecraft.tags.FluidTags
 import net.minecraft.tags.ItemTags
 import net.minecraft.util.Mth
@@ -59,6 +60,7 @@ import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.*
 import net.minecraft.world.level.block.Blocks
+import net.minecraft.world.level.block.LevelEvent
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.levelgen.Heightmap
 import net.minecraft.world.level.portal.TeleportTransition
@@ -689,15 +691,19 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         return level.getBlockState(flagPos).`is`(PazBlocks.PLANTZ_FLAG)
     }
 
+    /** Safely get a block state by using [net.minecraft.world.level.chunk.ChunkSource]
+     * Prevents game from hanging when tring to process block states when saving */
+    fun safeGetBlockState(pos: BlockPos): BlockState {
+        val chunkX = SectionPos.blockToSectionCoord(pos.x)
+        val chunkZ = SectionPos.blockToSectionCoord(pos.z)
+        val chunk = level().chunkSource.getChunkNow(chunkX, chunkZ)
+        return chunk?.getBlockState(pos) ?: Blocks.AIR.defaultBlockState()
+    }
+
     fun getBlockBelow(): BlockState {
         val feetY = y - 0.001
         val blockBelowPos = BlockPos.containing(x, feetY, z)
-
-        val chunkX = SectionPos.blockToSectionCoord(blockBelowPos.x)
-        val chunkZ = SectionPos.blockToSectionCoord(blockBelowPos.z)
-        val chunk = level().chunkSource.getChunkNow(chunkX, chunkZ)
-
-        return chunk?.getBlockState(blockBelowPos) ?: Blocks.AIR.defaultBlockState()
+        return safeGetBlockState(blockBelowPos)
     }
 
     fun isOverEntityLimit(): Boolean {

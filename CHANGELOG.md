@@ -10,6 +10,7 @@
 - Zombie Robots built by the Engineer will vanish at the end of the raid.
 - Balloon Zombies can drop balloons when killed.
 - Puff Shrooms, Sun Shrooms, and Scaredy Shrooms now spawn again. :,)
+- Fixed a bug that caused the game to hang when processing certain plants when saving.
 
 # Changelog 1.5
 ### General:   
