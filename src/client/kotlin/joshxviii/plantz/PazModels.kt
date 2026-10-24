@@ -206,7 +206,7 @@ object PazModels {
 
         EntityRenderers.register(PazEntities.BROWN_COAT) { PazZombieRenderer(it) }
         EntityRenderers.register(PazEntities.NEWSPAPER_ZOMBIE) { PazZombieRenderer(it) }
-        EntityRenderers.register(PazEntities.DIGGER_ZOMBIE) { PazZombieRenderer(it, DiggerZombieModel(it.bakeLayer(DiggerZombieModel.LAYER_LOCATION))) }
+        EntityRenderers.register(PazEntities.DIGGER_ZOMBIE) { DiggerZombieRenderer(it) }
         EntityRenderers.register(PazEntities.ENGINEER_ZOMBIE) { PazZombieRenderer(it, EngineerZombieModel(it.bakeLayer(EngineerZombieModel.LAYER_LOCATION))) }
         EntityRenderers.register(PazEntities.ZOMBIE_YETI) { ZombieYetiRenderer(it) }
         EntityRenderers.register(PazEntities.BACKUP_DANCER) { PazZombieRenderer(it, DiscoZombieModel(it.bakeLayer(DiscoZombieModel.LAYER_LOCATION))) }

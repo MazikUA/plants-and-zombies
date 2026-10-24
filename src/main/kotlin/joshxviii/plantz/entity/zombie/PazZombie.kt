@@ -315,6 +315,11 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
         return super.getMoveControl()
     }
 
+    override fun getLookControl(): LookControl {
+        if (isImmobile) return noLookControl
+        return super.getLookControl()
+    }
+
     override fun registerGoals() {
         super.registerGoals()
         this.goalSelector.addGoal(7, FlyingPathfindingGoal(this, hoverGroundHeight = 1.5))
@@ -421,9 +426,8 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
         }
     }
 
-    override fun isImmobile(): Boolean {
-        return if (state==ZombieState.EMERGING || state==ZombieState.RETREATING) true else super.isImmobile()
-    }
+    override fun isImmobile(): Boolean = state==ZombieState.EMERGING || state==ZombieState.RETREATING || super.isImmobile()
+    override fun isWithinMeleeAttackRange(target: LivingEntity): Boolean = !isImmobile && super.isWithinMeleeAttackRange(target)
 
     override fun travel(travelVector: Vec3) {
         if (isFlying && this.isEffectiveAi) {

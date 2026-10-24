@@ -9,6 +9,8 @@
 - Added "Zomboween" special wave.
   - Has a chance to occur 2 weeks before and 1 day after October 31st.
   - Can happen within waves 4–11.
+- Reworked the Digger Zombie's behavior.
+  - The Digger Zombie will attempt to dig into the ground and will dig out the ground closer to its target when far away.
 - Plant and Brainz Flags can only be placed while holding shift.
 - Plant and Zombie projectiles are now ignored by:
   - Armor Stand
@@ -17,7 +19,7 @@
   - Item Frames
 - The Skillet item from [Farmer's Delight](https://modrinth.com/mod/farmers-delight-refabricated) can now be equipped.
 - Added a new server config option: `graveStoneActivationRange`.
-  - Sets the range at which Gravestone can spawn zombies.
+  - Sets the range at which Gravestone can spawn zombies. The default value is 24.0
 ### Fixes
 - Reduced Grave Digger spawn chance during raids.
 - Zombie Robots built by the Engineer will vanish at the end of the raid.

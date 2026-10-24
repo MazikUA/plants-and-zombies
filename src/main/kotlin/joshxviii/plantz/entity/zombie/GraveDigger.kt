@@ -72,9 +72,7 @@ class GraveDigger(type: EntityType<out GraveDigger>, level: Level) : PazZombie(t
         output.putInt("dug_graves", dugGraves)
     }
 
-    override fun getMoveControl(): MoveControl = if (digTime>0) noMoveControl else super.getMoveControl()
-    override fun getLookControl(): LookControl = if (digTime>0) noLookControl else super.getLookControl()
-    override fun isWithinMeleeAttackRange(target: LivingEntity): Boolean = if (digTime>0) false else super.isWithinMeleeAttackRange(target)
+    override fun isImmobile(): Boolean = super.isImmobile() || digTime>0
 
     override fun registerGoals() {
         super.registerGoals()

@@ -77,8 +77,7 @@ enum class WaveType(
                 ),
                 WaveSpawnEntry(
                     PazEntities.GARGANTUAR,
-                    if (wave == 10) 1 // always spawn at wave 10
-                    else if (wave > 11) scaled(0.5f + (wave - 13) * 0.3f, omen, credits, max = 3) else 0
+                    if (wave > 11) scaled(0.5f + (wave - 13) * 0.3f, omen, credits, max = 3) else 0
                 ),
                 WaveSpawnEntry(
                     PazEntities.ENGINEER_ZOMBIE,
@@ -388,7 +387,7 @@ enum class WaveType(
                 zombie.setItemSlot(EquipmentSlot.HEAD, PazItems.FOOTBALL_HELMET.defaultInstance)
                 zombie.setDropChance(EquipmentSlot.HEAD, 0.0f)
             }
-            if (zombie is BrownCoat) zombie.spawnWithBalloons()
+            if (zombie is BrownCoat && zombie.random.nextFloat() < 0.6f) zombie.spawnWithBalloons()
         }
 
         fun configureWinterWonderland(zombie: Zombie) {
