@@ -5,6 +5,14 @@
   - ***Currently not obtainable outside of Creative mode.***
 
 # Changelog 1.5.1
+### Changes / Additions
+- Plant and Brainz Flags can only be placed while holding shift.
+- Plant and Zombie projectiles are now ignored by:
+  - Armor Stand
+  - Boat
+  - Minecarts
+  - Item Frames
+- The Skillet item from [Farmer's Delight](https://modrinth.com/mod/farmers-delight-refabricated) can now be equipped.
 ### Fixes
 - Reduced Grave Digger spawn chance during raids.
 - Zombie Robots built by the Engineer will vanish at the end of the raid.
