@@ -43,6 +43,8 @@ public class ZombieMixin implements ZombieRaider {
     static private final EntityDataAccessor<Boolean> IS_FROM_RAID  = SynchedEntityData.defineId(Zombie.class, EntityDataSerializers.BOOLEAN);
     @Unique
     static private final EntityDataAccessor<Boolean> ADDS_HEALTH_TO_RAID  = SynchedEntityData.defineId(Zombie.class, EntityDataSerializers.BOOLEAN);
+    @Unique
+    static private final EntityDataAccessor<Boolean> IS_BOSS  = SynchedEntityData.defineId(Zombie.class, EntityDataSerializers.BOOLEAN);
 
     @Override
     public boolean plantz$getIsFromRaid() {
@@ -64,22 +66,35 @@ public class ZombieMixin implements ZombieRaider {
         ((Entity) (Object) this).getEntityData().set(ADDS_HEALTH_TO_RAID, value);
     }
 
+    @Override
+    public boolean plantz$getIsBoss() {
+        return ((Entity) (Object) this).getEntityData().get(IS_BOSS);
+    }
+
+    @Override
+    public void plantz$setIsBoss(boolean value) {
+        ((Entity) (Object) this).getEntityData().set(IS_BOSS, value);
+    }
+
     @Inject(method = "defineSynchedData", at = @At("TAIL"))
     public void syncedData(SynchedEntityData.Builder entityData, CallbackInfo ci) {
         entityData.define(IS_FROM_RAID, false);
         entityData.define(ADDS_HEALTH_TO_RAID, true);
+        entityData.define(IS_BOSS, false);
     }
 
     @Inject(method = "addAdditionalSaveData", at = @At("TAIL"))
     private void saveCustomFlags(ValueOutput output, CallbackInfo ci) {
         output.putBoolean("plantz:IsFromRaid", this.plantz$getIsFromRaid());
         output.putBoolean("plantz:AddsHealthToRaid", this.plantz$getAddsHealthToRaid());
+        output.putBoolean("plantz:IsBoss", this.plantz$getIsBoss());
     }
 
     @Inject(method = "readAdditionalSaveData", at = @At("TAIL"))
     private void loadCustomFlags(ValueInput input, CallbackInfo ci) {
         this.plantz$setIsFromRaid(input.getBooleanOr("plantz:IsFromRaid", false));
         this.plantz$setAddsHealthToRaid(input.getBooleanOr("plantz:AddsHealthToRaid", true));
+        this.plantz$setIsBoss(input.getBooleanOr("plantz:IsBoss", false));
     }
 
     @ModifyArgs(method = "hurtServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/monster/Monster;hurtServer(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)Z"))
