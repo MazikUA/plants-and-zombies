@@ -28,6 +28,7 @@ object ZombieRaidOverlay {
     val PLANT_FLAG_SPRITE: Identifier = pazResource("textures/gui/raid/plant_flag.png")
     val ZOMBIE_HEAD_SPRITE: Identifier = pazResource("textures/gui/raid/zombie_head.png")
     val ZOMBIE_HEAD_CREDITS_SPRITE: Identifier = pazResource("textures/gui/raid/zombie_head_after_credits.png")
+    val BOSS_HEAD_SPRITE: Identifier = pazResource("textures/gui/raid/boss_head.png")
     val HEALTH_BAR_FLAG: Identifier = pazResource("textures/gui/raid/flag_health.png")
     val HEALTH_BAR_ZOMBIES: Identifier = pazResource("textures/gui/raid/zombie_health.png")
     val BOSS_BAR_BACKGROUND: Identifier = pazResource("textures/gui/raid/boss_bar_background.png")
@@ -56,6 +57,8 @@ object ZombieRaidOverlay {
         val x = screenWidth / 2 - (BG_WIDTH / 2)
         val y = 0
 
+        val renderBossbar = raidEvent.bossProgressBar > 0f
+
         // tombstone bg
         graphics.blit(RenderPipelines.GUI_TEXTURED, if (raidEvent.seenCredits) BACKGROUND_CREDITS else BACKGROUND, x, y, 0f, 0f, BG_WIDTH, BG_HEIGHT, BG_WIDTH, BG_HEIGHT)
 
@@ -66,14 +69,14 @@ object ZombieRaidOverlay {
         zombieBar(x, y, graphics, raidEvent)
 
         // boss health
-        //bossBar(x, y, graphics, raidEvent)
+        if (renderBossbar) bossBar(x, y, graphics, raidEvent)
 
         // timer
         val time = raidEvent.waveTimer
         val timer = Component.literal(time.tickTimeFormat())
 
         val textX = screenWidth / 2 - font.width(timer) / 2
-        val textY = y + 18
+        val textY = y + if (renderBossbar) 17 else 18
         val textColor = when (time) {
             in -1..600 -> 0xFF5555
             in 601..1200 -> 0xFFFF55
@@ -83,7 +86,7 @@ object ZombieRaidOverlay {
 
         val waveText = "${raidEvent.currentWaveNumber()} / ${raidEvent.numWaves}"
         val waveX = screenWidth / 2 - font.width(waveText) / 2
-        graphics.text(font, waveText, waveX, textY+14, -1)
+        graphics.outlineText(font, waveText, waveX, textY + if (renderBossbar) 10 else 14, color = 0xDDDDDD, outlineColor = 0x444444)
         if (PazConfig.SHOW_DEBUG_INFO) {
             val textX = screenWidth / 2 - font.width(raidEvent.status.name) / 2
             graphics.text(font, raidEvent.status.name, textX, textY+30, -1)
@@ -93,8 +96,8 @@ object ZombieRaidOverlay {
     private fun renderPlantBar(x: Int, y: Int, graphics: GuiGraphicsExtractor, raidEvent: ZombieRaidClientData) {
         val flagHealthPercent = raidEvent.plantProgressBar
         val flagBarWidth = Mth.floor(BAR_WIDTH * flagHealthPercent)
-        val flagHealthX = x + 17 + (BAR_WIDTH - flagBarWidth)
-        val flagHealthY = y + 15
+        val flagHealthX = x+17 + (BAR_WIDTH - flagBarWidth)
+        val flagHealthY = y+15
         val flagFrame = if (raidEvent.activeTime % 30 > 15) 1 else 0
         graphics.blit(RenderPipelines.GUI_TEXTURED, HEALTH_BAR_FLAG, flagHealthX, flagHealthY, 0f, 0f, flagBarWidth, BAR_HEIGHT, BAR_WIDTH, BAR_HEIGHT)
         graphics.blit(RenderPipelines.GUI_TEXTURED, PLANT_FLAG_SPRITE, flagHealthX-7, flagHealthY-5, 7f*flagFrame, 0f, 7, 10, 14, 10)
@@ -104,8 +107,8 @@ object ZombieRaidOverlay {
         val zombieHealthPercent = raidEvent.zombieProgressBar
         if (zombieHealthPercent > 0f) {
             val zombieBarWidth = Mth.floor(BAR_WIDTH * zombieHealthPercent)
-            val zombieHealthX = x + (BG_WIDTH-BAR_WIDTH) - 17
-            val zombieHealthY = y + 15
+            val zombieHealthX = x-17 + (BG_WIDTH-BAR_WIDTH)
+            val zombieHealthY = y+15
             graphics.blit(RenderPipelines.GUI_TEXTURED, HEALTH_BAR_ZOMBIES, zombieHealthX, zombieHealthY, 0f, 0f, zombieBarWidth, BAR_HEIGHT, BAR_WIDTH, BAR_HEIGHT)
             val headWidth = 10
             val headCount = zombieBarWidth / 8
@@ -120,17 +123,20 @@ object ZombieRaidOverlay {
 
     private fun bossBar(x: Int, y: Int, graphics: GuiGraphicsExtractor, raidEvent: ZombieRaidClientData) {
         val bossHealthPercent = raidEvent.bossProgressBar
-        if (bossHealthPercent <= 0f) return //TODO maybe use -1 to hide bar?
-
         val font = Minecraft.getInstance().font
 
+        val barX = (graphics.guiWidth()-132)/2
+        val barY = y+32
+        graphics.blit(RenderPipelines.GUI_TEXTURED, BOSS_BAR_BACKGROUND, barX, barY, 0f, 0f, 132, 15, 132, 15)
+
+        val bossBarWidth = 126
+        val bossBarHeight = 8
+        graphics.blit(RenderPipelines.GUI_TEXTURED, BOSS_BAR, barX+3, barY+4, 0f, 0f, Mth.floor(bossBarWidth * bossHealthPercent), bossBarHeight, bossBarWidth, bossBarHeight)
+        graphics.blit(RenderPipelines.GUI_TEXTURED, BOSS_HEAD_SPRITE, barX+Mth.floor(bossBarWidth * bossHealthPercent)-10, barY, 0f, 0f, 16, 16, 16, 16)
+
         val text = "$bossHealthPercent"
-        val bossBarWidth = Mth.floor(BAR_WIDTH * bossHealthPercent)
         val bossHealthX = (graphics.guiWidth()/2) - font.width(text) / 2
         val bossHealthY = y + 45
-        graphics.text(font, text, bossHealthX, bossHealthY, -1)
-        return
-        graphics.blit(RenderPipelines.GUI_TEXTURED, BOSS_BAR_BACKGROUND, bossHealthX, bossHealthY, 0f, 0f, BAR_WIDTH, BAR_HEIGHT, BAR_WIDTH, BAR_HEIGHT)
-        graphics.blit(RenderPipelines.GUI_TEXTURED, BOSS_BAR, bossHealthX, bossHealthY, 0f, 0f, bossBarWidth, BAR_HEIGHT, BAR_WIDTH, BAR_HEIGHT)
+        //graphics.text(font, text, bossHealthX, bossHealthY, -1)
     }
 }

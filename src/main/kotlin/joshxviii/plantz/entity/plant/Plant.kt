@@ -4,8 +4,10 @@ import joshxviii.plantz.*
 import joshxviii.plantz.PazDataSerializers.DATA_PLANT_STATE
 import joshxviii.plantz.PazTags.BlockTags.PLANTABLE
 import joshxviii.plantz.ai.PlantState
+import joshxviii.plantz.ai.ZombieState
 import joshxviii.plantz.ai.goal.SleepGoal
 import joshxviii.plantz.api.SeedMutationManager
+import joshxviii.plantz.block.entity.FlagBlockEntity
 import joshxviii.plantz.entity.Sun
 import joshxviii.plantz.item.SeedPacketItem
 import joshxviii.plantz.raid.isNearRaid
@@ -45,6 +47,7 @@ import net.minecraft.world.entity.*
 import net.minecraft.world.entity.ai.attributes.AttributeModifier
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier
 import net.minecraft.world.entity.ai.attributes.Attributes
+import net.minecraft.world.entity.ai.behavior.SetWalkTargetAwayFrom.pos
 import net.minecraft.world.entity.ai.control.BodyRotationControl
 import net.minecraft.world.entity.ai.control.LookControl
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal
@@ -83,8 +86,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
     companion object {
         val LOGGER: Logger = LoggerFactory.getLogger(Plant::class.java)
         private const val NUTRIENT_SUPPLY_MAX = 160  // ticks before suffocating when on invalid ground
-        private const val FLAG_POWER_RANGE = 5
-        
+
         /**
          * Default plant spawn rules
          */
@@ -133,6 +135,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         val ATTACHED_PLAYER: EntityDataAccessor<Optional<EntityReference<LivingEntity>>> = SynchedEntityData.defineId(Plant::class.java, EntityDataSerializers.OPTIONAL_LIVING_ENTITY_REFERENCE)
         val COOLDOWN: EntityDataAccessor<Int> = SynchedEntityData.defineId<Int>(Plant::class.java, EntityDataSerializers.INT)
         val COFFEE_BUFF: EntityDataAccessor<Int> = SynchedEntityData.defineId<Int>(Plant::class.java, EntityDataSerializers.INT)
+        val PUMPKIN_ARMOR: EntityDataAccessor<Float> = SynchedEntityData.defineId<Float>(Plant::class.java, EntityDataSerializers.FLOAT)
         val RECEIVED_SUN: EntityDataAccessor<Int> = SynchedEntityData.defineId<Int>(Plant::class.java, EntityDataSerializers.INT)
         val RECEIVED_WATER: EntityDataAccessor<Int> = SynchedEntityData.defineId<Int>(Plant::class.java, EntityDataSerializers.INT)
         val SEED_GROW_COOLDOWN: EntityDataAccessor<Int> = SynchedEntityData.defineId<Int>(Plant::class.java, EntityDataSerializers.INT)
@@ -218,6 +221,10 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         get() = this.entityData.get(COFFEE_BUFF)
         set(value) = this.entityData.set(COFFEE_BUFF, value.coerceAtLeast(0))
 
+    var pumpkinArmor: Float
+        get() = this.entityData.get(PUMPKIN_ARMOR)
+        set(value) = this.entityData.set(PUMPKIN_ARMOR, value.coerceAtLeast(0f))
+
     private var attachedPlayerReference: EntityReference<LivingEntity>?
         get() = this.entityData.get(ATTACHED_PLAYER).getOrNull()
         set(value) = this.entityData.set(ATTACHED_PLAYER, Optional.ofNullable(value))
@@ -251,14 +258,14 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
     val bounceAnimation = AnimationState()
 
     init {
-        this.lookControl = object : LookControl(this) {
-            override fun clampHeadRotationToBody() {}
-            override fun tick() { if (!isAsleep) super.tick() }
-        }
         idleAnimationStartTick = this.random.nextInt(200, 240)
     }
 
     // disables body control
+    override fun getLookControl(): LookControl {
+        if (isImmobile || !canLookAround() || isAsleep) return noLookControl
+        return super.getLookControl()
+    }
     protected val noLookControl = object : LookControl(this) {}
     override fun createBodyControl(): BodyRotationControl = object : BodyRotationControl(this) { override fun clientTick() {} }
 
@@ -270,6 +277,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         entityData.define(RECEIVED_WATER, 0)
         entityData.define(SEED_GROW_COOLDOWN, 0)
         entityData.define(COFFEE_BUFF, 0)
+        entityData.define(PUMPKIN_ARMOR, 0f)
         entityData.define(SLEEPING, false)
         entityData.define(POWERED_UP, false)
         entityData.define(ATTACHED_PLAYER, Optional.empty())
@@ -294,6 +302,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         output.putInt("plantz:ReceivedWater", receivedWater)
         output.putInt("plantz:SeedGrowTime", seedGrowCooldown)
         output.putInt("plantz:CoffeeBuff", coffeeBuff)
+        output.putFloat("plantz:PumpkinArmor", pumpkinArmor)
         output.putInt("plantz:Cooldown", cooldown)
         output.putInt("plantz:State", state.ordinal)
         output.putBoolean("plantz:IsAsleep", isAsleep)
@@ -305,6 +314,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         receivedWater = input.getInt("plantz:ReceivedWater").getOrElse { 0 }
         seedGrowCooldown = input.getInt("plantz:SeedGrowTime").getOrElse { 0 }
         coffeeBuff = input.getInt("plantz:CoffeeBuff").getOrElse { 0 }
+        pumpkinArmor = input.getFloatOr("plantz:PumpkinArmor", 0f)
         cooldown = input.getInt("plantz:Cooldown").getOrElse { this.entityData.get(COOLDOWN) }.coerceAtLeast(0)
         state = PlantState.entries[input.getInt("plantz:State").getOrElse { 1 }].takeIf { it != PlantState.ACTION }?: PlantState.IDLE
         isAsleep = input.getBooleanOr("plantz:IsAsleep", false)
@@ -331,8 +341,10 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
             sleepDuringDay = sleepsDuringDay(),
             sleepDuringNight = sleepsDuringNight()
         ))
-        this.goalSelector.addGoal(3, RandomLookAroundGoal(this))
-        this.goalSelector.addGoal(3, LookAtPlayerGoal(this, Player::class.java, 8.0f))
+        if (canLookAround()) {
+            this.goalSelector.addGoal(3, RandomLookAroundGoal(this))
+            this.goalSelector.addGoal(3, LookAtPlayerGoal(this, Player::class.java, 8.0f))
+        }
         attackGoals()
     }
     open fun attackGoals() {
@@ -368,6 +380,9 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         if (source.`is`(PazTags.DamageTypes.IGNORED_BY_PLANTS)) return false
         if (source.directEntity != owner) source.entity?.let { if (hasSameOwner(it)) return false }
         if ( attachedEntity.let { it!=null && source.entity?.`is`(it)==true } ) return false
+        val potProtection: Boolean = hasPlantPotProtection() && source.entity is Enemy
+        val newDamage = pumpkinProtectFrom(damage * if (potProtection) PazConfig.PLANT_POT_DAMAGE_REDUCTION.toFloat() else 1f)
+        if (newDamage <= 0) return false
         return super.hurtServer(
             level,
             if (source.entity is Zombie && source.`is`(DamageTypes.MOB_ATTACK)) DamageSource(
@@ -375,22 +390,31 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
                 source.directEntity,
                 source.entity
             ) else source,
-            damage
+            newDamage
         )
     }
 
-    override fun hurtClient(source: DamageSource): Boolean {
-        return super.hurtClient(source)
-    }
-
-    override fun actuallyHurt(level: ServerLevel, source: DamageSource, damage: Float) {
-        if (source.directEntity != owner) source.entity?.let { if (hasSameOwner(it)) return }
-        val potProtection: Boolean = hasPlantPotProtection() && source.entity is Enemy
-        super.actuallyHurt(
-            level,
-            source,
-            if (potProtection) (damage * PazConfig.PLANT_POT_DAMAGE_REDUCTION).toFloat() else damage
-        )
+    private fun pumpkinProtectFrom(damage: Float): Float {
+        if (pumpkinArmor <= 0) return damage
+        val result = (damage - pumpkinArmor).coerceAtLeast(0f)
+        pumpkinArmor -= damage
+        if (pumpkinArmor <= 0) {
+            playSound(SoundEvents.WOOD_BREAK, 0.5f, 1.0f)
+            addParticlesAroundSelf(
+                particle = BlockParticleOption(ParticleTypes.BLOCK, Blocks.PUMPKIN.defaultBlockState()),
+                height = 0.0f,
+                verticalSpreadScale = 0.1,
+                amount = 16..20
+            )
+        } else {
+            playSound(SoundEvents.WOOD_HIT, 0.5f, 1.0f)
+            addParticlesAroundSelf(
+                particle = BlockParticleOption(ParticleTypes.BLOCK, Blocks.PUMPKIN.defaultBlockState()),
+                height = 0.0f,
+                verticalSpreadScale = 0.1
+            )
+        }
+        return result
     }
 
     protected fun <T: Plant> convertToPlantType(
@@ -421,6 +445,14 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         }
         else deltaMovement
         super.setDeltaMovement(m)
+    }
+
+    override fun isImmobile(): Boolean = state == PlantState.INIT || super.isImmobile()
+
+    override fun travel(input: Vec3) {
+        if (clampToGrid() && onGround()) {
+            if (tickCount%20 == 0) super.travel(input)
+        } else super.travel(input)
     }
 
     override fun setPos(x: Double, y: Double, z: Double) {
@@ -472,7 +504,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
                 }
             }
 
-            updatePlantPower(level)
+            if (tickCount % 20 == 0) updatePlantPower(level, hasNearbyPlantzFlag(level))
 
             if (cooldown > 0 && !isAsleep) cooldown--
             if (cooldown == 0) cooldownFinished()
@@ -645,19 +677,20 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
 
     // if on invalid ground plant should start to suffocate
     private fun onValidGround() : Boolean {
-        return (attachedEntity != null) || canSurviveOn(getBlockBelow()) || vehicle?.`is`(PazEntities.PLANT_POT_MINECART) == true
+        return (attachedEntity != null) || pumpkinArmor > 0 || canSurviveOn(getBlockBelow()) || vehicle?.`is`(PazEntities.PLANT_POT_MINECART) == true
     }
 
     fun sunIsVisible() : Boolean {
         return level().isBrightOutside && level().getBrightness(LightLayer.SKY, BlockPos.containing(x, eyeY, z)) >= 7
     }
     fun exposedToRain(): Boolean = level().isRainingAt(blockPosition().above())
+    open fun canLookAround(): Boolean = true
     open fun sleepsDuringNight(): Boolean = false
     open fun sleepsDuringDay(): Boolean = this.`is`(PazTags.EntityTypes.MUSHROOM)
     open fun canSurviveOn(block: BlockState) : Boolean = block.`is`(PLANTABLE)
     open fun canPlaceOn(block: BlockState) : Boolean = canSurviveOn(block)
     open fun canProduceSeeds(): Boolean = true
-    open fun clampToGrid() = canSurviveOn(getBlockBelow())
+    open fun clampToGrid() = canSurviveOn(getBlockBelow()) || pumpkinArmor > 0
     open fun cooldownFinished() {}
 
     fun hurtOnCollide(other: Entity?) {
@@ -672,8 +705,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         }
     }
 
-    private fun updatePlantPower(level: ServerLevel) {
-        val nearFlag = hasNearbyPlantzFlag(level)
+    fun updatePlantPower(level: ServerLevel, nearFlag: Boolean) {
         if (nearFlag != poweredUp) {
             poweredUp = nearFlag
             if (poweredUp) addParticlesAroundSelf(particle = PazServerParticles.POWERED_UP)
@@ -684,7 +716,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         val flagPos = level.poiManager.findClosest(
             { it.value() == PazBlocks.PLANTZ_FLAG_POI },
             blockPosition(),
-            FLAG_POWER_RANGE,
+            FlagBlockEntity.FLAG_POWER_RANGE.toInt(),
             PoiManager.Occupancy.ANY
         ).orElse(null) ?: return false
 
@@ -818,16 +850,6 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         return super.mobInteract(player, hand)
     }
 
-    fun applyCoffeeBuff() {
-        val level = level() as? ServerLevel?: return
-        coffeeBuff = PazConfig.COFFEE_BUFF_DURATION
-        playSound(SoundEvents.WITCH_DRINK, 1f, 1.5f)
-        addParticlesAroundSelf(level,
-            PazServerParticles.ENERGIZED,
-            amount = 16..18
-        )
-    }
-
     fun attachToEntity(entity: LivingEntity): Boolean {
         if (level().isClientSide) return false
         ScopedCollector(this.problemPath(), LOGGER).use { reporter ->
@@ -880,14 +902,16 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
     fun dropAsSeedPacketItem(force: Boolean = false): Boolean {
         val level = level() as? ServerLevel ?: return false
         if (force || customName!=null) {// Spawn a seed packet item containing this plant's data
-            val stack = SeedPacketItem.stackFor(this.type)
-            if (customName!=null) stack.set(DataComponents.CUSTOM_NAME, customName)
-            val itemEntity = ItemEntity(level, x, y + 0.5, z, stack)
-            if(level.addFreshEntity(itemEntity)){
-                this.discard()
-                return true
+            val drops = mutableListOf(
+                SeedPacketItem.stackFor(this.type).also { if (customName!=null) it.set(DataComponents.CUSTOM_NAME, customName) }
+            )
+            if (pumpkinArmor > 0) drops.add(SeedPacketItem.stackFor(PazEntities.PUMPKIN))
+            drops.forEach { stack ->
+                val itemEntity = ItemEntity(level, x, y + 0.5, z, stack)
+                level.addFreshEntity(itemEntity)
             }
-            else return false
+            this.discard()
+            return true
         }
         this.discard()
         return true

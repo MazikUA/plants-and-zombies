@@ -184,9 +184,7 @@ class Gargantuar(type: EntityType<out Gargantuar>, level: Level) : PazZombie(typ
         this.goalSelector.setControlFlag(Goal.Flag.TARGET, noController)
     }
 
-    override fun getLookControl(): LookControl =  if (smashAttackTime>0) noLookControl else super.getLookControl()
-    override fun getMoveControl(): MoveControl = if (smashAttackTime>0) noMoveControl else super.getMoveControl()
-    override fun isWithinMeleeAttackRange(target: LivingEntity): Boolean = if (smashAttackTime>0) false else super.isWithinMeleeAttackRange(target)
+    override fun isImmobile(): Boolean = super.isImmobile() || smashAttackTime>0
 
     override fun tick() {
         super.tick()

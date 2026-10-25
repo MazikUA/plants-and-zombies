@@ -10,6 +10,7 @@ import joshxviii.plantz.ai.pathfinding.PazFlyingPathNavigation
 import joshxviii.plantz.ai.pathfinding.PazGroundPathNavigation
 import joshxviii.plantz.entity.Balloon
 import joshxviii.plantz.entity.ZombieRaider
+import joshxviii.plantz.entity.setCountHealth
 import joshxviii.plantz.item.BalloonItem
 import joshxviii.plantz.raid.ZombieRaid.Companion.RAID_DISTANCE
 import joshxviii.plantz.raid.getZombieRaids
@@ -314,6 +315,11 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
         return super.getMoveControl()
     }
 
+    override fun getLookControl(): LookControl {
+        if (isImmobile) return noLookControl
+        return super.getLookControl()
+    }
+
     override fun registerGoals() {
         super.registerGoals()
         this.goalSelector.addGoal(7, FlyingPathfindingGoal(this, hoverGroundHeight = 1.5))
@@ -420,9 +426,8 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
         }
     }
 
-    override fun isImmobile(): Boolean {
-        return if (state==ZombieState.EMERGING || state==ZombieState.RETREATING) true else super.isImmobile()
-    }
+    override fun isImmobile(): Boolean = state==ZombieState.EMERGING || state==ZombieState.RETREATING || super.isImmobile()
+    override fun isWithinMeleeAttackRange(target: LivingEntity): Boolean = !isImmobile && super.isWithinMeleeAttackRange(target)
 
     override fun travel(travelVector: Vec3) {
         if (isFlying && this.isEffectiveAi) {
@@ -524,7 +529,8 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
         val level = level() as ServerLevel
         if (newData.isRaider) {
             val raid = level.getZombieRaids().getNearbyRaid(blockPosition(), RAID_DISTANCE)
-            raid?.joinRaid(level, this, newData.isCountedTowardRaidHealth)
+            this.setCountHealth(newData.isCountedTowardRaidHealth)
+            raid?.joinRaid(level, this)
         }
 
         val data = super.finalizeSpawn(level, difficulty, spawnReason, newData)

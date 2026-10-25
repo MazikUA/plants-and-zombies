@@ -24,6 +24,7 @@ data class RaiderRecord(val uuid: UUID, val wave: Int, val health: Float, val po
         fun loadInto(zombie: Zombie, record: RaiderRecord) {
             zombie.uuid = record.uuid
             if (zombie !is ZombieRaider) return
+            zombie.`plantz$setIsFromRaid`(true)
             zombie.`plantz$setIsLeader`(record.isLeader)
             zombie.`plantz$setIsBoss`(record.isBoss)
         }
@@ -43,6 +44,10 @@ interface ZombieRaider {
 
 fun Zombie.getEffectiveRaidHealth(): Float {
     return if (this is ZombieRaider && this.`plantz$getAddsHealthToRaid`()) this.health else 0f
+}
+
+fun Zombie.setCountHealth(value: Boolean) {
+    if (this is ZombieRaider) this.`plantz$setAddsHealthToRaid`(value)
 }
 
 fun Zombie.isActiveInRaid(): Boolean = this is ZombieRaider && this.`plantz$getIsFromRaid`() && this.isAlive

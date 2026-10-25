@@ -335,6 +335,14 @@ object PazEntities {
             followRange = 1.0
         )
     )
+    @JvmField val PUMPKIN: EntityType<Pumpkin> = registerPlant(
+        "pumpkin", EntityType.Builder.of(::Pumpkin, MobCategory.CREATURE),
+        width = 0.85f,
+        height = 0.5f,
+        attributes = Plant.Companion.PlantAttributes(
+            maxHealth = 30.0,
+        )
+    )
     // endregion
 
     // region Zombies
@@ -729,6 +737,7 @@ object PazEntities {
     }
 
     val MAGIC_NAMES = mapOf<EntityType<*>, List<String>>(
+        SUNFLOWER    to listOf("vampire"),
         CHOMPER      to listOf("chester"),
         DISCO_ZOMBIE to listOf("mj"),
         BROWN_COAT   to listOf("tugboat", "mustache")
