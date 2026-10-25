@@ -11,6 +11,7 @@
   - Can happen within waves 4–11.
 - Reworked the Digger Zombie's behavior.
   - The Digger Zombie will attempt to dig into the ground and will dig out the ground closer to its target when far away.
+- Balloon Zombies can drop balloons when killed.
 - Plant and Brainz Flags can only be placed while holding shift.
 - Plant and Zombie projectiles are now ignored by:
   - Armor Stand
@@ -23,7 +24,8 @@
 ### Fixes
 - Reduced Grave Digger spawn chance during raids.
 - Zombie Robots built by the Engineer will vanish at the end of the raid.
-- Balloon Zombies can drop balloons when killed.
+- Optimized zombie pathfinding during a raid.
+- Optimized some checks on idle plants.
 - Puff Shrooms, Sun Shrooms, and Scaredy Shrooms now spawn again. :,)
 - Fixed a bug that caused the game to hang when processing certain plants when saving.
 

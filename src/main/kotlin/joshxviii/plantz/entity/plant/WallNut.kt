@@ -84,6 +84,7 @@ open class WallNut(type: EntityType<out Plant>, level: Level) : Plant(type, leve
         rolledOverEntities.clear()
     }
 
+    override fun canLookAround(): Boolean = false
     override fun clampToGrid(): Boolean = !isRolling && super.clampToGrid()
 
     override fun limitPistonMovement(vec: Vec3): Vec3 {

@@ -2,7 +2,6 @@ package joshxviii.plantz.entity.plant
 
 import com.mojang.logging.LogUtils
 import joshxviii.plantz.*
-import joshxviii.plantz.item.GardeningGloveItem
 import joshxviii.plantz.item.SeedPacketItem
 import net.minecraft.ChatFormatting
 import net.minecraft.core.component.DataComponents
@@ -14,6 +13,8 @@ import net.minecraft.sounds.SoundEvents
 import net.minecraft.util.ProblemReporter.ScopedCollector
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.entity.Entity
+import net.minecraft.world.entity.EntitySpawnReason
+import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.ItemUtils
@@ -170,16 +171,64 @@ fun Plant.processSeedPacketInteraction(player: Player, itemStack: ItemStack, blo
                 }
             }
         }
-        else -> PacketInteractionResult.NO_INTERACTION
+        PazEntities.PUMPKIN -> pumpkinSeedInteraction(type, cantAfford, player)
+        else -> when (this) {// placing plant into pumpkin
+            is Pumpkin -> pumpkinSeedInteraction(type, cantAfford, player)
+            else -> PacketInteractionResult.NO_INTERACTION
+        }
     }
     // show message
-    if (result == PacketInteractionResult.CANT_AFFORD) player.sendOverlayMessage(Component.translatable("message.plantz.not_enough_sun", availableSun, sunCost).withStyle(ChatFormatting.RED))
+    if (result == PacketInteractionResult.CANT_AFFORD) player.sendOverlayMessage(Component.translatable("message.plantz.not_enough_item", PazItems.SUN.name(), availableSun, sunCost).withStyle(ChatFormatting.RED))
     // remove used sun
     if (result == PacketInteractionResult.SUCCESS && !player.hasInfiniteMaterials()) {
         player.removeSunFromStorageAndInventory(sunCost)
         SeedPacketItem.applyCooldown(itemStack, player)
     }
     return result
+}
+
+fun Plant.applyCoffeeBuff() {
+    val level = level() as? ServerLevel?: return
+    coffeeBuff = PazConfig.COFFEE_BUFF_DURATION
+    playSound(SoundEvents.WITCH_DRINK, 1f, 1.5f)
+    addParticlesAroundSelf(level,
+        PazServerParticles.ENERGIZED,
+        amount = 16..18
+    )
+}
+
+fun Plant.applyPumpkinArmor() {
+    pumpkinArmor = Pumpkin.PUMPKIN_ARMOR
+    playSound(SoundEvents.WOLF_ARMOR_REPAIR)
+}
+
+fun Plant.pumpkinSeedInteraction(seedType: EntityType<*>?, cantAfford: Boolean, player: Player): PacketInteractionResult {
+    if (this.pumpkinArmor > 0 || this.type == seedType) return PacketInteractionResult.NO_INTERACTION
+    if (cantAfford) return PacketInteractionResult.CANT_AFFORD
+    if (this is Pumpkin && seedType != null) {
+        (level() as? ServerLevel)?.let { level ->
+            seedType.create(
+                level, {}, blockPosition(), EntitySpawnReason.SPAWN_ITEM_USE, true, true
+            )?.let {
+                if (it is Plant) {
+                    it.tame(player)
+                    it.yHeadRot = this.yHeadRot
+                    it.yBodyRot = this.yBodyRot
+                    it.yRot = this.yRot
+                    it.applyPumpkinArmor()
+                }
+                if (level.addFreshEntity(it)) {
+                    it.playSound(SoundEvents.BIG_DRIPLEAF_PLACE)
+                    discard()
+                }
+            }
+        }
+        return PacketInteractionResult.SUCCESS
+    }
+    else {
+        applyPumpkinArmor()
+        return PacketInteractionResult.SUCCESS
+    }
 }
 
 enum class PacketInteractionResult {
