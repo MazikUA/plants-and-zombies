@@ -219,7 +219,7 @@ enum class WaveType(
                 )
                 else WaveSpawnEntry(
                     PazEntities.PIRATE_CAPTAIN_GHOST,
-                    if (wave > 7) scaled(0.5f + (wave - 7) * 0.3f, omen, credits, max = 4) else 0,
+                    if (wave > 6) scaled(0.55f + (wave - 6) * 0.4f, omen, credits, max = 6) else 0,
                     { configureZomboween(it, raid) }
                 )
             )
@@ -256,7 +256,7 @@ enum class WaveType(
                 ),
                 WaveSpawnEntry(
                     PazEntities.GARGANTUAR,
-                    if (wave > 10) scaled(0.4f + wave * 0.1f, omen, credits, min = 0) else 0,
+                    if (wave > 10) scaled(0.3f + wave * 0.1f, omen, credits, max = 3) else 0,
                     ::configurePirateInvasion
                 ),
                 graveDiggerEntry(raid),
@@ -340,7 +340,21 @@ enum class WaveType(
             ByIdMap.continuous(WaveType::ordinal, WaveType.entries.toTypedArray(), ByIdMap.OutOfBoundsStrategy.ZERO);
         val STREAM_CODEC: StreamCodec<ByteBuf, WaveType> = ByteBufCodecs.idMapper<WaveType>(BY_ID, WaveType::ordinal)
 
-        fun omenScale(omen: Float): Float = 1f+(omen-1f) * 0.08f
+        fun pickWaveType(raid: ZombieRaid, creditsUnlocked: Boolean): WaveType {
+            val eligible = WaveType.entries.filter { it.isAvailable(raid, creditsUnlocked) }
+            val totalWeight = eligible.sumOf { it.weight(raid, creditsUnlocked).toDouble() }.toFloat()
+            if (totalWeight <= 0f) return DEFAULT
+
+            val roll = raid.random.nextFloat() * totalWeight
+            var runningWeight = 0f
+            for (wave in eligible) {
+                runningWeight += wave.weight(raid, creditsUnlocked)
+                if (roll < runningWeight) return wave
+            }
+            return DEFAULT
+        }
+
+        fun omenScale(omen: Float): Float = 1f+(omen-1f) * 0.05f
         fun creditsBonus(credits: Boolean): Float = if (credits) 1.2f else 1f // credits bonus
 
         fun scaled(base: Float, omen: Float, credits: Boolean, min: Int = 0, max: Int = Int.MAX_VALUE): Int {
@@ -414,7 +428,7 @@ enum class WaveType(
             val random = raid.random
             if (zombie is SuperBrainz) zombie.variant = SuperBrainzVariant.TOXIC
 
-            val pumpkinChance = random.nextFloat() < 0.65f
+            val pumpkinChance = random.nextFloat() < 0.65f || zombie is PirateCaptainGhost
             if (zombie !is SuperBrainz && pumpkinChance) {
                 if (random.nextFloat() < 0.4f) zombie.setItemSlot(EquipmentSlot.HEAD, Items.JACK_O_LANTERN.defaultInstance)
                 else zombie.setItemSlot(EquipmentSlot.HEAD, Items.CARVED_PUMPKIN.defaultInstance)

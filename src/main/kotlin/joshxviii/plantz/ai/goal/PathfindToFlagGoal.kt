@@ -32,7 +32,7 @@ class PathfindToFlagGoal(
 
     override fun canUse(): Boolean {
         mob.target?.let {
-            if (it.isAlive && mob.withinAttackRange(it)) return false
+            if (it.isAlive && mob.withinAttackRange(it, 4.0)) return false
         }
         if (mob.isAggressive || mob.hasEffect(PazEffects.HYPNOTIZE)) return false
 

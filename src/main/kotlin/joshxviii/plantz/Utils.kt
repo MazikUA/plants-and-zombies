@@ -396,8 +396,8 @@ fun LivingEntity.attackRange(): Double {
     return hitboxWidth + attackRange
 }
 
-fun LivingEntity.withinAttackRange(entity: Entity): Boolean {
-    return entity.distanceToSqr(this) <= this.attackRange().pow(2)
+fun LivingEntity.withinAttackRange(entity: Entity, plus: Double = 0.0): Boolean {
+    return entity.distanceToSqr(this) <= this.attackRange().plus(plus).pow(2)
 }
 
 fun Path?.getEndPos(): BlockPos? = this?.endNode?.let { BlockPos(it.x, it.y, it.z) }

@@ -51,11 +51,11 @@ class DiggerZombie(type: EntityType<out DiggerZombie>, level: Level) : PazZombie
                     && checkMobSpawnRules(type, level, spawnReason, pos, random)
                     && pos.y < 10) || isMineshaftSpawn
         }
-        val TUNNEL_COOLDOWN_ID: EntityDataAccessor<Int> = SynchedEntityData.defineId<Int>(SuperBrainz::class.java, EntityDataSerializers.INT)
+        val TUNNEL_COOLDOWN_ID: EntityDataAccessor<Int> = SynchedEntityData.defineId<Int>(DiggerZombie::class.java, EntityDataSerializers.INT)
         val MINE_TIME_ID: EntityDataAccessor<Int> = SynchedEntityData.defineId<Int>(DiggerZombie::class.java, EntityDataSerializers.INT)
         val TUNNEL_TIME_ID: EntityDataAccessor<Int> = SynchedEntityData.defineId<Int>(DiggerZombie::class.java, EntityDataSerializers.INT)
-        const val TUNNELING_DURATION: Int = 100
-        const val TUNNELING_COOLDOWN = 320
+        const val TUNNELING_DURATION: Int = 82
+        const val TUNNELING_COOLDOWN = 300
     }
 
     val mineBlockAnimation : AnimationState = AnimationState()
@@ -124,8 +124,8 @@ class DiggerZombie(type: EntityType<out DiggerZombie>, level: Level) : PazZombie
         if (tunnelTime>0) {
             val serverLevel = level() as? ServerLevel
             tunnelAnimation.startIfStopped(tickCount)
-            if(tickCount%3==0) playSound(SoundEvents.ROOTED_DIRT_HIT, 1.0f, 0.2f)
-            if(tickCount%2==0) serverLevel?.sendParticles(
+            if(tickCount%5==0) playSound(SoundEvents.ROOTED_DIRT_HIT, 1.0f, 0.2f)
+            if(tickCount%3==0) serverLevel?.sendParticles(
                 BlockParticleOption(ParticleTypes.BLOCK, serverLevel.getBlockState(blockPosition().below())),
                 x, y + 0.05, z, 8, 0.25, 0.0, 0.25, 0.4
             )
@@ -133,7 +133,7 @@ class DiggerZombie(type: EntityType<out DiggerZombie>, level: Level) : PazZombie
                 tunnelAnimation.start(tickCount)
                 tunnelExitPos?.let { dest ->
                     teleportTo(dest.x + 0.5, dest.y.toDouble(), dest.z + 0.5)
-                    tunnelCooldown = TUNNELING_COOLDOWN + random.nextInt(10, 50)
+                    tunnelCooldown = TUNNELING_COOLDOWN + random.nextInt(20, 100)
                 }
             }
             if (tunnelTime++>=TUNNELING_DURATION) {
@@ -145,8 +145,6 @@ class DiggerZombie(type: EntityType<out DiggerZombie>, level: Level) : PazZombie
             tunnelAnimation.stop()
         }
     }
-
-    override fun hasLineOfSight(target: Entity): Boolean = true
 
     override fun createNavigation(level: Level): PathNavigation {
         return super.createNavigation(level) // MinerNavigation(this, level)
@@ -172,6 +170,8 @@ class DiggerZombie(type: EntityType<out DiggerZombie>, level: Level) : PazZombie
         groupData: SpawnGroupData?
     ): SpawnGroupData? {
         val data = super.finalizeSpawn(level, difficulty, spawnReason, groupData)
+
+        tunnelCooldown = TUNNELING_COOLDOWN + random.nextInt(20, 100)
 
         setCanBreakDoors(true)
         setItemSlot(EquipmentSlot.MAINHAND, Items.IRON_PICKAXE.defaultInstance)

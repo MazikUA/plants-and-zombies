@@ -11,6 +11,8 @@
   - Can happen within waves 4–11.
 - Reworked the Digger Zombie's behavior.
   - The Digger Zombie will attempt to dig into the ground and will dig out the ground closer to its target when far away.
+- Added a Boss Bar during boss waves.
+  - If a Boss is not defeated by the end of a boss wave, that wave the raid will be lost.
 - Balloon Zombies can drop balloons when killed.
 - Plant and Brainz Flags can only be placed while holding shift.
 - Plant and Zombie projectiles are now ignored by:
