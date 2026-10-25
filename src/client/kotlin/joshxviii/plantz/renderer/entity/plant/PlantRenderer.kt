@@ -206,6 +206,7 @@ class PumpkinArmorLayer<M : EntityModel<PlantRenderState>>(
         poseStack.translate(0.0f, -1.501f, 0.0f)
 
         val pumpkinState = PumpkinRenderState()
+        pumpkinState.lightCoords = state.lightCoords
         pumpkinState.ageInTicks = state.ageInTicks
         pumpkinState.isAsleep = state.isAsleep
         pumpkinState.sleepAnimationState.copyFrom(state.sleepAnimationState)
@@ -245,11 +246,9 @@ open class PlantRenderState : LivingEntityRenderState() {
         val magicName = this.validMagicName(customName)
         val suffixes = mutableListOf<String>().apply {
             textureExtra.forEach                { add(it) }
+            if (isBaby)                         add("baby")
+            if (isAsleep || deathTime > 0)      add("sleep")
             if (magicName!=null)                add(magicName)
-            else {
-                if (isBaby)                     add("baby")
-                if (isAsleep || deathTime > 0)  add("sleep")
-            }
         }.filter { it.isNotEmpty() }.toMutableList()
         return suffixes
     }

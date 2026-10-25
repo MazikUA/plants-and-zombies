@@ -737,6 +737,7 @@ object PazEntities {
     }
 
     val MAGIC_NAMES = mapOf<EntityType<*>, List<String>>(
+        SUNFLOWER    to listOf("vampire"),
         CHOMPER      to listOf("chester"),
         DISCO_ZOMBIE to listOf("mj"),
         BROWN_COAT   to listOf("tugboat", "mustache")

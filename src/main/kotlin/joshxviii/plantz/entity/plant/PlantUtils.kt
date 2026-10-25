@@ -159,6 +159,7 @@ fun Plant.processSeedPacketInteraction(player: Player, itemStack: ItemStack, blo
     val result = when (type) {
         PazEntities.COFFEE_BEAN -> {
             when {
+                !isAsleep -> PacketInteractionResult.NO_INTERACTION
                 isGrowingSeeds -> {
                     player.sendOverlayMessage(Component.translatable("message.plantz.growing", name.copy().withStyle(ChatFormatting.RED)).withStyle(ChatFormatting.DARK_RED))
                     PacketInteractionResult.FAIL
@@ -171,9 +172,9 @@ fun Plant.processSeedPacketInteraction(player: Player, itemStack: ItemStack, blo
                 }
             }
         }
-        PazEntities.PUMPKIN -> pumpkinSeedInteraction(type, cantAfford, player)
+        PazEntities.PUMPKIN -> pumpkinSeedInteraction(itemStack, cantAfford, player)
         else -> when (this) {// placing plant into pumpkin
-            is Pumpkin -> pumpkinSeedInteraction(type, cantAfford, player)
+            is Pumpkin -> pumpkinSeedInteraction(itemStack, cantAfford, player)
             else -> PacketInteractionResult.NO_INTERACTION
         }
     }
@@ -202,13 +203,14 @@ fun Plant.applyPumpkinArmor() {
     playSound(SoundEvents.WOLF_ARMOR_REPAIR)
 }
 
-fun Plant.pumpkinSeedInteraction(seedType: EntityType<*>?, cantAfford: Boolean, player: Player): PacketInteractionResult {
-    if (this.pumpkinArmor > 0 || this.type == seedType) return PacketInteractionResult.NO_INTERACTION
+fun Plant.pumpkinSeedInteraction(itemStack: ItemStack, cantAfford: Boolean, player: Player): PacketInteractionResult {
+    val type = itemStack.get(DataComponents.ENTITY_DATA)?.type()
+    if (this.pumpkinArmor > 0 || this.type == type) return PacketInteractionResult.NO_INTERACTION
     if (cantAfford) return PacketInteractionResult.CANT_AFFORD
-    if (this is Pumpkin && seedType != null) {
+    if (this is Pumpkin && type != null) {
         (level() as? ServerLevel)?.let { level ->
-            seedType.create(
-                level, {}, blockPosition(), EntitySpawnReason.SPAWN_ITEM_USE, true, true
+            type.create(
+                level, EntityType.createDefaultStackConfig(level, itemStack, null), blockPosition(), EntitySpawnReason.SPAWN_ITEM_USE, true, true
             )?.let {
                 if (it is Plant) {
                     it.tame(player)

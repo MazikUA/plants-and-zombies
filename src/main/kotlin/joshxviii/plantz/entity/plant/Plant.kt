@@ -263,7 +263,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
 
     // disables body control
     override fun getLookControl(): LookControl {
-        if (isImmobile || !canLookAround()) return noLookControl
+        if (isImmobile || !canLookAround() || isAsleep) return noLookControl
         return super.getLookControl()
     }
     protected val noLookControl = object : LookControl(this) {}
@@ -381,7 +381,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         if (source.directEntity != owner) source.entity?.let { if (hasSameOwner(it)) return false }
         if ( attachedEntity.let { it!=null && source.entity?.`is`(it)==true } ) return false
         val potProtection: Boolean = hasPlantPotProtection() && source.entity is Enemy
-        val newDamage = pumpkinProtectFrom(damage)
+        val newDamage = pumpkinProtectFrom(damage * if (potProtection) PazConfig.PLANT_POT_DAMAGE_REDUCTION.toFloat() else 1f)
         if (newDamage <= 0) return false
         return super.hurtServer(
             level,
@@ -390,7 +390,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
                 source.directEntity,
                 source.entity
             ) else source,
-            if (potProtection) (newDamage * PazConfig.PLANT_POT_DAMAGE_REDUCTION).toFloat() else newDamage
+            newDamage
         )
     }
 
@@ -400,6 +400,12 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         pumpkinArmor -= damage
         if (pumpkinArmor <= 0) {
             playSound(SoundEvents.WOOD_BREAK, 0.5f, 1.0f)
+            addParticlesAroundSelf(
+                particle = BlockParticleOption(ParticleTypes.BLOCK, Blocks.PUMPKIN.defaultBlockState()),
+                height = 0.0f,
+                verticalSpreadScale = 0.1,
+                amount = 16..20
+            )
         } else {
             playSound(SoundEvents.WOOD_HIT, 0.5f, 1.0f)
             addParticlesAroundSelf(
@@ -441,7 +447,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         super.setDeltaMovement(m)
     }
 
-    override fun isImmobile(): Boolean = state == PlantState.INIT || isAsleep || super.isImmobile()
+    override fun isImmobile(): Boolean = state == PlantState.INIT || super.isImmobile()
 
     override fun travel(input: Vec3) {
         if (clampToGrid() && onGround()) {
@@ -897,7 +903,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         val level = level() as? ServerLevel ?: return false
         if (force || customName!=null) {// Spawn a seed packet item containing this plant's data
             val drops = mutableListOf(
-                SeedPacketItem.stackFor(this.type).apply { if (customName!=null) set(DataComponents.CUSTOM_NAME, customName) }
+                SeedPacketItem.stackFor(this.type).also { if (customName!=null) it.set(DataComponents.CUSTOM_NAME, customName) }
             )
             if (pumpkinArmor > 0) drops.add(SeedPacketItem.stackFor(PazEntities.PUMPKIN))
             drops.forEach { stack ->
