@@ -205,7 +205,8 @@ fun Plant.applyPumpkinArmor() {
 
 fun Plant.pumpkinSeedInteraction(itemStack: ItemStack, cantAfford: Boolean, player: Player): PacketInteractionResult {
     val type = itemStack.get(DataComponents.ENTITY_DATA)?.type()
-    if (this.pumpkinArmor > 0 || this.type == type) return PacketInteractionResult.NO_INTERACTION
+    if (this.`is`(PazTags.EntityTypes.CANNOT_PUMPKIN) || type == PazTags.EntityTypes.CANNOT_PUMPKIN) return PacketInteractionResult.NO_INTERACTION
+    if (this.pumpkinArmor > 0) return PacketInteractionResult.NO_INTERACTION
     if (cantAfford) return PacketInteractionResult.CANT_AFFORD
     if (this is Pumpkin && type != null) {
         (level() as? ServerLevel)?.let { level ->

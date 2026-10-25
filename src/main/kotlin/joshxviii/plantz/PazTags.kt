@@ -39,6 +39,7 @@ object PazTags {
         @JvmField val IGNORE_PAZ_PROJECTILES = tag("ignore_paz_projectiles")
         @JvmField val IMMUNE_TO_ELECTRICITY = tag("immune_to_electricity")
         @JvmField val CANNOT_CHOMP = tag("cannot_be_chomped")
+        @JvmField val CANNOT_PUMPKIN = tag("cannot_pumpkin")
         @JvmField val CANNOT_HYPNOTIZE = tag("cannot_be_hypnotized")
         @JvmField val ZOMBIE_RAIDERS = tag("zombie_raider")
         @JvmField val CAN_BE_LEADER = tag("can_be_leader")

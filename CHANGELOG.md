@@ -16,7 +16,7 @@
 - Balloon Zombies can drop balloons when killed.
 - Added Pumpkin Plant.
   - Can be obtained as rewards for the Zomboween special wave.
-- Plants will now only snap onto valid blocks that they can survive on. 
+- Plants will now only snap onto blocks that they can survive on. 
 - Plant and Brainz Flags can only be placed while holding shift.
 - Plant and Zombie projectiles are now ignored by:
   - Armor Stand
