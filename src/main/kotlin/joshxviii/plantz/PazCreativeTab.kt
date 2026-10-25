@@ -55,6 +55,7 @@ object PazCreativeTab {
                 output.accept(SeedPacketItem.stackFor(PazEntities.SEA_SHROOM))
                 output.accept(SeedPacketItem.stackFor(PazEntities.COFFEE_BEAN))
                 output.accept(SeedPacketItem.stackFor(PazEntities.GRAVE_BUSTER))
+                output.accept(SeedPacketItem.stackFor(PazEntities.PUMPKIN))
 
                 // machine blueprints
                 if (PazConfig.SHOW_HIDDEN_ITEMS) {

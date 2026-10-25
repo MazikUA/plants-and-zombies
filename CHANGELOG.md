@@ -25,6 +25,7 @@
 - Reduced Grave Digger spawn chance during raids.
 - Zombie Robots built by the Engineer will vanish at the end of the raid.
 - Optimized zombie pathfinding during a raid.
+- Optimized some checks on idle plants.
 - Puff Shrooms, Sun Shrooms, and Scaredy Shrooms now spawn again. :,)
 - Fixed a bug that caused the game to hang when processing certain plants when saving.
 

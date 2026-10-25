@@ -4,6 +4,7 @@ import joshxviii.plantz.*
 import joshxviii.plantz.PazDataSerializers.DATA_PLANT_STATE
 import joshxviii.plantz.PazTags.BlockTags.PLANTABLE
 import joshxviii.plantz.ai.PlantState
+import joshxviii.plantz.ai.ZombieState
 import joshxviii.plantz.ai.goal.SleepGoal
 import joshxviii.plantz.api.SeedMutationManager
 import joshxviii.plantz.block.entity.FlagBlockEntity
@@ -133,6 +134,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         val ATTACHED_PLAYER: EntityDataAccessor<Optional<EntityReference<LivingEntity>>> = SynchedEntityData.defineId(Plant::class.java, EntityDataSerializers.OPTIONAL_LIVING_ENTITY_REFERENCE)
         val COOLDOWN: EntityDataAccessor<Int> = SynchedEntityData.defineId<Int>(Plant::class.java, EntityDataSerializers.INT)
         val COFFEE_BUFF: EntityDataAccessor<Int> = SynchedEntityData.defineId<Int>(Plant::class.java, EntityDataSerializers.INT)
+        val PUMPKIN_ARMOR: EntityDataAccessor<Int> = SynchedEntityData.defineId<Int>(Plant::class.java, EntityDataSerializers.INT)
         val RECEIVED_SUN: EntityDataAccessor<Int> = SynchedEntityData.defineId<Int>(Plant::class.java, EntityDataSerializers.INT)
         val RECEIVED_WATER: EntityDataAccessor<Int> = SynchedEntityData.defineId<Int>(Plant::class.java, EntityDataSerializers.INT)
         val SEED_GROW_COOLDOWN: EntityDataAccessor<Int> = SynchedEntityData.defineId<Int>(Plant::class.java, EntityDataSerializers.INT)
@@ -251,14 +253,14 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
     val bounceAnimation = AnimationState()
 
     init {
-        this.lookControl = object : LookControl(this) {
-            override fun clampHeadRotationToBody() {}
-            override fun tick() { if (!isAsleep) super.tick() }
-        }
         idleAnimationStartTick = this.random.nextInt(200, 240)
     }
 
     // disables body control
+    override fun getLookControl(): LookControl {
+        if (isImmobile || !canLookAround()) return noLookControl
+        return super.getLookControl()
+    }
     protected val noLookControl = object : LookControl(this) {}
     override fun createBodyControl(): BodyRotationControl = object : BodyRotationControl(this) { override fun clientTick() {} }
 
@@ -331,8 +333,10 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
             sleepDuringDay = sleepsDuringDay(),
             sleepDuringNight = sleepsDuringNight()
         ))
-        this.goalSelector.addGoal(3, RandomLookAroundGoal(this))
-        this.goalSelector.addGoal(3, LookAtPlayerGoal(this, Player::class.java, 8.0f))
+        if (canLookAround()) {
+            this.goalSelector.addGoal(3, RandomLookAroundGoal(this))
+            this.goalSelector.addGoal(3, LookAtPlayerGoal(this, Player::class.java, 8.0f))
+        }
         attackGoals()
     }
     open fun attackGoals() {
@@ -423,9 +427,11 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         super.setDeltaMovement(m)
     }
 
+    override fun isImmobile(): Boolean = state == PlantState.INIT || isAsleep || super.isImmobile()
+
     override fun travel(input: Vec3) {
-        if (clampToGrid()) {
-            if (tickCount%20 == 0) setPos(x,y,z)
+        if (clampToGrid() && onGround()) {
+            if (tickCount%20 == 0) super.travel(input)
         } else super.travel(input)
     }
 
@@ -658,6 +664,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         return level().isBrightOutside && level().getBrightness(LightLayer.SKY, BlockPos.containing(x, eyeY, z)) >= 7
     }
     fun exposedToRain(): Boolean = level().isRainingAt(blockPosition().above())
+    open fun canLookAround(): Boolean = true
     open fun sleepsDuringNight(): Boolean = false
     open fun sleepsDuringDay(): Boolean = this.`is`(PazTags.EntityTypes.MUSHROOM)
     open fun canSurviveOn(block: BlockState) : Boolean = block.`is`(PLANTABLE)

@@ -65,13 +65,14 @@ data class ServerConfig(
         "plantz:puffshroom"             to 0,
         "plantz:scaredyshroom"          to 3,
         "plantz:fumeshroom"             to 6,
-        "plantz:sunshroom"              to 4,
+        "plantz:sunshroom"              to 6,
         "plantz:hypnoshroom"            to 7,
         "plantz:iceshroom"              to 5,
         "plantz:doomshroom"             to 14,
         "plantz:seashroom"              to 0,
         "plantz:coffeebean"             to 2,
         "plantz:grave_buster"           to 3,
+        "plantz:pumpkin"                to 6,
     ),
     var graveStoneActivationRange: Double = 24.0
 )
