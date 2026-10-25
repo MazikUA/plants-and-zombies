@@ -185,7 +185,7 @@ class DiggerZombie(type: EntityType<out DiggerZombie>, level: Level) : PazZombie
     ) : Goal() {
 
         companion object {
-            const val MIN_DIST = 10.0
+            const val MIN_DIST = 12.0
             const val MAX_DIST = 30.0
         }
 
