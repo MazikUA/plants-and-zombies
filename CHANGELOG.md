@@ -10,29 +10,59 @@
   - Has a chance to occur 2 weeks before and 1 day after October 31st.
   - Can happen within waves 4–11.
 - Added a Boss Bar during boss waves.
-  - If a Boss is not defeated by the end of a boss wave, that wave the raid will be lost.
+  - If a Boss is not defeated by the end of a boss wave, the raid will be lost.
 - Reworked the Digger Zombie's behavior.
-  - The Digger Zombie will attempt to dig into the ground and will dig out the ground closer to its target when far away.
+  - When 12 - 30 blocks away from its target, The Digger Zombie will attempt to tunnel into the ground closer to its target.
 - Balloon Zombies can drop balloons when killed.
 - Added Pumpkin Plant.
   - Can be obtained as rewards for the Zomboween special wave.
-- Plants will now only snap onto valid blocks that they can survive on. 
+  - When applied to a plant, it will completely tank any given damage until destroyed.
+- Plants will now only snap onto blocks that they can survive on. 
 - Plant and Brainz Flags can only be placed while holding shift.
 - Plant and Zombie projectiles are now ignored by:
   - Armor Stand
   - Boat
   - Minecarts
   - Item Frames
-- The Skillet item from [Farmer's Delight](https://modrinth.com/mod/farmers-delight-refabricated) can now be equipped.
-- Added a new server config option: `graveStoneActivationRange`.
-  - Sets the range at which Gravestone can spawn zombies. The default value is 24.0
-### Fixes
+- The Skillet item from [Farmer's Delight](https://modrinth.com/mod/farmers-delight-refabricated) can now be equipped on your head.
+- Added nametag ester eggs for the Sunflower (Vampire) and Fire Peashooter (Blaze).
+### Fixes / Technical Changes
 - Reduced Grave Digger spawn chance during raids.
 - Zombie Robots built by the Engineer will vanish at the end of the raid.
-- Optimized zombie pathfinding during a raid.
+- Optimized zombie pathfinding during raids.
 - Optimized some checks on idle plants.
 - Puff Shrooms, Sun Shrooms, and Scaredy Shrooms now spawn again. :,)
-- Fixed a bug that caused the game to hang when processing certain plants when saving.
+- Fixed a bug that caused the game to hang when processing certain plants while saving.
+- Added a new server config option: `graveStoneActivationRange`.
+  - Sets the range at which Gravestone can spawn zombies. The default value is 24.0
+- Updated seed packet mutations to accept an item as a result:
+  - The `result` field either accept and `entity_type` or and object:
+    - `item` - an item id
+    - `count` - a value range. Defaults to `{ "min": 1, "max": 1 }` (optional)
+#### Example files:
+```
+{
+  "mutations": [
+    {
+      "biome": "minecraft:forest",
+      "chance": 1.0,
+      "result": {
+        "item": "minecraft:apple"
+      }
+    },
+    {
+      "chance": 0.5,
+      "result": {
+        "item": "minecraft:emerald",
+        "count": {
+          "min": 2,
+          "max": 8
+        }
+      }
+    }
+  ]
+}
+```
 
 # Changelog 1.5
 ### General:   

@@ -6,6 +6,7 @@ import joshxviii.plantz.item.SeedPacketItem
 import net.minecraft.ChatFormatting
 import net.minecraft.core.component.DataComponents
 import net.minecraft.core.particles.ParticleTypes
+import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
@@ -71,20 +72,21 @@ fun Plant.processWateringItem(player: Player, item: ItemStack, hand: Interaction
     val isWaterBottle = item.components.get(DataComponents.POTION_CONTENTS)?.`is`(Potions.WATER) == true
     val isWaterBucket = item.`is`(Items.WATER_BUCKET)
     val hasStoredWater = item.get(PazComponents.STORED_WATER)?.hasWater() == true
+    val infiniteWater = player.hasInfiniteMaterials()
     val waterAmount = when (true) {
         isWaterBottle -> {
-            player.setItemInHand(hand, ItemUtils.createFilledResult(item, player, ItemStack(Items.GLASS_BOTTLE)))
+            if (!infiniteWater) player.setItemInHand(hand, ItemUtils.createFilledResult(item, player, ItemStack(Items.GLASS_BOTTLE)))
             this.playSound(SoundEvents.BOTTLE_EMPTY)
             1
         }
         isWaterBucket -> {
-            player.setItemInHand(hand, ItemStack(Items.BUCKET))
+            if (!infiniteWater) player.setItemInHand(hand, ItemStack(Items.BUCKET))
             this.playSound(SoundEvents.BUCKET_EMPTY, 1.0f, 1.0f)
             8
         }
         (hasStoredWater) -> {
             this.playSound(PazSounds.WATERING_CAN)
-            item.set(PazComponents.STORED_WATER, item.get(PazComponents.STORED_WATER)?.removeWater(2))
+            if (!infiniteWater) item.set(PazComponents.STORED_WATER, item.get(PazComponents.STORED_WATER)?.removeWater(2))
             2
         }
         else -> 0
@@ -174,7 +176,7 @@ fun Plant.processSeedPacketInteraction(player: Player, itemStack: ItemStack, blo
         }
         PazEntities.PUMPKIN -> pumpkinSeedInteraction(itemStack, cantAfford, player)
         else -> when (this) {// placing plant into pumpkin
-            is Pumpkin -> pumpkinSeedInteraction(itemStack, cantAfford, player)
+            is Pumpkin -> if (isGrowingSeeds) PacketInteractionResult.NO_INTERACTION else pumpkinSeedInteraction(itemStack, cantAfford, player)
             else -> PacketInteractionResult.NO_INTERACTION
         }
     }
@@ -204,12 +206,14 @@ fun Plant.applyPumpkinArmor() {
 }
 
 fun Plant.pumpkinSeedInteraction(itemStack: ItemStack, cantAfford: Boolean, player: Player): PacketInteractionResult {
-    val type = itemStack.get(DataComponents.ENTITY_DATA)?.type()
-    if (this.pumpkinArmor > 0 || this.type == type) return PacketInteractionResult.NO_INTERACTION
+    val seedType = itemStack.get(DataComponents.ENTITY_DATA)?.type()?: return PacketInteractionResult.NO_INTERACTION
+    if (BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(seedType).`is`(PazTags.EntityTypes.CANNOT_PUMPKIN)) return PacketInteractionResult.NO_INTERACTION
+    if (this.`is`(PazTags.EntityTypes.CANNOT_PUMPKIN) && this !is Pumpkin) return PacketInteractionResult.NO_INTERACTION
+    if (this.pumpkinArmor > 0) return PacketInteractionResult.NO_INTERACTION
     if (cantAfford) return PacketInteractionResult.CANT_AFFORD
-    if (this is Pumpkin && type != null) {
+    if (this is Pumpkin) {
         (level() as? ServerLevel)?.let { level ->
-            type.create(
+            seedType.create(
                 level, EntityType.createDefaultStackConfig(level, itemStack, null), blockPosition(), EntitySpawnReason.SPAWN_ITEM_USE, true, true
             )?.let {
                 if (it is Plant) {

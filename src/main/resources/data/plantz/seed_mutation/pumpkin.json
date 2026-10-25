@@ -1,0 +1,10 @@
+{
+  "mutations": [
+    {
+      "chance": 0.35,
+      "result": {
+        "item": "minecraft:pumpkin"
+      }
+    }
+  ]
+}
