@@ -12,7 +12,7 @@
 - Added a Boss Bar during boss waves.
   - If a Boss is not defeated by the end of a boss wave, the raid will be lost.
 - Reworked the Digger Zombie's behavior.
-  - When 12 - 30 blocks away from its target, The Digger Zombie will attempt to tunnel into the ground closer to its target.
+  - When 10 - 30 blocks away from its target, The Digger Zombie will attempt to tunnel into the ground closer to its target.
 - Balloon Zombies can drop balloons when killed.
 - Added Pumpkin Plant.
   - Can be obtained as rewards for the Zomboween special wave.

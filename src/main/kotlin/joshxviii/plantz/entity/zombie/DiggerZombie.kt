@@ -185,7 +185,7 @@ class DiggerZombie(type: EntityType<out DiggerZombie>, level: Level) : PazZombie
     ) : Goal() {
 
         companion object {
-            const val MIN_DIST = 12.0
+            const val MIN_DIST = 10.0
             const val MAX_DIST = 30.0
         }
 
@@ -227,7 +227,7 @@ class DiggerZombie(type: EntityType<out DiggerZombie>, level: Level) : PazZombie
             val random = digger.random
 
             for (attempt in 0 until 16) {
-                val t = 0.75 + random.nextDouble() * 0.15
+                val t = 0.8 + random.nextDouble() * 0.15
                 val baseX = from.x + (targetPos.x - from.x) * t
                 val baseZ = from.z + (targetPos.z - from.z) * t
                 val baseY = from.y + (targetPos.y - from.y) * t
