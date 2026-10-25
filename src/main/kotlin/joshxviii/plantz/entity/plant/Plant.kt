@@ -56,6 +56,7 @@ import net.minecraft.world.entity.monster.Enemy
 import net.minecraft.world.entity.monster.zombie.Zombie
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.Items
 import net.minecraft.world.level.*
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.block.state.BlockState
@@ -631,6 +632,15 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         pumpkinArmor = amount.toFloat()
         playSound(SoundEvents.WOLF_ARMOR_REPAIR, 0.5f, 1f)
     }
+    fun removePumpkinArmor() {
+        if (pumpkinArmor > 0) (level() as? ServerLevel)?.let{ level ->
+            val drop = SeedPacketItem.stackFor(PazEntities.PUMPKIN)
+            val itemEntity = ItemEntity(level, x, y + 0.5, z, drop)
+            level.addFreshEntity(itemEntity)
+        }
+        pumpkinArmor = 0f
+        playSound(SoundEvents.PUMPKIN_CARVE, 0.5f, 1f)
+    }
 
     /**
      * @param sunAmount the amount of sun used to heal.
@@ -832,6 +842,12 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
                 if (player is ServerPlayer) PazCriteria.RELOCATION.trigger(player, success)
                 return InteractionResult.SUCCESS_SERVER
             }
+            if (itemStack.`is`(Items.SHEARS)) {
+                if (hasPumpkinArmor()) {
+                    removePumpkinArmor()
+                    return InteractionResult.SUCCESS
+                }
+            }
 
             // sun iteration
             if (processSunItem(player, itemStack, hand, growNeeds)) return InteractionResult.SUCCESS
@@ -912,14 +928,10 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
     fun dropAsSeedPacketItem(force: Boolean = false): Boolean {
         val level = level() as? ServerLevel ?: return false
         if (force || customName!=null) {// Spawn a seed packet item containing this plant's data
-            val drops = mutableListOf(
-                SeedPacketItem.stackFor(this.type).also { if (customName!=null) it.set(DataComponents.CUSTOM_NAME, customName) }
-            )
-            if (pumpkinArmor > 0) drops.add(SeedPacketItem.stackFor(PazEntities.PUMPKIN))
-            drops.forEach { stack ->
-                val itemEntity = ItemEntity(level, x, y + 0.5, z, stack)
-                level.addFreshEntity(itemEntity)
-            }
+            removePumpkinArmor()
+            val drop = SeedPacketItem.stackFor(this.type).also { if (customName!=null) it.set(DataComponents.CUSTOM_NAME, customName) }
+            val itemEntity = ItemEntity(level, x, y + 0.5, z, drop)
+            level.addFreshEntity(itemEntity)
             this.discard()
             return true
         }
