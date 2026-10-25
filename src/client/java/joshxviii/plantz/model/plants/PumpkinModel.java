@@ -1,12 +1,10 @@
 package joshxviii.plantz.model.plants;
 
-import joshxviii.plantz.animation.plants.CoffeeBeanAnimation;
 import joshxviii.plantz.renderer.entity.plant.PlantRenderState;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
-import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 
 import static joshxviii.plantz.UtilsKt.pazResource;
@@ -19,11 +17,6 @@ public class PumpkinModel extends PlantModel {
 
 	public PumpkinModel(ModelPart root) {
 		super(root);
-
-		initAnimation = CoffeeBeanAnimation.init.bake(root);
-		idleAnimation = CoffeeBeanAnimation.idle.bake(root);
-		actionAnimation = CoffeeBeanAnimation.action.bake(root);
-		sleepAnimation = CoffeeBeanAnimation.sleep.bake(root);
 
         this.body = root.getChild("body");
 		this.head = this.body.getChild("head");

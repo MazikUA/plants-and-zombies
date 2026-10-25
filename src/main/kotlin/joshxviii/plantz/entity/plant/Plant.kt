@@ -134,7 +134,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         val ATTACHED_PLAYER: EntityDataAccessor<Optional<EntityReference<LivingEntity>>> = SynchedEntityData.defineId(Plant::class.java, EntityDataSerializers.OPTIONAL_LIVING_ENTITY_REFERENCE)
         val COOLDOWN: EntityDataAccessor<Int> = SynchedEntityData.defineId<Int>(Plant::class.java, EntityDataSerializers.INT)
         val COFFEE_BUFF: EntityDataAccessor<Int> = SynchedEntityData.defineId<Int>(Plant::class.java, EntityDataSerializers.INT)
-        val PUMPKIN_ARMOR: EntityDataAccessor<Int> = SynchedEntityData.defineId<Int>(Plant::class.java, EntityDataSerializers.INT)
+        val PUMPKIN_ARMOR: EntityDataAccessor<Float> = SynchedEntityData.defineId<Float>(Plant::class.java, EntityDataSerializers.FLOAT)
         val RECEIVED_SUN: EntityDataAccessor<Int> = SynchedEntityData.defineId<Int>(Plant::class.java, EntityDataSerializers.INT)
         val RECEIVED_WATER: EntityDataAccessor<Int> = SynchedEntityData.defineId<Int>(Plant::class.java, EntityDataSerializers.INT)
         val SEED_GROW_COOLDOWN: EntityDataAccessor<Int> = SynchedEntityData.defineId<Int>(Plant::class.java, EntityDataSerializers.INT)
@@ -220,6 +220,10 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         get() = this.entityData.get(COFFEE_BUFF)
         set(value) = this.entityData.set(COFFEE_BUFF, value.coerceAtLeast(0))
 
+    var pumpkinArmor: Float
+        get() = this.entityData.get(PUMPKIN_ARMOR)
+        set(value) = this.entityData.set(PUMPKIN_ARMOR, value.coerceAtLeast(0f))
+
     private var attachedPlayerReference: EntityReference<LivingEntity>?
         get() = this.entityData.get(ATTACHED_PLAYER).getOrNull()
         set(value) = this.entityData.set(ATTACHED_PLAYER, Optional.ofNullable(value))
@@ -272,6 +276,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         entityData.define(RECEIVED_WATER, 0)
         entityData.define(SEED_GROW_COOLDOWN, 0)
         entityData.define(COFFEE_BUFF, 0)
+        entityData.define(PUMPKIN_ARMOR, 0f)
         entityData.define(SLEEPING, false)
         entityData.define(POWERED_UP, false)
         entityData.define(ATTACHED_PLAYER, Optional.empty())
@@ -296,6 +301,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         output.putInt("plantz:ReceivedWater", receivedWater)
         output.putInt("plantz:SeedGrowTime", seedGrowCooldown)
         output.putInt("plantz:CoffeeBuff", coffeeBuff)
+        output.putFloat("plantz:PumpkinArmor", pumpkinArmor)
         output.putInt("plantz:Cooldown", cooldown)
         output.putInt("plantz:State", state.ordinal)
         output.putBoolean("plantz:IsAsleep", isAsleep)
@@ -307,6 +313,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         receivedWater = input.getInt("plantz:ReceivedWater").getOrElse { 0 }
         seedGrowCooldown = input.getInt("plantz:SeedGrowTime").getOrElse { 0 }
         coffeeBuff = input.getInt("plantz:CoffeeBuff").getOrElse { 0 }
+        pumpkinArmor = input.getFloatOr("plantz:PumpkinArmor", 0f)
         cooldown = input.getInt("plantz:Cooldown").getOrElse { this.entityData.get(COOLDOWN) }.coerceAtLeast(0)
         state = PlantState.entries[input.getInt("plantz:State").getOrElse { 1 }].takeIf { it != PlantState.ACTION }?: PlantState.IDLE
         isAsleep = input.getBooleanOr("plantz:IsAsleep", false)
@@ -372,6 +379,9 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         if (source.`is`(PazTags.DamageTypes.IGNORED_BY_PLANTS)) return false
         if (source.directEntity != owner) source.entity?.let { if (hasSameOwner(it)) return false }
         if ( attachedEntity.let { it!=null && source.entity?.`is`(it)==true } ) return false
+        val potProtection: Boolean = hasPlantPotProtection() && source.entity is Enemy
+        val newDamage = pumpkinProtectFrom(damage)
+        if (newDamage <= 0) return false
         return super.hurtServer(
             level,
             if (source.entity is Zombie && source.`is`(DamageTypes.MOB_ATTACK)) DamageSource(
@@ -379,22 +389,18 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
                 source.directEntity,
                 source.entity
             ) else source,
-            damage
+            if (potProtection) (newDamage * PazConfig.PLANT_POT_DAMAGE_REDUCTION).toFloat() else newDamage
         )
     }
 
-    override fun hurtClient(source: DamageSource): Boolean {
-        return super.hurtClient(source)
-    }
-
-    override fun actuallyHurt(level: ServerLevel, source: DamageSource, damage: Float) {
-        if (source.directEntity != owner) source.entity?.let { if (hasSameOwner(it)) return }
-        val potProtection: Boolean = hasPlantPotProtection() && source.entity is Enemy
-        super.actuallyHurt(
-            level,
-            source,
-            if (potProtection) (damage * PazConfig.PLANT_POT_DAMAGE_REDUCTION).toFloat() else damage
-        )
+    private fun pumpkinProtectFrom(damage: Float): Float {
+        if (pumpkinArmor <= 0) return damage
+        val result = (damage - pumpkinArmor).coerceAtLeast(0f)
+        pumpkinArmor -= damage
+        if (pumpkinArmor <= 0) {
+            playSound(SoundEvents.WOLF_ARMOR_BREAK.value())
+        } else playSound(SoundEvents.WOLF_ARMOR_DAMAGE)
+        return result
     }
 
     protected fun <T: Plant> convertToPlantType(
@@ -830,16 +836,6 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         return super.mobInteract(player, hand)
     }
 
-    fun applyCoffeeBuff() {
-        val level = level() as? ServerLevel?: return
-        coffeeBuff = PazConfig.COFFEE_BUFF_DURATION
-        playSound(SoundEvents.WITCH_DRINK, 1f, 1.5f)
-        addParticlesAroundSelf(level,
-            PazServerParticles.ENERGIZED,
-            amount = 16..18
-        )
-    }
-
     fun attachToEntity(entity: LivingEntity): Boolean {
         if (level().isClientSide) return false
         ScopedCollector(this.problemPath(), LOGGER).use { reporter ->
@@ -892,14 +888,16 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
     fun dropAsSeedPacketItem(force: Boolean = false): Boolean {
         val level = level() as? ServerLevel ?: return false
         if (force || customName!=null) {// Spawn a seed packet item containing this plant's data
-            val stack = SeedPacketItem.stackFor(this.type)
-            if (customName!=null) stack.set(DataComponents.CUSTOM_NAME, customName)
-            val itemEntity = ItemEntity(level, x, y + 0.5, z, stack)
-            if(level.addFreshEntity(itemEntity)){
-                this.discard()
-                return true
+            val drops = mutableListOf(
+                SeedPacketItem.stackFor(this.type).apply { if (customName!=null) set(DataComponents.CUSTOM_NAME, customName) }
+            )
+            if (pumpkinArmor > 0) drops.add(SeedPacketItem.stackFor(PazEntities.PUMPKIN))
+            drops.forEach { stack ->
+                val itemEntity = ItemEntity(level, x, y + 0.5, z, stack)
+                level.addFreshEntity(itemEntity)
             }
-            else return false
+            this.discard()
+            return true
         }
         this.discard()
         return true

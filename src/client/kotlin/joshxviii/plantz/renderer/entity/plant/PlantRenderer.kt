@@ -105,6 +105,7 @@ open class PlantRenderer(
         if (entity is ExplosivePlant) state.swelling = entity.getSwelling(partialTick)
         state.cooldown = entity.cooldown
         state.isAsleep = entity.isAsleep
+        state.pumpkinArmor = entity.pumpkinArmor
         state.damagedAmount = entity.damagedPercent
         state.initAnimationState.copyFrom(entity.initAnimationState)
         state.idleAnimationState.copyFrom(entity.idleAnimationState)
