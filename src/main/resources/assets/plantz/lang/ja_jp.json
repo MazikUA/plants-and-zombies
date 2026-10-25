@@ -83,8 +83,8 @@
   "event.plantz.zombie_raid.huge_wave": "ゾンビの大群が接近中！",
   "event.plantz.zombie_raid.special_wave": "特殊ウェーブ：",
   "event.plantz.zombie_raid.boss_wave": "ボスウェーブ：",
-  "event.plantz.zombie_raid.boss_title": "%s",
-  "event.plantz.zombie_raid.boss.spawn": "ボスが現れた！：%s",
+  "event.plantz.zombie_raid.boss": "%s",
+  "event.plantz.zombie_raid.boss.spawn": "ボスが現れた：%s",
   "event.plantz.zombie_raid.special_wave.bucket_brigade": "バケツ部隊！",
   "event.plantz.zombie_raid.special_wave.halftime_showdown": "ハーフタイム決戦！",
   "event.plantz.zombie_raid.special_wave.winter_wonderland": "ウィンターワンダーランド！",
@@ -311,6 +311,7 @@
   "entity.plantz.seashroom": "シーシュルーム",
   "entity.plantz.coffeebean": "コーヒービーン",
   "entity.plantz.grave_buster": "グレイブバスター",
+  "entity.plantz.pumpkin": "パンプキン",
 
   "entity.plantz.browncoat": "ゾンビ",
   "entity.plantz.newspaper_zombie": "新聞ゾンビ",

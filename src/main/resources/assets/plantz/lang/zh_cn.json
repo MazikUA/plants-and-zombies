@@ -83,8 +83,8 @@
   "event.plantz.zombie_raid.huge_wave": "一大波僵尸正在接近！",
   "event.plantz.zombie_raid.special_wave": "特殊波次：",
   "event.plantz.zombie_raid.boss_wave": "Boss波次：",
-  "event.plantz.zombie_raid.boss_title": "%s",
-  "event.plantz.zombie_raid.boss.spawn": "Boss已出现！：%s",
+  "event.plantz.zombie_raid.boss": "%s",
+  "event.plantz.zombie_raid.boss.spawn": "Boss已出现：%s",
   "event.plantz.zombie_raid.special_wave.bucket_brigade": "铁桶小队！",
   "event.plantz.zombie_raid.special_wave.halftime_showdown": "中场对决！",
   "event.plantz.zombie_raid.special_wave.winter_wonderland": "寒冬奇境！",
@@ -311,6 +311,7 @@
   "entity.plantz.seashroom": "海蘑菇",
   "entity.plantz.coffeebean": "咖啡豆",
   "entity.plantz.grave_buster": "噬碑藤",
+  "entity.plantz.pumpkin": "南瓜头",
 
   "entity.plantz.browncoat": "僵尸",
   "entity.plantz.newspaper_zombie": "报纸僵尸",
