@@ -36,6 +36,8 @@
 - Fixed a bug that caused the game to hang when processing certain plants while saving.
 - Added a new server config option: `graveStoneActivationRange`.
   - Sets the range at which Gravestone can spawn zombies. The default value is 24.0
+- Added a new server config option: `pumpkinArmorAmount`.
+  - Sets the amount of pumpkin armor gets applied. The default value is 35.
 - Updated seed packet mutations to accept an item as a result:
   - The `result` field either accept and `entity_type` or and object:
     - `item` - an item id

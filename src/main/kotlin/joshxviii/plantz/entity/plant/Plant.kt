@@ -460,13 +460,6 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         } else super.setPos(x, y, z)
     }
 
-    override fun isInWall(): Boolean {
-        val r = super.isInWall()
-        if (r) applyImpulse()
-        return r
-    }
-
-
     fun applyGridClamp() {
         val gx = Mth.floor(x) + 0.5
         val gz = Mth.floor(z) + 0.5

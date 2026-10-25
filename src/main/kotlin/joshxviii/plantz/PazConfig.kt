@@ -23,7 +23,7 @@ data class ServerConfig(
     var plantPotDamageReduction: Double = 0.5,
     var poweredUpCooldownReduction: Double = 0.2,
     var coffeeBuffDuration: Int = 48_000,
-    var pumpkinArmorAmount: Int = 38,
+    var pumpkinArmorAmount: Int = 35,
     var sunCostTamingThreshold: Int = 30,
     var plantCooldownEnabled: Boolean = false,
     var plantCooldownTime: Double = 4.0,
