@@ -23,6 +23,7 @@ import net.minecraft.world.item.Items
 import net.minecraft.world.item.alchemy.Potions
 import net.minecraft.world.item.component.TypedEntityData
 import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.level.storage.TagValueInput
 import net.minecraft.world.level.storage.TagValueOutput
 import net.minecraft.world.phys.Vec3
 
@@ -138,19 +139,6 @@ fun Plant.processGloveItem(player: Player, item: ItemStack, hand: InteractionHan
     return true
 }
 
-fun Entity.saveAsCompoundTag(): CompoundTag {
-    if (level().isClientSide) return CompoundTag()
-    ScopedCollector(problemPath(), LogUtils.getLogger()).use { reporter ->
-        val output = TagValueOutput.createWithContext(reporter, registryAccess())
-        saveWithoutId(output)
-        if (this is Plant) plantSaveData(output)
-        output.discard("UUID")
-        output.discard("Pos")
-        output.discard("leash")
-        return output.buildResult()
-    }
-}
-
 // seed packet interaction
 fun Plant.processSeedPacketInteraction(player: Player, itemStack: ItemStack, blockState: BlockState? = null): PacketInteractionResult {
     val type = itemStack.get(DataComponents.ENTITY_DATA)?.type()
@@ -190,50 +178,50 @@ fun Plant.processSeedPacketInteraction(player: Player, itemStack: ItemStack, blo
     return result
 }
 
-fun Plant.applyCoffeeBuff() {
-    val level = level() as? ServerLevel?: return
-    coffeeBuff = PazConfig.COFFEE_BUFF_DURATION
-    playSound(SoundEvents.WITCH_DRINK, 1f, 1.5f)
-    addParticlesAroundSelf(level,
-        PazServerParticles.ENERGIZED,
-        amount = 16..18
-    )
-}
-
-fun Plant.applyPumpkinArmor() {
-    pumpkinArmor = Pumpkin.PUMPKIN_ARMOR
-    playSound(SoundEvents.WOLF_ARMOR_REPAIR)
-}
-
 fun Plant.pumpkinSeedInteraction(itemStack: ItemStack, cantAfford: Boolean, player: Player): PacketInteractionResult {
-    val seedType = itemStack.get(DataComponents.ENTITY_DATA)?.type()?: return PacketInteractionResult.NO_INTERACTION
+    if (this.hasPumpkinArmor()) return PacketInteractionResult.NO_INTERACTION
+    if (this !is Pumpkin) {
+        applyPumpkinArmor()
+        return PacketInteractionResult.SUCCESS
+    }
+    val seedData = itemStack.get(DataComponents.ENTITY_DATA)?: return PacketInteractionResult.NO_INTERACTION
+    val seedType = seedData.type()
     if (BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(seedType).`is`(PazTags.EntityTypes.CANNOT_PUMPKIN)) return PacketInteractionResult.NO_INTERACTION
-    if (this.`is`(PazTags.EntityTypes.CANNOT_PUMPKIN) && this !is Pumpkin) return PacketInteractionResult.NO_INTERACTION
-    if (this.pumpkinArmor > 0) return PacketInteractionResult.NO_INTERACTION
     if (cantAfford) return PacketInteractionResult.CANT_AFFORD
-    if (this is Pumpkin) {
-        (level() as? ServerLevel)?.let { level ->
-            seedType.create(
-                level, EntityType.createDefaultStackConfig(level, itemStack, null), blockPosition(), EntitySpawnReason.SPAWN_ITEM_USE, true, true
-            )?.let {
-                if (it is Plant) {
-                    it.tame(player)
-                    it.yHeadRot = this.yHeadRot
-                    it.yBodyRot = this.yBodyRot
-                    it.yRot = this.yRot
-                    it.applyPumpkinArmor()
-                }
-                if (level.addFreshEntity(it)) {
-                    it.playSound(SoundEvents.BIG_DRIPLEAF_PLACE)
-                    discard()
-                }
-            }
+    (level() as? ServerLevel)?.let { level ->
+        seedType.create(
+            level, EntityType.createDefaultStackConfig(level, itemStack, null), blockPosition(), EntitySpawnReason.SPAWN_ITEM_USE, true, true
+        )?.let {
+            //TODO: save the pumpkin entity in a variable in plant (for names + textures on pumpkin)
+            val pumpkinData = this.saveAsCompoundTag(listOf("Health", "plantz:State"))
+            val mergedData = TypedEntityData.of(seedType, seedData.copyTagWithoutId().merge(pumpkinData))
+            mergedData.loadInto(it)
+            if (it is Plant) it.applyPumpkinArmor()
+            if (level.addFreshEntity(it)) discard()
         }
         return PacketInteractionResult.SUCCESS
     }
-    else {
-        applyPumpkinArmor()
-        return PacketInteractionResult.SUCCESS
+    return PacketInteractionResult.SUCCESS
+}
+
+fun Entity.saveAsCompoundTag(discards: List<String> = listOf("Pos")): CompoundTag {
+    if (level().isClientSide) return CompoundTag()
+    ScopedCollector(problemPath(), LogUtils.getLogger()).use { reporter ->
+        val output = TagValueOutput.createWithContext(reporter, registryAccess())
+        saveWithoutId(output)
+        if (this is Plant) plantSaveData(output)
+        discards.forEach { output.discard(it) }
+        output.discard("leash")
+        output.discard("UUID")
+        return output.buildResult()
+    }
+}
+
+fun Entity.loadFromCompoundTag(data: CompoundTag) {
+    ScopedCollector(problemPath(), LogUtils.getLogger()).use { reporter ->
+        val newData = TagValueInput.create(reporter, registryAccess(), data)
+        newData
+        this.load(newData)
     }
 }
 
