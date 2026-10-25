@@ -183,7 +183,7 @@ object RaidMusicManager {
                     in 601..1200 -> 1.12f
                     else -> 1.0f
                 }
-            }
+            } else targetPitch = 1.0f
         }
         return targetPitch != pitch
     }

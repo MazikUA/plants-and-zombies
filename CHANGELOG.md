@@ -9,11 +9,14 @@
 - Added "Zomboween" special wave.
   - Has a chance to occur 2 weeks before and 1 day after October 31st.
   - Can happen within waves 4–11.
-- Reworked the Digger Zombie's behavior.
-  - The Digger Zombie will attempt to dig into the ground and will dig out the ground closer to its target when far away.
 - Added a Boss Bar during boss waves.
   - If a Boss is not defeated by the end of a boss wave, that wave the raid will be lost.
+- Reworked the Digger Zombie's behavior.
+  - The Digger Zombie will attempt to dig into the ground and will dig out the ground closer to its target when far away.
 - Balloon Zombies can drop balloons when killed.
+- Added Pumpkin Plant.
+  - Can be obtained as rewards for the Zomboween special wave.
+- Plants will now only snap onto valid blocks that they can survive on. 
 - Plant and Brainz Flags can only be placed while holding shift.
 - Plant and Zombie projectiles are now ignored by:
   - Armor Stand

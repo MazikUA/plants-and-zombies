@@ -188,7 +188,7 @@ class SunGlowLayer<M : EntityModel<PlantRenderState>>(
 class PumpkinArmorLayer<M : EntityModel<PlantRenderState>>(
     val context: EntityRendererProvider.Context,
     val renderer: RenderLayerParent<PlantRenderState, M>,
-    val pumpkinArmorRenderer: PumpkinRenderer = PumpkinRenderer(context, true)
+    val pumpkinArmorRenderer: PumpkinRenderer = PumpkinRenderer(context)
 ): RenderLayer<PlantRenderState, M>(renderer) {
     override fun submit(
         poseStack: PoseStack,
@@ -206,6 +206,10 @@ class PumpkinArmorLayer<M : EntityModel<PlantRenderState>>(
         poseStack.translate(0.0f, -1.501f, 0.0f)
 
         val pumpkinState = PumpkinRenderState()
+        pumpkinState.ageInTicks = state.ageInTicks
+        pumpkinState.isAsleep = state.isAsleep
+        pumpkinState.sleepAnimationState.copyFrom(state.sleepAnimationState)
+        pumpkinState.idleAnimationState.copyFrom(state.idleAnimationState)
 
         pumpkinArmorRenderer.submit(pumpkinState, poseStack, submitNodeCollector, CameraRenderState())
         poseStack.popPose()

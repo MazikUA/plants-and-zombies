@@ -12,7 +12,6 @@ import net.minecraft.client.renderer.state.level.CameraRenderState
 
 class PumpkinRenderer(
     context: EntityRendererProvider.Context,
-    val isArmorLayer: Boolean,
     private val defaultModel: EntityModel<PlantRenderState> = PumpkinModel(context.bakeLayer(PumpkinModel.LAYER_LOCATION)),
 ): PlantRenderer(
     defaultModel,

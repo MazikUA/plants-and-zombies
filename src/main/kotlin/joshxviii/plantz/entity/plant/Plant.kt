@@ -47,6 +47,7 @@ import net.minecraft.world.entity.*
 import net.minecraft.world.entity.ai.attributes.AttributeModifier
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier
 import net.minecraft.world.entity.ai.attributes.Attributes
+import net.minecraft.world.entity.ai.behavior.SetWalkTargetAwayFrom.pos
 import net.minecraft.world.entity.ai.control.BodyRotationControl
 import net.minecraft.world.entity.ai.control.LookControl
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal
@@ -398,8 +399,15 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         val result = (damage - pumpkinArmor).coerceAtLeast(0f)
         pumpkinArmor -= damage
         if (pumpkinArmor <= 0) {
-            playSound(SoundEvents.WOLF_ARMOR_BREAK.value())
-        } else playSound(SoundEvents.WOLF_ARMOR_DAMAGE)
+            playSound(SoundEvents.WOOD_BREAK, 0.5f, 1.0f)
+        } else {
+            playSound(SoundEvents.WOOD_HIT, 0.5f, 1.0f)
+            addParticlesAroundSelf(
+                particle = BlockParticleOption(ParticleTypes.BLOCK, Blocks.PUMPKIN.defaultBlockState()),
+                height = 0.0f,
+                verticalSpreadScale = 0.1
+            )
+        }
         return result
     }
 
@@ -663,7 +671,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
 
     // if on invalid ground plant should start to suffocate
     private fun onValidGround() : Boolean {
-        return (attachedEntity != null) || canSurviveOn(getBlockBelow()) || vehicle?.`is`(PazEntities.PLANT_POT_MINECART) == true
+        return (attachedEntity != null) || pumpkinArmor > 0 || canSurviveOn(getBlockBelow()) || vehicle?.`is`(PazEntities.PLANT_POT_MINECART) == true
     }
 
     fun sunIsVisible() : Boolean {
@@ -676,7 +684,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
     open fun canSurviveOn(block: BlockState) : Boolean = block.`is`(PLANTABLE)
     open fun canPlaceOn(block: BlockState) : Boolean = canSurviveOn(block)
     open fun canProduceSeeds(): Boolean = true
-    open fun clampToGrid() = canSurviveOn(getBlockBelow())
+    open fun clampToGrid() = canSurviveOn(getBlockBelow()) || pumpkinArmor > 0
     open fun cooldownFinished() {}
 
     fun hurtOnCollide(other: Entity?) {

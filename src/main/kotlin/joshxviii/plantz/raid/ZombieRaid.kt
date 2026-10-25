@@ -227,7 +227,7 @@ class ZombieRaid(
 
         if (waveTimer>0) {
             waveTimer--
-            if ((isFinalWave() || getBosses().isNotEmpty()) && waveTimer<=COUNTDOWN_BEFORE_LOSS+20 && waveTimer%20==19) {// count down before loss
+            if ((isFinalWave() || getBosses().isNotEmpty()) && (waveTimer<=COUNTDOWN_BEFORE_LOSS+20 && waveTimer%20==19 || waveTimer==600)) {// count down before loss
                 showTitleMessage(Component.literal(waveTimer.tickSecondFormat()).withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD))
             }
         }
@@ -358,7 +358,7 @@ class ZombieRaid(
         waveTypes = waveTypes.toMutableList()
         waveTypes.add(waveType)
         val wave = currentWaveNumber()
-        val shouldSpawnBoss = wave % 2 == 0
+        val shouldSpawnBoss = wave % 10 == 0
         var leaderSet = false
         totalZombieHealth = 0f
         totalBossHealth = 0f
