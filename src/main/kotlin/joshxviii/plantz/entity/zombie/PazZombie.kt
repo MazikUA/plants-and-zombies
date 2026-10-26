@@ -242,14 +242,6 @@ abstract class PazZombie(type: EntityType<out PazZombie>, level: Level) : Zombie
     }
 
     override fun pickUpItem(level: ServerLevel, entity: ItemEntity) {
-        if (isBaby) return super.pickUpItem(level, entity)
-        val balloonItem = entity.item.item as? BalloonItem ?: return super.pickUpItem(level, entity)
-
-        val balloonsMissing = (MAX_EQUIPPABLE_BALLOONS - getHeldBalloons().size).coerceIn(0, MAX_EQUIPPABLE_BALLOONS)
-        val count = entity.item.count.coerceAtMost(balloonsMissing)
-        spawnBalloons(count, balloonItem.color)
-        entity.item.shrink(count)
-
         super.pickUpItem(level, entity)
     }
 

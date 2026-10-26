@@ -9,17 +9,22 @@ import net.minecraft.world.entity.monster.zombie.Zombie
 
 enum class BossType(
     private val weightFn: (ZombieRaid) -> Float,
-    private val boss: List<BossEntry>,
+    private val bossSpawns: (ZombieRaid, WaveType) -> List<BossEntry>,
 ): StringRepresentable {
     GARGANTUAR(
         weightFn = { 1f },
-        listOf(
-            BossEntry(PazEntities.GARGANTUAR),
-        )
+        bossSpawns = { raid, wave ->
+            listOf(
+                BossEntry(
+                    PazEntities.GARGANTUAR,
+                    { if (it is Gargantuar && wave == WaveType.PIRATE_INVASION) it.variant = GargantuarVariant.PIRATE }
+                ),
+            )
+        }
     ),
     ZOMBOSS(
         weightFn = { 0f },
-        listOf()
+        bossSpawns = { raid, wave -> listOf() }
     );
 
     override fun getSerializedName(): String = name.lowercase()
@@ -40,13 +45,9 @@ enum class BossType(
         }
     }
 
-    fun bossEntityEntries(raid: ZombieRaid): List<BossEntry> = boss
+    fun bossEntityEntries(raid: ZombieRaid, wave: WaveType): List<BossEntry> = bossSpawns(raid, wave)
 
     fun weight(raid: ZombieRaid): Float = weightFn(raid)
-
-    fun bossTitle(): Component {
-        return Component.translatable("event.plantz.zombie_raid.boss", boss.first().entityType.description)
-    }
 
     data class BossEntry(
         val entityType: EntityType<out Zombie>,

@@ -15,7 +15,7 @@
   - When 10 - 30 blocks away from its target, The Digger Zombie will attempt to tunnel into the ground closer to its target.
 - Balloon Zombies can drop balloons when killed.
 - Added Pumpkin Plant.
-  - Can be obtained as rewards for the Zomboween special wave.
+  - Can be obtained as rewards for the Zomboween special wave or from carving pumpkins.
   - When applied to a plant, it will completely tank any given damage until destroyed.
 - Plants will now only snap onto blocks that they can survive on. 
 - Plant and Brainz Flags can only be placed while holding shift.

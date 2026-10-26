@@ -364,7 +364,7 @@ class ZombieRaid(
         totalBossHealth = 0f
         waveTimer = if (isFinalWave()) FINAL_WAVE_DURATION else if (shouldSpawnBoss) BOSS_WAVE_DURATION else WAVE_DURATION
         if (waveType != WaveType.DEFAULT && !shouldSpawnBoss) announceSpecialWave(waveType)
-        if (shouldSpawnBoss) spawnBoss(level, pos)
+        if (shouldSpawnBoss) spawnBoss(level, pos, waveType)
 
         val waveEntries = waveType.spawnEntries(this, creditsUnlocked)
 
@@ -384,16 +384,18 @@ class ZombieRaid(
         }
     }
 
-    fun spawnBoss(level: ServerLevel, pos: BlockPos) {
+    fun spawnBoss(level: ServerLevel, pos: BlockPos, waveType: WaveType) {
         val bossType: BossType = BossType.pickBossType(this)
-        for ((type, configure) in bossType.bossEntityEntries(this)) {
+        val bossEntities = bossType.bossEntityEntries(this, waveType)
+        for ((type, configure) in bossEntities) {
             val zombie = type.create(level, EntitySpawnReason.EVENT) ?: return
             setBoss(zombie)
             joinRaid(level, zombie, exists = false, pos = pos, configure = configure)
         }
-        announceBoss(bossType.bossTitle())
+        val bossName = bossEntities.firstOrNull()?.entityType?.description?: Component.empty()
+        announceBoss(bossName)
         zombieRaidEvent.players.forEach {
-            it.sendSystemMessage(Component.translatable("event.plantz.zombie_raid.boss.spawn", bossType.bossTitle()).withColor(0x872727))
+            it.sendSystemMessage(Component.translatable("event.plantz.zombie_raid.boss.spawn", bossName).withColor(0x872727))
         }
     }
 
