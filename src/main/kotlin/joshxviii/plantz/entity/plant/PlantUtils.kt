@@ -181,7 +181,7 @@ fun Plant.processSeedPacketInteraction(player: Player, itemStack: ItemStack, blo
 fun Plant.pumpkinSeedInteraction(itemStack: ItemStack, cantAfford: Boolean, player: Player): PacketInteractionResult {
     if (this.hasPumpkinArmor()) return PacketInteractionResult.NO_INTERACTION
     if (this !is Pumpkin) {
-        applyPumpkinArmor()
+        applyPumpkinArmor(pumpkinData = itemStack.get(DataComponents.ENTITY_DATA))
         return PacketInteractionResult.SUCCESS
     }
     val seedData = itemStack.get(DataComponents.ENTITY_DATA)?: return PacketInteractionResult.NO_INTERACTION
@@ -192,11 +192,15 @@ fun Plant.pumpkinSeedInteraction(itemStack: ItemStack, cantAfford: Boolean, play
         seedType.create(
             level, EntityType.createDefaultStackConfig(level, itemStack, null), blockPosition(), EntitySpawnReason.SPAWN_ITEM_USE, true, true
         )?.let {
-            //TODO: save the pumpkin entity in a variable in plant (for names + textures on pumpkin)
-            val pumpkinData = this.saveAsCompoundTag(listOf("Health", "plantz:State"))
-            val mergedData = TypedEntityData.of(seedType, seedData.copyTagWithoutId().merge(pumpkinData))
+            val pumpkinData = this.saveAsCompoundTag()
+            val filteredData = pumpkinData.copy().apply {
+                remove("CustomName")
+                remove("plantz:State")
+                remove("plantz:Cooldown")
+            }
+            val mergedData = TypedEntityData.of(seedType, seedData.copyTagWithoutId().merge(filteredData))
             mergedData.loadInto(it)
-            if (it is Plant) it.applyPumpkinArmor()
+            if (it is Plant) it.applyPumpkinArmor(pumpkinData = TypedEntityData.of(this.type, pumpkinData))
             if (level.addFreshEntity(it)) discard()
         }
         return PacketInteractionResult.SUCCESS

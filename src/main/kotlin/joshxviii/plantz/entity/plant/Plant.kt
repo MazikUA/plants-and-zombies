@@ -18,7 +18,6 @@ import net.minecraft.core.component.DataComponents
 import net.minecraft.core.particles.BlockParticleOption
 import net.minecraft.core.particles.ParticleOptions
 import net.minecraft.core.particles.ParticleTypes
-import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.chat.Component
 import net.minecraft.network.syncher.EntityDataAccessor
@@ -56,6 +55,7 @@ import net.minecraft.world.entity.monster.Enemy
 import net.minecraft.world.entity.monster.zombie.Zombie
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.component.TypedEntityData
 import net.minecraft.world.item.Items
 import net.minecraft.world.level.*
 import net.minecraft.world.level.block.Blocks
@@ -219,6 +219,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
     var pumpkinArmor: Float
         get() = this.entityData.get(PUMPKIN_ARMOR)
         private set(value) = this.entityData.set(PUMPKIN_ARMOR, value.coerceAtLeast(0f))
+    private var pumpkinEntityData: TypedEntityData<EntityType<*>>? = null
 
     private var attachedPlayerReference: EntityReference<LivingEntity>?
         get() = this.entityData.get(ATTACHED_PLAYER).getOrNull()
@@ -300,6 +301,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         output.putInt("plantz:SeedGrowTime", seedGrowCooldown)
         output.putInt("plantz:CoffeeBuff", coffeeBuff)
         output.putFloat("plantz:PumpkinArmor", pumpkinArmor)
+        pumpkinEntityData?.let { output.store("plantz:PumpkinEntity", TypedEntityData.codec(EntityType.CODEC), it) }
         output.putInt("plantz:Cooldown", cooldown)
         output.putInt("plantz:State", state.ordinal)
         output.putBoolean("plantz:IsAsleep", isAsleep)
@@ -312,6 +314,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         seedGrowCooldown = input.getInt("plantz:SeedGrowTime").getOrElse { 0 }
         coffeeBuff = input.getInt("plantz:CoffeeBuff").getOrElse { 0 }
         pumpkinArmor = input.getFloatOr("plantz:PumpkinArmor", 0f)
+        pumpkinEntityData = input.read("plantz:PumpkinEntity", TypedEntityData.codec(EntityType.CODEC)).orElse(null)
         cooldown = input.getInt("plantz:Cooldown").getOrElse { this.entityData.get(COOLDOWN) }.coerceAtLeast(0)
         state = PlantState.entries[input.getInt("plantz:State").getOrElse { 1 }].takeIf { it != PlantState.ACTION }?: PlantState.IDLE
         isAsleep = input.getBooleanOr("plantz:IsAsleep", false)
@@ -397,6 +400,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         else {
             pumpkinArmor -= dmg
             if (pumpkinArmor <= 0) {
+                pumpkinEntityData = null
                 playSound(SoundEvents.WOOD_BREAK, 0.5f, 1.0f)
                 addParticlesAroundSelf(
                     particle = BlockParticleOption(ParticleTypes.BLOCK, Blocks.PUMPKIN.defaultBlockState()),
@@ -630,8 +634,12 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         )
         funnyBounce()
     }
-    fun applyPumpkinArmor(amount: Int = PazConfig.PUMPKIN_ARMOR_AMOUNT) {
+    fun applyPumpkinArmor(
+        amount: Int = PazConfig.PUMPKIN_ARMOR_AMOUNT,
+        pumpkinData: TypedEntityData<EntityType<*>>? = null
+    ) {
         pumpkinArmor = amount.toFloat()
+        pumpkinData?.let { pumpkinEntityData = it }
         playSound(SoundEvents.WOLF_ARMOR_REPAIR, 0.5f, 1f)
         funnyBounce()
     }
@@ -642,7 +650,27 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
             level.addFreshEntity(itemEntity)
         }
         pumpkinArmor = 0f
+        pumpkinEntityData = null
         playSound(SoundEvents.PUMPKIN_CARVE, 0.5f, 1f)
+    }
+
+    protected fun restorePumpkinFromArmor() {
+        val armor = pumpkinArmor
+        val pumpkinData = pumpkinEntityData ?: return
+        if (armor <= 0f) return
+        val level = level() as? ServerLevel?: return
+        val pumpkin = pumpkinData.type().create(level, EntitySpawnReason.LOAD) ?: return
+        pumpkinData.loadInto(pumpkin)
+        pumpkin.setPos(x, y, z)
+        if (pumpkin is Plant) {
+            pumpkin.getAttribute(Attributes.MAX_HEALTH)?.baseValue = maxOf(pumpkin.maxHealth, armor).toDouble()
+            pumpkin.state = PlantState.IDLE
+            pumpkin.health = armor
+        }
+        if (level.addFreshEntity(pumpkin)) {
+            pumpkinArmor = 0f
+            pumpkinEntityData = null
+        } else pumpkin.discard()
     }
 
     /**
@@ -904,6 +932,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
 
     override fun remove(reason: RemovalReason) {
         super.remove(reason)
+        if (reason == RemovalReason.DISCARDED) restorePumpkinFromArmor()
         if (reason != RemovalReason.UNLOADED_WITH_PLAYER) detachFromEntity()
     }
 
@@ -931,12 +960,9 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
     fun dropAsSeedPacketItem(force: Boolean = false): Boolean {
         val level = level() as? ServerLevel ?: return false
         if (force || customName!=null) {// Spawn a seed packet item containing this plant's data
-            removePumpkinArmor()
             val drop = SeedPacketItem.stackFor(this.type).also { if (customName!=null) it.set(DataComponents.CUSTOM_NAME, customName) }
             val itemEntity = ItemEntity(level, x, y + 0.5, z, drop)
             level.addFreshEntity(itemEntity)
-            this.discard()
-            return true
         }
         this.discard()
         return true
