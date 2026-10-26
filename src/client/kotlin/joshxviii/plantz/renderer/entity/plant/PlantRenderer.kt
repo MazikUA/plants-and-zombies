@@ -10,6 +10,8 @@ import joshxviii.plantz.renderer.getEmissiveTextureLocation
 import joshxviii.plantz.renderer.getTextureLocation
 import joshxviii.plantz.renderer.validMagicName
 import net.minecraft.client.model.EntityModel
+import net.minecraft.client.model.Model
+import net.minecraft.client.model.geom.ModelPart
 import net.minecraft.client.renderer.SubmitNodeCollector
 import net.minecraft.client.renderer.entity.EntityRendererProvider
 import net.minecraft.client.renderer.entity.MobRenderer
@@ -29,6 +31,7 @@ import net.minecraft.util.Mth
 import net.minecraft.world.entity.AnimationState
 import net.minecraft.world.phys.Vec3
 import org.joml.Quaternionf
+import kotlin.collections.listOf
 import kotlin.math.pow
 
 open class PlantRenderer(
@@ -60,9 +63,7 @@ open class PlantRenderer(
         )
 
         model = if (state.isBaby && babyModel != null) babyModel else defaultModel
-        if (state.plantState != PlantState.INIT || state.ageInTicks>1) {
-            super.submit(state, poseStack, collector, camera)
-        }
+        super.submit(state, poseStack, collector, camera)
     }
 
     override fun getFlipDegrees(): Float = 0f

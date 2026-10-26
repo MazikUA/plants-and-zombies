@@ -280,9 +280,11 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
 
     override fun onSyncedDataUpdated(accessor: EntityDataAccessor<*>) {
         super.onSyncedDataUpdated(accessor)
-        if ((accessor == POWERED_UP && poweredUp) || accessor == RECEIVED_SUN || accessor == RECEIVED_WATER && level().isClientSide) {
-            funnyBounce()
+        if (level().isClientSide) when (accessor) {
+            POWERED_UP -> if (poweredUp) funnyBounce()
+            RECEIVED_SUN, RECEIVED_WATER -> funnyBounce()
         }
+        if (state == PlantState.INIT) initAnimationState.startIfStopped(tickCount)
     }
 
     override fun addAdditionalSaveData(output: ValueOutput) {
@@ -620,17 +622,18 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         bounceAnimation.startIfStopped(tickCount)
     }
     fun applyCoffeeBuff(amount: Int = PazConfig.COFFEE_BUFF_DURATION) {
-        val level = level() as? ServerLevel?: return
         coffeeBuff = amount
         playSound(SoundEvents.WITCH_DRINK, 1f, 1.5f)
-        addParticlesAroundSelf(level,
-            PazServerParticles.ENERGIZED,
+        addParticlesAroundSelf(
+            particle = PazServerParticles.ENERGIZED,
             amount = 16..18
         )
+        funnyBounce()
     }
     fun applyPumpkinArmor(amount: Int = PazConfig.PUMPKIN_ARMOR_AMOUNT) {
         pumpkinArmor = amount.toFloat()
         playSound(SoundEvents.WOLF_ARMOR_REPAIR, 0.5f, 1f)
+        funnyBounce()
     }
     fun removePumpkinArmor() {
         if (pumpkinArmor > 0) (level() as? ServerLevel)?.let{ level ->
@@ -787,7 +790,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         spawnReason: EntitySpawnReason,
         groupData: SpawnGroupData?
     ): SpawnGroupData? {
-        state = PlantState.INIT
+        if (spawnReason == EntitySpawnReason.SPAWN_ITEM_USE) state = PlantState.INIT
         if (spawnReason == EntitySpawnReason.NATURAL) {
             val yaw = Direction.getRandom(random).toYRot()
             yHeadRot = yaw

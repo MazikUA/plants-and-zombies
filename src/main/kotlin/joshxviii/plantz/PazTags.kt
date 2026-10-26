@@ -37,6 +37,7 @@ object PazTags {
         @JvmField val PLANTABLE_ON_WATER = tag("plantable_on_water")
         @JvmField val PLANT_PROJECTILE = tag("plant_projectile")
         @JvmField val IGNORE_PAZ_PROJECTILES = tag("ignore_paz_projectiles")
+        @JvmField val IGNORE_WALLNUT_COLLISION = tag("ignore_wallnut_collision")
         @JvmField val IMMUNE_TO_ELECTRICITY = tag("immune_to_electricity")
         @JvmField val CANNOT_CHOMP = tag("cannot_be_chomped")
         @JvmField val CANNOT_PUMPKIN = tag("cannot_pumpkin")
