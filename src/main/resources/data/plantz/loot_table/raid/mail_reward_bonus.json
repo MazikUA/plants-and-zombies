@@ -24,14 +24,14 @@
           "weight": 7
         },
         {
+          "type": "minecraft:loot_table",
+          "value": "plantz:gnomes",
+          "weight": 6
+        },
+        {
           "type": "minecraft:item",
           "name": "plantz:lawn_flamingo",
           "weight": 3
-        },
-        {
-          "type": "minecraft:loot_table",
-          "value": "plantz:gnomes",
-          "weight": 1
         }
       ]
     }

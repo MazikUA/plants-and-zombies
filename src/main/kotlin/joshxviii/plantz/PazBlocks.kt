@@ -112,13 +112,15 @@ object PazBlocks {
     @JvmField val GREEN_GARDEN_GNOME: Block = registerBlock("green_garden_gnome", gardenGnomeProperties(MapColor.COLOR_GREEN), { GardenGnomeBlock(it, GardenGnomeColor.GREEN) })
     @JvmField val RED_GARDEN_GNOME: Block = registerBlock("red_garden_gnome", gardenGnomeProperties(MapColor.COLOR_RED), { GardenGnomeBlock(it, GardenGnomeColor.RED) })
     @JvmField val YELLOW_GARDEN_GNOME: Block = registerBlock("yellow_garden_gnome", gardenGnomeProperties(MapColor.COLOR_YELLOW), { GardenGnomeBlock(it, GardenGnomeColor.YELLOW) })
+    @JvmField val GOLDEN_GARDEN_GNOME: Block = registerBlock("golden_garden_gnome", gardenGnomeProperties(MapColor.COLOR_YELLOW), { GardenGnomeBlock(it, GardenGnomeColor.GOLDEN) })
     val GARDEN_GNOME_ENTITY: BlockEntityType<GardenGnomeBlockEntity> = registerBlockEntity(
         "garden_gnome",
         ::GardenGnomeBlockEntity,
         BLUE_GARDEN_GNOME,
         GREEN_GARDEN_GNOME,
         RED_GARDEN_GNOME,
-        YELLOW_GARDEN_GNOME
+        YELLOW_GARDEN_GNOME,
+        GOLDEN_GARDEN_GNOME
     )
 
     @JvmField val LAWN_FLAMINGO: Block = registerBlock(

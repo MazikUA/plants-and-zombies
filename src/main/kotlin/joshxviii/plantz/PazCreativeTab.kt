@@ -131,6 +131,7 @@ object PazCreativeTab {
                 output.accept(PazBlocks.GREEN_GARDEN_GNOME)
                 output.accept(PazBlocks.RED_GARDEN_GNOME)
                 output.accept(PazBlocks.YELLOW_GARDEN_GNOME)
+                output.accept(PazBlocks.GOLDEN_GARDEN_GNOME)
                 output.accept(PazBlocks.LAWN_FLAMINGO)
                 if (PazConfig.SHOW_HIDDEN_ITEMS) output.accept(PazBlocks.TIME_MACHINE)
             }

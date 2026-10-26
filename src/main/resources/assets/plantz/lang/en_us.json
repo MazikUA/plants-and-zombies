@@ -35,6 +35,8 @@
   "advancements.plantz.craft_plant_flag.description": "Craft a Plantz Flag from a Brainz Flag",
   "advancements.plantz.taco_time": "Taco Time 2x!",
   "advancements.plantz.taco_time.description": "Get to wave 10! You'll receive 2x bonus rewards if you win!",
+  "advancements.plantz.all_gnomes": "I'm a Gnome, I'm a Garden Gnome",
+  "advancements.plantz.all_gnomes.description": "Collect each type of Garden Gnome",
   "advancements.plantz.win_zombie_raid": "Home Lawn Security",
   "advancements.plantz.win_zombie_raid.description": "Defeat the Zombie Raid!",
   "advancements.plantz.win_hardest_raid": "Zomboss's Army",
@@ -203,6 +205,7 @@
   "item.plantz.green_garden_gnome": "Green Garden Gnome",
   "item.plantz.red_garden_gnome": "Red Garden Gnome",
   "item.plantz.yellow_garden_gnome": "Yellow Garden Gnome",
+  "item.plantz.golden_garden_gnome": "Golden Garden Gnome",
 
   "item.plantz.lawn_flamingo": "Lawn Flamingo",
 
