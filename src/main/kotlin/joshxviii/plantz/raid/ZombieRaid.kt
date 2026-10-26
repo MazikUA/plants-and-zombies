@@ -263,7 +263,7 @@ class ZombieRaid(
         }
 
         if (shouldSpawnNextWave()) {
-            val spawnPos = findRandomSpawnPos(level, 20) ?: center
+            val spawnPos = findRandomSpawnPos(level, 20) ?: return
             spawnNextWave(level, spawnPos)
             zombieRaidEvent.players.forEach { player ->
                 PazCriteria.RAID_WAVE_TRIGGER.trigger(player, currentWaveNumber())
@@ -379,6 +379,7 @@ class ZombieRaid(
                     val randZ = pos.z + random.nextInt(11) - 5
                     val randY = findSpawnSurfaceY(level, randX, randZ)
                     if (abs(randY - center.y) > MAX_SPAWN_HEIGHT_DIFFERENCE || abs(randY - pos.y) > MAX_SPAWN_HEIGHT_DIFFERENCE) continue
+                    if (level.getBlockState(BlockPos(randX, randY - 1, randZ)).`is`(PazTags.BlockTags.INVALID_RAID_SPAWN)) continue
 
                     val candidate = MutableBlockPos(randX, randY, randZ)
                     if (level.isPositionEntityTicking(candidate)) {
@@ -423,7 +424,7 @@ class ZombieRaid(
         val added = addWaveMob(zombie, waveNumber, level, addMaxHealth)
         if (added) {
             if (!exists && pos != null) {
-                zombie.setPos(pos.x.toDouble() + 0.5, pos.y.toDouble() + 1.0, pos.z.toDouble() + 0.5)
+                zombie.setPos(pos.x.toDouble() + 0.5, pos.y.toDouble(), pos.z.toDouble() + 0.5)
                 zombie.finalizeSpawn(
                     level,
                     level.getCurrentDifficultyAt(pos),
@@ -606,6 +607,7 @@ class ZombieRaid(
             val spawnZ = center.z + Mth.floor(Mth.sin(angle.toDouble()) * SPAWN_DISTANCE)
             val spawnY = findSpawnSurfaceY(level, spawnX, spawnZ)
             if (abs(spawnY - center.y) > MAX_SPAWN_HEIGHT_DIFFERENCE) continue
+            if (level.getBlockState(BlockPos(spawnX, spawnY - 1, spawnZ)).`is`(PazTags.BlockTags.INVALID_RAID_SPAWN)) continue
             spawnPos.set(spawnX, spawnY, spawnZ)
             if (level.isPositionEntityTicking(spawnPos)) return spawnPos
         }
@@ -613,10 +615,7 @@ class ZombieRaid(
     }
     private fun findSpawnSurfaceY(level: ServerLevel, x: Int, z: Int): Int {
         var spawnY = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z)
-        if (level.getFluidState(BlockPos(x, spawnY + 1, z)).`is`(FluidTags.WATER)) {
-            while (level.getFluidState(BlockPos(x, spawnY + 1, z)).`is`(FluidTags.WATER)) spawnY++
-            spawnY++
-        }
+        while (level.getFluidState(BlockPos(x, spawnY + 1, z)).`is`(FluidTags.WATER)) spawnY++
         return spawnY
     }
 

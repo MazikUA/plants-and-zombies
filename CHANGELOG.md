@@ -9,14 +9,17 @@
 - Added "Zomboween" special wave.
   - Has a chance to occur 2 weeks before and 1 day after October 31st.
   - Can happen within waves 4–11.
+- Added Pumpkin Plant.
+  - Can be obtained as rewards for the Zomboween special wave or from carving pumpkins.
+  - When applied to a plant, it will completely tank any given damage until destroyed.
 - Added a Boss Bar during boss waves.
   - If a Boss is not defeated by the end of a boss wave, the raid will be lost.
 - Reworked the Digger Zombie's behavior.
   - When 10 - 30 blocks away from its target, The Digger Zombie will attempt to tunnel into the ground closer to its target.
 - Balloon Zombies can drop balloons when killed.
-- Added Pumpkin Plant.
-  - Can be obtained as rewards for the Zomboween special wave or from carving pumpkins.
-  - When applied to a plant, it will completely tank any given damage until destroyed.
+- Unleashed Balloons will pop after 2 minutes.
+- Reduced how often and how many graves the grave digger will dig.
+- During a raid, the center flag will display a beacon beam while far away.
 - Plants will now only snap onto blocks that they can survive on. 
 - Plant and Brainz Flags can only be placed while holding shift.
 - Plant and Zombie projectiles are now ignored by:
@@ -30,6 +33,7 @@
 - Reduced Grave Digger spawn chance during raids.
 - Zombie Robots built by the Engineer will vanish at the end of the raid.
 - Reduced the range for Robo Zombie.
+- Raid zombies will no longer spawn on top of trees.
 - Optimized zombie pathfinding during raids.
 - Optimized some checks on idle plants.
 - Puff Shrooms, Sun Shrooms, and Scaredy Shrooms now spawn again. :,)

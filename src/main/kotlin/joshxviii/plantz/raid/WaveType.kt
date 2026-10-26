@@ -85,16 +85,16 @@ enum class WaveType(
                 ),
                 WaveSpawnEntry(
                     PazEntities.SOLDIER_ZOMBIE,
-                    if (credits && wave > 8) scaled(1f + (wave - 8) * 0.5f, omen, true) else 0
+                    if (credits && wave > 10) scaled(1f + (wave - 10) * 0.5f, omen, true) else 0
                 ),
                 if (raid.random.nextFloat() < 0.4f) WaveSpawnEntry(
                     PazEntities.SUPER_BRAINZ,
-                    if (wave > 16) scaled(0.4f + (wave - 16) * 0.3f, omen, credits, max = 3) else 0,
+                    if (wave > 15) scaled(0.4f + (wave - 15) * 0.3f, omen, credits, max = 3) else 0,
                     { configureZomboween(it, raid) }
                 )
                 else WaveSpawnEntry(
                     PazEntities.ROBO_ZOMBIE,
-                    if (wave > 17) scaled(0.4f + (wave - 17) * 0.3f, omen, credits, max = 3) else 0,
+                    if (wave > 16) scaled(0.4f + (wave - 16) * 0.3f, omen, credits, max = 3) else 0,
                     { configureZomboween(it, raid) }
                 ),
                 graveDiggerEntry(raid),
