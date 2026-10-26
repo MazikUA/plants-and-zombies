@@ -60,7 +60,7 @@ enum class WaveType(
                 ),
                 WaveSpawnEntry(
                     PazEntities.DIGGER_ZOMBIE,
-                    if (wave > 3) scaled(1f + wave * 0.4f, omen, credits) else 0
+                    if (wave > 3) scaled(0.7f + wave * 0.4f, omen, credits) else 0
                 ),
                 WaveSpawnEntry(
                     PazEntities.IMP,

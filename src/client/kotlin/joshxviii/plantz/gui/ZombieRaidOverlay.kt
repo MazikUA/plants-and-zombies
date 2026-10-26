@@ -14,7 +14,9 @@ import net.minecraft.client.gui.components.LerpingBossEvent
 import net.minecraft.client.renderer.RenderPipelines
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.Identifier
+import net.minecraft.util.ARGB
 import net.minecraft.util.Mth
+import java.util.UUID
 
 object ZombieRaidOverlay {
 
@@ -25,20 +27,30 @@ object ZombieRaidOverlay {
 
     val BACKGROUND: Identifier = pazResource("textures/gui/raid/background.png")
     val BACKGROUND_CREDITS: Identifier = pazResource("textures/gui/raid/background_after_credits.png")
+    val BOSS_BAR_BACKGROUND: Identifier = pazResource("textures/gui/raid/boss_bar_background.png")
     val PLANT_FLAG_SPRITE: Identifier = pazResource("textures/gui/raid/plant_flag.png")
     val ZOMBIE_HEAD_SPRITE: Identifier = pazResource("textures/gui/raid/zombie_head.png")
     val ZOMBIE_HEAD_CREDITS_SPRITE: Identifier = pazResource("textures/gui/raid/zombie_head_after_credits.png")
     val BOSS_HEAD_SPRITE: Identifier = pazResource("textures/gui/raid/boss_head.png")
-    val HEALTH_BAR_FLAG: Identifier = pazResource("textures/gui/raid/flag_health.png")
+    val HEALTH_BAR_PLANT: Identifier = pazResource("textures/gui/raid/flag_health.png")
+    val HEALTH_BAR_PLANT_FLASH: Identifier = pazResource("textures/gui/raid/flag_health_flash.png")
     val HEALTH_BAR_ZOMBIES: Identifier = pazResource("textures/gui/raid/zombie_health.png")
-    val BOSS_BAR_BACKGROUND: Identifier = pazResource("textures/gui/raid/boss_bar_background.png")
+    val HEALTH_BAR_ZOMBIES_FLASH: Identifier = pazResource("textures/gui/raid/zombie_health_flash.png")
     val BOSS_BAR: Identifier = pazResource("textures/gui/raid/boss_bar.png")
+    val BOSS_BAR_FLASH: Identifier = pazResource("textures/gui/raid/boss_bar_flash.png")
 
     const val BG_WIDTH = 256
     const val BG_HEIGHT = 32
 
     const val BAR_WIDTH = 98
     const val BAR_HEIGHT = 5
+    private const val HEALTH_DAMAGE_FLASH_DURATION = 4
+
+    private var lastRaidId: UUID? = null
+    private var lastFlagHealth: Float? = null
+    private var flagDamageFlashUntil = 0
+    private var lastBossHealth: Float? = null
+    private var bossDamageFlashUntil = 0
 
     fun extractRenderState(
         graphics: GuiGraphicsExtractor,
@@ -58,6 +70,7 @@ object ZombieRaidOverlay {
         val y = 0
 
         val renderBossbar = raidEvent.bossProgressBar > 0f
+        flashingStatus(raidEvent)
 
         // tombstone bg
         graphics.blit(RenderPipelines.GUI_TEXTURED, if (raidEvent.seenCredits) BACKGROUND_CREDITS else BACKGROUND, x, y, 0f, 0f, BG_WIDTH, BG_HEIGHT, BG_WIDTH, BG_HEIGHT)
@@ -94,12 +107,12 @@ object ZombieRaidOverlay {
     }
 
     private fun renderPlantBar(x: Int, y: Int, graphics: GuiGraphicsExtractor, raidEvent: ZombieRaidClientData) {
-        val flagHealthPercent = raidEvent.plantProgressBar
-        val flagBarWidth = Mth.floor(BAR_WIDTH * flagHealthPercent)
+        val flagBarWidth = Mth.floor(BAR_WIDTH * raidEvent.plantProgressBar)
         val flagHealthX = x+17 + (BAR_WIDTH - flagBarWidth)
         val flagHealthY = y+15
         val flagFrame = if (raidEvent.activeTime % 30 > 15) 1 else 0
-        graphics.blit(RenderPipelines.GUI_TEXTURED, HEALTH_BAR_FLAG, flagHealthX, flagHealthY, 0f, 0f, flagBarWidth, BAR_HEIGHT, BAR_WIDTH, BAR_HEIGHT)
+        val flash = isDamageFlashActive(raidEvent.activeTime, flagDamageFlashUntil)
+        graphics.blit(RenderPipelines.GUI_TEXTURED, if (flash) HEALTH_BAR_PLANT_FLASH else HEALTH_BAR_PLANT, flagHealthX, flagHealthY, 0f, 0f, flagBarWidth, BAR_HEIGHT, BAR_WIDTH, BAR_HEIGHT)
         graphics.blit(RenderPipelines.GUI_TEXTURED, PLANT_FLAG_SPRITE, flagHealthX-7, flagHealthY-5, 7f*flagFrame, 0f, 7, 10, 14, 10)
     }
 
@@ -131,7 +144,8 @@ object ZombieRaidOverlay {
 
         val bossBarWidth = 126
         val bossBarHeight = 8
-        graphics.blit(RenderPipelines.GUI_TEXTURED, BOSS_BAR, barX+3, barY+4, 0f, 0f, Mth.floor(bossBarWidth * bossHealthPercent), bossBarHeight, bossBarWidth, bossBarHeight)
+        val flash = isDamageFlashActive(raidEvent.activeTime, bossDamageFlashUntil)
+        graphics.blit(RenderPipelines.GUI_TEXTURED, if (flash) BOSS_BAR_FLASH else BOSS_BAR, barX+3, barY+4, 0f, 0f, Mth.floor(bossBarWidth * bossHealthPercent), bossBarHeight, bossBarWidth, bossBarHeight)
         graphics.blit(RenderPipelines.GUI_TEXTURED, BOSS_HEAD_SPRITE, barX+Mth.floor(bossBarWidth * bossHealthPercent)-10, barY, 0f, 0f, 16, 16, 16, 16)
 
         val text = "$bossHealthPercent"
@@ -139,4 +153,28 @@ object ZombieRaidOverlay {
         val bossHealthY = y + 45
         //graphics.text(font, text, bossHealthX, bossHealthY, -1)
     }
+
+    fun flashingStatus(raidEvent: ZombieRaidClientData) {
+        if (lastRaidId != raidEvent.id) {
+            lastRaidId = raidEvent.id
+            lastFlagHealth = raidEvent.plantProgressBar
+            flagDamageFlashUntil = raidEvent.activeTime
+            lastBossHealth = raidEvent.bossProgressBar
+            bossDamageFlashUntil = raidEvent.activeTime
+        } else {
+            val previousFlagHealth = lastFlagHealth
+            if (previousFlagHealth != null && raidEvent.plantProgressBar < previousFlagHealth) {
+                flagDamageFlashUntil = raidEvent.activeTime + HEALTH_DAMAGE_FLASH_DURATION
+            }
+            lastFlagHealth = raidEvent.plantProgressBar
+
+            val previousBossHealth = lastBossHealth
+            if (previousBossHealth != null && raidEvent.bossProgressBar < previousBossHealth) {
+                bossDamageFlashUntil = raidEvent.activeTime + HEALTH_DAMAGE_FLASH_DURATION
+            }
+            lastBossHealth = raidEvent.bossProgressBar
+        }
+    }
+
+    private fun isDamageFlashActive(activeTime: Int, flashUntil: Int): Boolean = activeTime < flashUntil
 }
