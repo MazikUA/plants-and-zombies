@@ -57,6 +57,7 @@ import net.minecraft.world.level.levelgen.Heightmap
 import net.minecraft.world.phys.AABB
 import java.util.*
 import java.util.function.Predicate
+import kotlin.math.abs
 
 class ZombieRaid(
     val center: BlockPos,
@@ -134,6 +135,7 @@ class ZombieRaid(
         const val PRE_RAID_TICKS: Int = 100
         const val POST_RAID_TICKS: Int = 80
         const val SPAWN_DISTANCE: Int = 88
+        const val MAX_SPAWN_HEIGHT_DIFFERENCE: Int = 32
         const val RAID_DISTANCE: Int = 160
         const val GARDEN_HERO_EFFECT_DURATION: Int = 72000
         const val COUNTDOWN_BEFORE_LOSS: Int = 200 //10 seconds
@@ -371,15 +373,24 @@ class ZombieRaid(
         for ((type, count, configure) in waveEntries) {
             for (i in 0..<count) {
                 val zombie = type.create(level, EntitySpawnReason.EVENT) ?: break
+                var randomPos: BlockPos? = null
+                for (attempt in 0 until 20) {
+                    val randX = pos.x + random.nextInt(11) - 5
+                    val randZ = pos.z + random.nextInt(11) - 5
+                    val randY = findSpawnSurfaceY(level, randX, randZ)
+                    if (abs(randY - center.y) > MAX_SPAWN_HEIGHT_DIFFERENCE || abs(randY - pos.y) > MAX_SPAWN_HEIGHT_DIFFERENCE) continue
+
+                    val candidate = MutableBlockPos(randX, randY, randZ)
+                    if (level.isPositionEntityTicking(candidate)) {
+                        randomPos = candidate
+                        break
+                    }
+                }
                 if (!leaderSet) {
                     setLeader(zombie)
                     leaderSet = true
                 }
-                val randX = pos.x + random.nextInt(11) - 5
-                val randZ = pos.z + random.nextInt(11) - 5
-                val randY = level.getHeight(Heightmap.Types.OCEAN_FLOOR, randX, randZ)
-                val randomPos = MutableBlockPos(randX,randY,randZ)
-                joinRaid(level, zombie, true, wave, false, randomPos, configure)
+                joinRaid(level, zombie, true, wave, false, randomPos ?: pos, configure)
             }
         }
     }
@@ -593,15 +604,20 @@ class ZombieRaid(
             val angle = startAngle + Math.PI.toFloat() * i / 8.0f
             val spawnX = center.x + Mth.floor(Mth.cos(angle.toDouble()) * SPAWN_DISTANCE)
             val spawnZ = center.z + Mth.floor(Mth.sin(angle.toDouble()) * SPAWN_DISTANCE)
-            var spawnY = level.getHeight(Heightmap.Types.WORLD_SURFACE, spawnX, spawnZ)
-            if (level.getFluidState(BlockPos(spawnX, spawnY + 1, spawnZ)).`is`(FluidTags.WATER)) {
-                while (level.getFluidState(BlockPos(spawnX, spawnY + 1, spawnZ)).`is`(FluidTags.WATER)) spawnY++
-                spawnY++
-            }
+            val spawnY = findSpawnSurfaceY(level, spawnX, spawnZ)
+            if (abs(spawnY - center.y) > MAX_SPAWN_HEIGHT_DIFFERENCE) continue
             spawnPos.set(spawnX, spawnY, spawnZ)
             if (level.isPositionEntityTicking(spawnPos)) return spawnPos
         }
         return null
+    }
+    private fun findSpawnSurfaceY(level: ServerLevel, x: Int, z: Int): Int {
+        var spawnY = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z)
+        if (level.getFluidState(BlockPos(x, spawnY + 1, z)).`is`(FluidTags.WATER)) {
+            while (level.getFluidState(BlockPos(x, spawnY + 1, z)).`is`(FluidTags.WATER)) spawnY++
+            spawnY++
+        }
+        return spawnY
     }
 
     fun stop() {

@@ -81,7 +81,7 @@ data class ClientConfig(
     var showDebugInfo: Boolean = false,
     var alwaysShowHeadMarkers: Boolean = false,
     var showHiddenItemsInCreativeTab: Boolean = false,
-    var hideRaidUi: Boolean = false
+    var hideRaidUi: Boolean = false,
 )
 
 object PazConfig {
@@ -141,6 +141,8 @@ object PazConfig {
 
     val HIDE_RAID_UI: Boolean
         get() = client.hideRaidUi
+
+
 
     val COFFEE_BUFF_DURATION: Int
         get() = server.coffeeBuffDuration.coerceAtLeast(0)
