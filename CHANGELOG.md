@@ -12,7 +12,7 @@
 - Added a Boss Bar during boss waves.
   - If a Boss is not defeated by the end of a boss wave, the raid will be lost.
 - Reworked the Digger Zombie's behavior.
-  - When 12 - 30 blocks away from its target, The Digger Zombie will attempt to tunnel into the ground closer to its target.
+  - When 10 - 30 blocks away from its target, The Digger Zombie will attempt to tunnel into the ground closer to its target.
 - Balloon Zombies can drop balloons when killed.
 - Added Pumpkin Plant.
   - Can be obtained as rewards for the Zomboween special wave.
@@ -29,12 +29,15 @@
 ### Fixes / Technical Changes
 - Reduced Grave Digger spawn chance during raids.
 - Zombie Robots built by the Engineer will vanish at the end of the raid.
+- Reduced the range for Robo Zombie.
 - Optimized zombie pathfinding during raids.
 - Optimized some checks on idle plants.
 - Puff Shrooms, Sun Shrooms, and Scaredy Shrooms now spawn again. :,)
 - Fixed a bug that caused the game to hang when processing certain plants while saving.
 - Added a new server config option: `graveStoneActivationRange`.
   - Sets the range at which Gravestone can spawn zombies. The default value is 24.0
+- Added a new server config option: `pumpkinArmorAmount`.
+  - Sets the amount of pumpkin armor gets applied. The default value is 35.
 - Updated seed packet mutations to accept an item as a result:
   - The `result` field either accept and `entity_type` or and object:
     - `item` - an item id

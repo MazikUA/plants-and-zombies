@@ -123,6 +123,7 @@ open class WallNut(type: EntityType<out Plant>, level: Level) : Plant(type, leve
     }
 
     override fun attackedWithGlove(player: Player, item: ItemStack, hand: InteractionHand) {
+        if (hasPumpkinArmor()) return
         funnyBounce()
         val direction = player.lookAngle.horizontal()
         roll(direction, power = 0.35f)

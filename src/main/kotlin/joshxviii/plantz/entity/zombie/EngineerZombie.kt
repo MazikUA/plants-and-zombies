@@ -58,7 +58,7 @@ class EngineerZombie(type: EntityType<out EngineerZombie>, level: Level) : PazZo
         entityData.define(BUILD_TIME_ID, 0)
     }
 
-    override fun isImmobile(): Boolean = super.isImmobile() || buildingTime>0
+    override fun getMoveControl(): MoveControl = if (buildingTime>0) noMoveControl else super.getMoveControl()
 
     override fun registerGoals() {
         super.registerGoals()

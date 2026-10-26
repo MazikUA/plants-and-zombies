@@ -72,7 +72,7 @@ class GraveDigger(type: EntityType<out GraveDigger>, level: Level) : PazZombie(t
         output.putInt("dug_graves", dugGraves)
     }
 
-    override fun isImmobile(): Boolean = super.isImmobile() || digTime>0
+    override fun getMoveControl(): MoveControl = if (digTime>0) noMoveControl else super.getMoveControl()
 
     override fun registerGoals() {
         super.registerGoals()

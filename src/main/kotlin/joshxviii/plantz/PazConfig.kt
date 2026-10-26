@@ -23,6 +23,7 @@ data class ServerConfig(
     var plantPotDamageReduction: Double = 0.5,
     var poweredUpCooldownReduction: Double = 0.2,
     var coffeeBuffDuration: Int = 48_000,
+    var pumpkinArmorAmount: Int = 35,
     var sunCostTamingThreshold: Int = 30,
     var plantCooldownEnabled: Boolean = false,
     var plantCooldownTime: Double = 4.0,
@@ -143,6 +144,9 @@ object PazConfig {
 
     val COFFEE_BUFF_DURATION: Int
         get() = server.coffeeBuffDuration.coerceAtLeast(0)
+
+    val PUMPKIN_ARMOR_AMOUNT: Int
+        get() = server.pumpkinArmorAmount.coerceAtLeast(0)
 
     val SUN_BATTERY_MAX: Int
         get() = server.solarBatteryMax.coerceAtLeast(0)

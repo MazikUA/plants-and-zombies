@@ -184,7 +184,7 @@ class Gargantuar(type: EntityType<out Gargantuar>, level: Level) : PazZombie(typ
         this.goalSelector.setControlFlag(Goal.Flag.TARGET, noController)
     }
 
-    override fun isImmobile(): Boolean = super.isImmobile() || smashAttackTime>0
+    override fun getMoveControl(): MoveControl = if (smashAttackTime>0) noMoveControl else super.getMoveControl()
 
     override fun tick() {
         super.tick()

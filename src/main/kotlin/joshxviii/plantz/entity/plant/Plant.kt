@@ -4,7 +4,6 @@ import joshxviii.plantz.*
 import joshxviii.plantz.PazDataSerializers.DATA_PLANT_STATE
 import joshxviii.plantz.PazTags.BlockTags.PLANTABLE
 import joshxviii.plantz.ai.PlantState
-import joshxviii.plantz.ai.ZombieState
 import joshxviii.plantz.ai.goal.SleepGoal
 import joshxviii.plantz.api.SeedMutationManager
 import joshxviii.plantz.block.entity.FlagBlockEntity
@@ -14,14 +13,12 @@ import joshxviii.plantz.raid.isNearRaid
 import net.minecraft.ChatFormatting
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
-import net.minecraft.core.Registry
 import net.minecraft.core.SectionPos
 import net.minecraft.core.component.DataComponents
 import net.minecraft.core.particles.BlockParticleOption
 import net.minecraft.core.particles.ParticleOptions
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.core.registries.BuiltInRegistries
-import net.minecraft.core.registries.Registries
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.chat.Component
 import net.minecraft.network.syncher.EntityDataAccessor
@@ -32,7 +29,6 @@ import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundEvent
 import net.minecraft.sounds.SoundEvents
-import net.minecraft.sounds.SoundSource
 import net.minecraft.tags.FluidTags
 import net.minecraft.tags.ItemTags
 import net.minecraft.util.Mth
@@ -47,7 +43,6 @@ import net.minecraft.world.entity.*
 import net.minecraft.world.entity.ai.attributes.AttributeModifier
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier
 import net.minecraft.world.entity.ai.attributes.Attributes
-import net.minecraft.world.entity.ai.behavior.SetWalkTargetAwayFrom.pos
 import net.minecraft.world.entity.ai.control.BodyRotationControl
 import net.minecraft.world.entity.ai.control.LookControl
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal
@@ -61,9 +56,9 @@ import net.minecraft.world.entity.monster.Enemy
 import net.minecraft.world.entity.monster.zombie.Zombie
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.Items
 import net.minecraft.world.level.*
 import net.minecraft.world.level.block.Blocks
-import net.minecraft.world.level.block.LevelEvent
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.levelgen.Heightmap
 import net.minecraft.world.level.portal.TeleportTransition
@@ -219,11 +214,11 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
 
     var coffeeBuff: Int
         get() = this.entityData.get(COFFEE_BUFF)
-        set(value) = this.entityData.set(COFFEE_BUFF, value.coerceAtLeast(0))
+        private set(value) = this.entityData.set(COFFEE_BUFF, value.coerceAtLeast(0))
 
     var pumpkinArmor: Float
         get() = this.entityData.get(PUMPKIN_ARMOR)
-        set(value) = this.entityData.set(PUMPKIN_ARMOR, value.coerceAtLeast(0f))
+        private set(value) = this.entityData.set(PUMPKIN_ARMOR, value.coerceAtLeast(0f))
 
     private var attachedPlayerReference: EntityReference<LivingEntity>?
         get() = this.entityData.get(ATTACHED_PLAYER).getOrNull()
@@ -331,6 +326,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
     override fun getAmbientSound(): SoundEvent? = super.getAmbientSound()// TODO make custom sounds
     override fun getHurtSound(source: DamageSource): SoundEvent? {
         if (source.`is`(PazDamageTypes.ZOMBIE_EAT)) return PazSounds.ZOMBIE_EATS
+        if (canPumpkinProtect(source)) return null
         return SoundEvents.ROOTED_DIRT_HIT// TODO make custom sounds
     }
     override fun getDeathSound(): SoundEvent? = SoundEvents.ROOTED_DIRT_BREAK// TODO make custom sounds
@@ -381,7 +377,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         if (source.directEntity != owner) source.entity?.let { if (hasSameOwner(it)) return false }
         if ( attachedEntity.let { it!=null && source.entity?.`is`(it)==true } ) return false
         val potProtection: Boolean = hasPlantPotProtection() && source.entity is Enemy
-        val newDamage = pumpkinProtectFrom(damage * if (potProtection) PazConfig.PLANT_POT_DAMAGE_REDUCTION.toFloat() else 1f)
+        val newDamage = damage * if (potProtection) PazConfig.PLANT_POT_DAMAGE_REDUCTION.toFloat() else 1f
         if (newDamage <= 0) return false
         return super.hurtServer(
             level,
@@ -394,30 +390,36 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         )
     }
 
-    private fun pumpkinProtectFrom(damage: Float): Float {
-        if (pumpkinArmor <= 0) return damage
-        val result = (damage - pumpkinArmor).coerceAtLeast(0f)
-        pumpkinArmor -= damage
-        if (pumpkinArmor <= 0) {
-            playSound(SoundEvents.WOOD_BREAK, 0.5f, 1.0f)
-            addParticlesAroundSelf(
-                particle = BlockParticleOption(ParticleTypes.BLOCK, Blocks.PUMPKIN.defaultBlockState()),
-                height = 0.0f,
-                verticalSpreadScale = 0.1,
-                amount = 16..20
-            )
-        } else {
-            playSound(SoundEvents.WOOD_HIT, 0.5f, 1.0f)
-            addParticlesAroundSelf(
-                particle = BlockParticleOption(ParticleTypes.BLOCK, Blocks.PUMPKIN.defaultBlockState()),
-                height = 0.0f,
-                verticalSpreadScale = 0.1
-            )
+    override fun actuallyHurt(level: ServerLevel, source: DamageSource, dmg: Float) {
+        if(!canPumpkinProtect(source)) super.actuallyHurt(level, source, dmg)
+        else {
+            pumpkinArmor -= dmg
+            if (pumpkinArmor <= 0) {
+                playSound(SoundEvents.WOOD_BREAK, 0.5f, 1.0f)
+                addParticlesAroundSelf(
+                    particle = BlockParticleOption(ParticleTypes.BLOCK, Blocks.PUMPKIN.defaultBlockState()),
+                    height = 0.0f,
+                    verticalSpreadScale = 0.1,
+                    amount = 16..20
+                )
+            } else {
+                playSound(SoundEvents.WOOD_HIT, 0.5f, 1.0f)
+                addParticlesAroundSelf(
+                    particle = BlockParticleOption(ParticleTypes.BLOCK, Blocks.PUMPKIN.defaultBlockState()),
+                    height = 0.0f,
+                    verticalSpreadScale = 0.1
+                )
+            }
         }
-        return result
     }
 
-    protected fun <T: Plant> convertToPlantType(
+    fun hasPlantPotProtection(): Boolean= getBlockBelow().`is`(PazTags.BlockTags.PLANT_POT) || isAttached()
+    fun hasPumpkinArmor(): Boolean = pumpkinArmor > 0
+    private fun canPumpkinProtect(source: DamageSource): Boolean {
+        return hasPumpkinArmor() && !source.`is`(PazTags.DamageTypes.BYPASSES_PUMPKIN_ARMOR)
+    }
+
+    fun <T: Plant> convertToPlantType(
         plantType: EntityType<T>,
         afterConversion: (plantEntity: Plant) -> Unit = {}) {
         convertTo(plantType, ConversionParams.single(this, true, true)) { newPlant ->
@@ -430,8 +432,6 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
             afterConversion(newPlant)
         }
     }
-
-    fun hasPlantPotProtection(): Boolean= getBlockBelow().`is`(PazTags.BlockTags.PLANT_POT) || isAttached()
 
     // only apply up/down movement
     override fun getDeltaMovement(): Vec3 {
@@ -619,6 +619,28 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         bounceAnimation.stop()
         bounceAnimation.startIfStopped(tickCount)
     }
+    fun applyCoffeeBuff(amount: Int = PazConfig.COFFEE_BUFF_DURATION) {
+        val level = level() as? ServerLevel?: return
+        coffeeBuff = amount
+        playSound(SoundEvents.WITCH_DRINK, 1f, 1.5f)
+        addParticlesAroundSelf(level,
+            PazServerParticles.ENERGIZED,
+            amount = 16..18
+        )
+    }
+    fun applyPumpkinArmor(amount: Int = PazConfig.PUMPKIN_ARMOR_AMOUNT) {
+        pumpkinArmor = amount.toFloat()
+        playSound(SoundEvents.WOLF_ARMOR_REPAIR, 0.5f, 1f)
+    }
+    fun removePumpkinArmor() {
+        if (pumpkinArmor > 0) (level() as? ServerLevel)?.let{ level ->
+            val drop = SeedPacketItem.stackFor(PazEntities.PUMPKIN)
+            val itemEntity = ItemEntity(level, x, y + 0.5, z, drop)
+            level.addFreshEntity(itemEntity)
+        }
+        pumpkinArmor = 0f
+        playSound(SoundEvents.PUMPKIN_CARVE, 0.5f, 1f)
+    }
 
     /**
      * @param sunAmount the amount of sun used to heal.
@@ -673,9 +695,9 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
         return PlantGrowNeeds.SUN
     }
 
-    // if on invalid ground plant should start to suffocate
+    /** if on invalid ground plant should start to suffocate */
     private fun onValidGround() : Boolean {
-        return (attachedEntity != null) || pumpkinArmor > 0 || canSurviveOn(getBlockBelow()) || vehicle?.`is`(PazEntities.PLANT_POT_MINECART) == true
+        return (attachedEntity != null) || hasPumpkinArmor() || canSurviveOn(getBlockBelow()) || vehicle?.`is`(PazEntities.PLANT_POT_MINECART) == true
     }
 
     fun sunIsVisible() : Boolean {
@@ -688,7 +710,7 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
     open fun canSurviveOn(block: BlockState) : Boolean = block.`is`(PLANTABLE)
     open fun canPlaceOn(block: BlockState) : Boolean = canSurviveOn(block)
     open fun canProduceSeeds(): Boolean = true
-    open fun clampToGrid() = canSurviveOn(getBlockBelow()) || pumpkinArmor > 0
+    open fun clampToGrid() = onValidGround()
     open fun cooldownFinished() {}
 
     fun hurtOnCollide(other: Entity?) {
@@ -820,6 +842,12 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
                 if (player is ServerPlayer) PazCriteria.RELOCATION.trigger(player, success)
                 return InteractionResult.SUCCESS_SERVER
             }
+            if (itemStack.`is`(Items.SHEARS)) {
+                if (hasPumpkinArmor()) {
+                    removePumpkinArmor()
+                    return InteractionResult.SUCCESS
+                }
+            }
 
             // sun iteration
             if (processSunItem(player, itemStack, hand, growNeeds)) return InteractionResult.SUCCESS
@@ -900,14 +928,10 @@ abstract class Plant(type: EntityType<out Plant>, level: Level) : TamableAnimal(
     fun dropAsSeedPacketItem(force: Boolean = false): Boolean {
         val level = level() as? ServerLevel ?: return false
         if (force || customName!=null) {// Spawn a seed packet item containing this plant's data
-            val drops = mutableListOf(
-                SeedPacketItem.stackFor(this.type).also { if (customName!=null) it.set(DataComponents.CUSTOM_NAME, customName) }
-            )
-            if (pumpkinArmor > 0) drops.add(SeedPacketItem.stackFor(PazEntities.PUMPKIN))
-            drops.forEach { stack ->
-                val itemEntity = ItemEntity(level, x, y + 0.5, z, stack)
-                level.addFreshEntity(itemEntity)
-            }
+            removePumpkinArmor()
+            val drop = SeedPacketItem.stackFor(this.type).also { if (customName!=null) it.set(DataComponents.CUSTOM_NAME, customName) }
+            val itemEntity = ItemEntity(level, x, y + 0.5, z, drop)
+            level.addFreshEntity(itemEntity)
             this.discard()
             return true
         }
