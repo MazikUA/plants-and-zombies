@@ -88,7 +88,7 @@
   "event.plantz.zombie_raid.special_wave.bucket_brigade": "铁桶小队！",
   "event.plantz.zombie_raid.special_wave.halftime_showdown": "中场对决！",
   "event.plantz.zombie_raid.special_wave.winter_wonderland": "寒冬奇境！",
-  "event.plantz.zombie_raid.special_wave.zomboween": "万尸之夜！",
+  "event.plantz.zombie_raid.special_wave.zomboween": "万尸夜！",
   "event.plantz.zombie_raid.special_wave.pirate_invasion": "海盗入侵！",
   "event.plantz.zombie_raid.special_wave.league_of_awesome": "非凡联盟！",
   "event.plantz.zombie_raid.special_wave.robo_army": "机械军团！",
@@ -98,7 +98,7 @@
   "event.plantz.zombie_raid.defeat_title": "失败",
 
   "effect.plantz.zombie_omen": "僵尸预兆",
-  "effect.plantz.toxic": "毒性",
+  "effect.plantz.toxic": "中毒",
   "effect.plantz.frozen": "冻结",
   "effect.plantz.chilled": "寒冷",
   "effect.plantz.hypnotize": "魅惑",
