@@ -31,6 +31,7 @@
 - Added nametag ester eggs for the Sunflower (Vampire) and Fire Peashooter (Blaze).
 ### Fixes / Technical Changes
 - Reduced Grave Digger spawn chance during raids.
+- Plants and Zombies no longer pop their own balloons. 
 - Zombie Robots built by the Engineer will vanish at the end of the raid.
 - Reduced the range for Robo Zombie.
 - Raid zombies will no longer spawn on top of trees.

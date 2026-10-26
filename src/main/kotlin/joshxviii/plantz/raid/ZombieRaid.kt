@@ -373,25 +373,12 @@ class ZombieRaid(
         for ((type, count, configure) in waveEntries) {
             for (i in 0..<count) {
                 val zombie = type.create(level, EntitySpawnReason.EVENT) ?: break
-                var randomPos: BlockPos? = null
-                for (attempt in 0 until 20) {
-                    val randX = pos.x + random.nextInt(11) - 5
-                    val randZ = pos.z + random.nextInt(11) - 5
-                    val randY = findSpawnSurfaceY(level, randX, randZ)
-                    if (abs(randY - center.y) > MAX_SPAWN_HEIGHT_DIFFERENCE || abs(randY - pos.y) > MAX_SPAWN_HEIGHT_DIFFERENCE) continue
-                    if (level.getBlockState(BlockPos(randX, randY - 1, randZ)).`is`(PazTags.BlockTags.INVALID_RAID_SPAWN)) continue
-
-                    val candidate = MutableBlockPos(randX, randY, randZ)
-                    if (level.isPositionEntityTicking(candidate)) {
-                        randomPos = candidate
-                        break
-                    }
-                }
+                val spawnPos = findClearSpawnPos(level, zombie, pos, 20) ?: pos
                 if (!leaderSet) {
                     setLeader(zombie)
                     leaderSet = true
                 }
-                joinRaid(level, zombie, true, wave, false, randomPos ?: pos, configure)
+                joinRaid(level, zombie, true, wave, false, spawnPos, configure)
             }
         }
     }
@@ -401,6 +388,7 @@ class ZombieRaid(
         val bossEntities = bossType.bossEntityEntries(this, waveType)
         for ((type, configure) in bossEntities) {
             val zombie = type.create(level, EntitySpawnReason.EVENT) ?: return
+            val spawnPos = pos
             setBoss(zombie)
             joinRaid(level, zombie, exists = false, pos = pos, configure = configure)
         }
@@ -597,6 +585,7 @@ class ZombieRaid(
         }
     }
 
+    /** Find the center location for the zombies to spawn */
     private fun findRandomSpawnPos(level: ServerLevel, maxTries: Int): BlockPos? {
         val spawnPos = MutableBlockPos()
         val startAngle = random.nextFloat() * (Math.PI * 2).toFloat()
@@ -607,16 +596,38 @@ class ZombieRaid(
             val spawnZ = center.z + Mth.floor(Mth.sin(angle.toDouble()) * SPAWN_DISTANCE)
             val spawnY = findSpawnSurfaceY(level, spawnX, spawnZ)
             if (abs(spawnY - center.y) > MAX_SPAWN_HEIGHT_DIFFERENCE) continue
-            if (level.getBlockState(BlockPos(spawnX, spawnY - 1, spawnZ)).`is`(PazTags.BlockTags.INVALID_RAID_SPAWN)) continue
+            val pos = BlockPos(spawnX, spawnY - 1, spawnZ)
+            if (level.getBlockState(pos).`is`(PazTags.BlockTags.INVALID_RAID_SPAWN)) continue
             spawnPos.set(spawnX, spawnY, spawnZ)
             if (level.isPositionEntityTicking(spawnPos)) return spawnPos
         }
         return null
     }
+
+    /** Scatter the zombies across the center spawn area */
+    private fun findClearSpawnPos(level: ServerLevel, zombie: Zombie, origin: BlockPos, maxTries: Int): BlockPos? {
+        for (attempt in 0 until maxTries) {
+            val x = origin.x + random.nextInt(11) - 5
+            val z = origin.z + random.nextInt(11) - 5
+            val y = findSpawnSurfaceY(level, x, z)
+            if (abs(y - center.y) > MAX_SPAWN_HEIGHT_DIFFERENCE || abs(y - origin.y) > MAX_SPAWN_HEIGHT_DIFFERENCE) continue
+            if (level.getBlockState(BlockPos(x, y - 1, z)).`is`(PazTags.BlockTags.INVALID_RAID_SPAWN)) continue
+
+            val candidate = MutableBlockPos(x, y, z)
+            if (level.isPositionEntityTicking(candidate) && canZombieSpawnAt(level, zombie, candidate)) return candidate
+        }
+        return null
+    }
+
     private fun findSpawnSurfaceY(level: ServerLevel, x: Int, z: Int): Int {
         var spawnY = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z)
         while (level.getFluidState(BlockPos(x, spawnY + 1, z)).`is`(FluidTags.WATER)) spawnY++
         return spawnY
+    }
+
+    private fun canZombieSpawnAt(level: ServerLevel, zombie: Zombie, pos: BlockPos): Boolean {
+        zombie.setPos(pos.x.toDouble() + 0.5, pos.y.toDouble(), pos.z.toDouble() + 0.5)
+        return level.noCollision(zombie)
     }
 
     fun stop() {
