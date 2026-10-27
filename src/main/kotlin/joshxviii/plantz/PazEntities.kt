@@ -339,7 +339,7 @@ object PazEntities {
         width = 0.85f,
         height = 0.5f,
         attributes = Plant.Companion.PlantAttributes(
-            maxHealth = 30.0,
+            maxHealth = PazConfig.PUMPKIN_ARMOR_AMOUNT.toDouble(),
         )
     )
     // endregion
