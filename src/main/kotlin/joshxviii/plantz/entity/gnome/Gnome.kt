@@ -103,10 +103,9 @@ class Gnome(type: EntityType<out Gnome>, level: Level) :Monster(type, level) {
         //this.goalSelector.addGoal(7, FollowMobGoal(this, 1.0, 3.0f, 7.0f))
         this.targetSelector.addGoal(1, HurtByTargetGoal(this, Gnome::class.java).setAlertOthers())
         this.targetSelector.addGoal(2, NearestAttackableTargetGoal(this, LivingEntity::class.java, true) { target, level ->
-            target !is Gnome
-                    && target is Plant
-                    || target is Zombie
-                    || target is Player
+                target is Plant
+                || target is Zombie
+                || target is Player
         })
     }
 
