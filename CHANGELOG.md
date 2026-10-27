@@ -29,7 +29,7 @@
 - Added a Boss Bar during boss waves.
   - If a Boss is not defeated by the end of a boss wave, the raid will be lost.
 - Reworked the Digger Zombie's behavior.
-  - When 10 - 30 blocks away from its target, The Digger Zombie will attempt to tunnel into the ground closer to its target.
+  - When 16–40 blocks away from its target, The Digger Zombie will attempt to tunnel into the ground closer to its target.
 - Added Vampire Browncoat variant.
   - Has a chance to appear during Halloween season.
 - Balloon Zombies can drop balloons when killed.
@@ -40,8 +40,8 @@
 - Plants will now only snap onto blocks that they can survive on. 
 - Plant and Brainz Flags can only be placed while holding shift.
 - Plant and Zombie projectiles are now ignored by:
-  - Armor Stand
-  - Boat
+  - Armor Stands
+  - Boats
   - Minecarts
   - Item Frames
 - The Skillet item from [Farmer's Delight](https://modrinth.com/mod/farmers-delight-refabricated) can now be equipped on your head.
